@@ -1,0 +1,182 @@
+# Nixie
+
+A fluent C# engine for building old-school **text adventures / interactive fiction**, with a retro
+"fake terminal" front end (Avalonia, so it runs on Windows, macOS and Linux). Define a world in a few
+lines of strongly-typed C#, and Nixie renders it as a glowing character-cell screen — blink, colour,
+scrollback, zoom and all.
+
+> *Nixie* — a water-faerie of folklore, and the warm orange glow of a Nixie display tube. Apt for an
+> engine whose whole job is glowing retro text.
+
+The engine ships as an *empty box*: it assumes nothing about your world and comes with **no** active
+verbs until you ask for them. You switch on whole families of built-in behaviour with one-liners like
+`.AddMovement()` or the omnibus `.AddStandardVerbs()`, then define rooms, items and creatures and
+wire them together **by C# reference** — there are no magic strings anywhere in a game definition.
+
+Two complete sample games are included: *The Haunted House* (an original retelling in the spirit of the
+Usborne type-in classic) and a full *Zork I* port.
+
+## Solution layout
+
+| Project | What it is |
+| --- | --- |
+| `src/Nixie` | The whole package: the UI-agnostic engine (`Nixie.Model` / `.Building` / `.Verbs` / `.Parsing` / `.Runtime` / `.Presentation`) **and** the Avalonia fake terminal (`Nixie.Terminal`). |
+| `src/TextAdventure.Sample.HauntedHouse` | A small, fully-worked sample game + Avalonia app host. |
+| `src/TextAdventure.Sample.Zork` | A complete Zork I port (see its `AGENTS.md` for the engine-gap list it tracks). |
+| `tests/TextAdventure.Engine.Tests` | xUnit tests for the engine (parser, verbs, world, save/load). |
+
+The engine half of Nixie knows nothing about Avalonia: it writes through an `ITerminal` interface and
+is fed input by whatever host drives it, so the same game logic runs in the fake terminal or a
+headless test. The engine and terminal live in **one NuGet package** for simplicity — referencing
+`Nixie` brings in Avalonia, which is the intended (and only) front end.
+
+## Building and running
+
+Requires the **.NET 10 SDK**.
+
+```
+dotnet build TextAdventure.sln
+dotnet run --project src/TextAdventure.Sample.HauntedHouse
+dotnet run --project src/TextAdventure.Sample.Zork
+dotnet test
+```
+
+> Package versions in the `.csproj` files (Avalonia 11.3.0, the xUnit/test-SDK versions) are
+> reasonable defaults — if `restore` complains, bump them to the latest your SDK offers.
+
+### Controls
+
+Type commands and press Enter. `F11` (or `Alt+Enter`) toggles fullscreen. The mouse wheel (or
+`PageUp`/`PageDown`) scrolls back through history; **`Ctrl` + mouse wheel** (or `Ctrl` `+` / `Ctrl` `-`
+/ `Ctrl` `0`) zooms the font. The text grid fills the window — it is not a fixed 80×25, so a bigger or
+fullscreen window gives more columns and rows, and a smaller font gives even more. Because the
+terminal stores logical lines and wraps on demand, resizing and zooming **re-paginate** the text. The
+mouse pointer is drawn as an inverted character cell rather than the OS cursor. Try `HELP` in-game.
+
+### Fonts
+
+Nixie ships with **no fonts** (so the package stays light and licence-clean). A game supplies its own
+via `GameBuilder.WithFont(spec)`, where `spec` is a system family name (`"Consolas"`), an Avalonia
+resource font with an explicit family (`"avares://MyGame/Assets/Fonts#PxPlus IBM VGA8"`), or a path to
+an embedded font file/folder (the family name is read from the font automatically). Embed the font in
+your *own* game project as an `<AvaloniaResource>`. If no font is given, a system monospace is used.
+The Haunted House sample embeds the freely-licensed *PxPlus IBM VGA8* font (int10h.org, CC BY-SA 4.0)
+and selects it with `.WithFont("avares://HauntedHouse/Assets/Fonts")`.
+
+### Guides
+
+- [`docs/AUTHORING.md`](docs/AUTHORING.md) — a complete, beginner-friendly, build-a-game-from-scratch
+  walkthrough: rooms, items, scenery, containers, NPCs, custom verbs, synonyms, reactions, flags,
+  timers, win/lose conditions, doors, dark rooms, the bars, fonts/cursor, the native window title and
+  icon, and a full tiny game you can paste and run.
+- [`docs/FEATURES.md`](docs/FEATURES.md) — the roadmap / backlog (graphics, sound, fuzzy typo
+  suggestions, a save/load file browser, and the engine gaps catalogued by the Zork port).
+
+## Quick start: defining a game
+
+```csharp
+var b = GameBuilder.Create("Cave of Wonders")
+    .AddStandardVerbs()          // movement + core + meta verbs, all at once
+    .WithDefaultTitleBar()
+    .WithFont("avares://MyGame/Assets/Fonts")   // your game embeds its own font
+    .WithCursor(TerminalCursor.Block);
+
+Room cave = b.Room("Cave Mouth").Describe("Daylight spills into a low cave. A tunnel leads east.");
+Room tomb = b.Room("Tomb").Describe("A cold burial chamber.").Brief("The tomb. Exits west.").Dark();
+cave.East(tomb);                 // reciprocal west exit is created automatically
+
+Thing torch = b.Item("torch").Describe("A pitch-soaked torch.").LightSource(lit: true);
+Thing gem   = b.Item("ruby").Adjectives("red").Describe("A fist-sized ruby.");
+cave.Contains(torch);
+tomb.Contains(gem);
+
+b.On(gem).After(b.Verbs.Take!, ctx => { ctx.State.Score += 10; return VerbResult.Pass; });
+
+b.StartIn(cave);
+Game game = b.Build();
+```
+
+Everything that links objects together — exits, container contents, which key opens which lock, which
+verb a thing reacts to — takes the actual object, never a name.
+
+### What the verb modules give you
+
+`AddMovement()` adds travel (and bare directions like `n`, `se`, `up`). `AddCoreVerbs()` adds look,
+examine, search, inventory, take, drop, open/close, lock/unlock, put (in/on), push/move, read,
+wear/remove, eat/drink, switch on/off, give and use. `AddMetaVerbs()` adds help, score, save, restore
+and quit. `AddStandardVerbs()` is just all three. You can also `DefineVerb(...)` your own.
+
+The parser is not limited to "verb noun": it understands bare verbs (`look`), bare directions (`n`),
+transitive forms (`take key`, `give bone`) and ditransitive forms joined by a preposition (`give bone
+to dog`, `put coin in slot`, `unlock door with key`). A word that is both a movement and an object
+verb disambiguates on its argument — `move north` travels, `move rug` acts on the rug. Every room,
+item and creature can declare any number of synonyms (`.Called(...)`) and adjectives (`.Adjectives(...)`).
+
+### Reacting to actions and the passage of time
+
+`b.On(thing).Before(verb, handler)` lets a thing intercept a verb (return `VerbResult.Done` to override
+the default behaviour, `Pass` to let it proceed). `b.On(thing).After(...)` runs afterward. Rooms have
+`OnEnter` / `OnFirstEnter` / `OnTurn` hooks, and `b.EveryTurn(...)` / `b.AtTurn(n, ...)` register world
+daemons (a roaming monster, a candle burning down, a timed trap).
+
+### Rooms: full and brief descriptions
+
+`Describe(...)` is the full room text shown on the first visit and whenever the player `LOOK`s.
+`Brief(...)` is an optional shorter line shown on re-entry to an already-visited room.
+
+### The fake terminal
+
+The screen is a true-colour character grid where every cell has its own foreground/background colour
+plus **blink, underline, bold and inverse** attributes. Colours are full 24-bit RGB — the classic
+16-colour VGA palette is provided for convenience but you are not limited to it. Styled output uses a
+small markup language:
+
+```
+ctx.Say("You found the {fg:gold}{bold}idol{/}{/}! {blink}Run!{/}");
+```
+
+A non-scrolling **title bar** (top) and an optional **status bar** (bottom) are driven by callbacks
+from the game definition and can be styled arbitrarily:
+
+```csharp
+b.WithDefaultTitleBar();                       // game name + score/turns
+b.WithStatusBar(ctx => new BarContent {
+    Left  = $" {ctx.CurrentRoom.Name}",
+    Right = "F11 fullscreen ",
+    Style = new TextStyle(TerminalColor.White, TerminalColor.Blue)
+});
+```
+
+The scrolling text region resizes itself to fit whichever bars are enabled, and the whole grid
+re-paginates when the window or font size changes.
+
+### The native window
+
+A game can set the OS window title and icon: `b.WithWindowTitle("...")` and
+`b.WithWindowIcon("avares://MyGame/Assets/icon.ico")` (or a file path).
+
+### Saving
+
+`SaveSystem` serialises the full mutable game state to JSON (thing locations, mutable attributes, turn
+count, score, current room, global puzzle flags, daemon firing, win/lose outcome). The samples wire
+`SAVE`/`RESTORE` to a slot under the user's local app-data folder; a host can point the engine's
+`WriteSave`/`ReadSave` hooks anywhere it likes. Keep puzzle flags as **global** `State<T>` keys (as the
+samples do) so they are captured in saves.
+
+## The samples
+
+**The Haunted House** — night has caught you at the gates of a derelict mansion. Find a light, keep
+the silver crucifix between you and what sleeps in the cellar, recover the golden idol, and escape
+through the iron gate. It exercises most of the engine (dark rooms and light sources, locked doors,
+containers, a deadly creature gated by an item, a roaming ghost daemon, scoring, both bars) in one
+readable file — a good template to copy.
+
+**Zork I** — a full port of the 1980 classic's map, treasures and win path. Its `AGENTS.md` documents
+where Infocom behaviours are simplified because the engine lacks a system yet; those gaps drive the
+roadmap in `docs/FEATURES.md`.
+
+## Roadmap
+
+See [`docs/FEATURES.md`](docs/FEATURES.md). Highlights: in-window graphics, sound/music, fuzzy
+spelling suggestions, an in-terminal save/load browser, and the systems (weight, vehicles, combat,
+timers) catalogued by the Zork port.

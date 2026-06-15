@@ -1,0 +1,38 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+artifacts/
+
+# Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*_i.c
+*.rsuser
+
+# Rider
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+project.lock.json
+project.fragment.lock.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+
+# Orphaned pre-merge projects (superseded by src/Nixie; delete the folders once your IDE is closed)
+src/TextAdventure.Engine/
+src/TextAdventure.Terminal.Avalonia/

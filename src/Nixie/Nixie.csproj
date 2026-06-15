@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Nixie</RootNamespace>
+    <AssemblyName>Nixie</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Nixie</PackageId>
+    <Description>Nixie — a fluent C# engine for building text adventures / interactive fiction, with a retro "fake terminal" front end (Avalonia). Rooms, things, creatures and verbs wired by reference (no magic strings); a flexible parser; reactions and daemons; JSON save/load; and a true-colour character-cell display with blink/underline/bold/inverse, scrollback, zoom, title/status bars and a game-supplied font. Ships no fonts of its own.</Description>
+    <PackageTags>text-adventure;interactive-fiction;game-engine;fluent;parser;avalonia;terminal;tui;retro</PackageTags>
+  </PropertyGroup>
+
+  <!-- Single package: the engine plus its Avalonia terminal front end. The terminal types live in
+       the Nixie.Terminal namespace. No fonts are bundled; a game supplies its own via WithFont(). -->
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+  </ItemGroup>
+
+</Project>
