@@ -50,7 +50,7 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §14 — Open egg releases canary; no break-on-drop from tree.</summary>
     internal const string Egg = nameof(Egg);
 
-    /// <summary>AGENTS.md §15 — Static sword text; no proximity glow level.</summary>
+    /// <summary>AGENTS.md §15 — IMPLEMENTED: proximity glow daemon (none/faint/bright). See ZorkWorld.DefineSwordGlow.</summary>
     internal const string Sword = nameof(Sword);
 
     /// <summary>AGENTS.md §16 — Cyclops sleep simplified; no mood counter or water quantity.</summary>

@@ -106,9 +106,9 @@ internal sealed partial class ZorkWorld
         Lantern = Reg("lantern", _b.Item("brass lantern").Called("lantern", "lamp").Adjectives("brass")
             .Describe("A battery-powered brass lantern.").LightSource(lit: false));
 
-        // ENGINE-LIMIT: ZorkSimplifications.Sword — static glow text; no proximity-based intensity daemon.
+        // Proximity glow is driven by a per-turn daemon (see ZorkWorld.DefineSwordGlow).
         Sword = Reg("sword", _b.Item("elvish sword").Called("sword", "blade").Adjectives("elvish", "glowing")
-            .Describe("A sword of elvish workmanship. It glows with a faint blue light."));
+            .Describe("A sword of elvish workmanship."));
 
         Sack = Reg("sack", _b.Item("brown sack").Called("sack", "bag").Adjectives("brown")
             .Describe("The brown sack is closed.").Container(open: false));

@@ -59,6 +59,7 @@ internal sealed partial class ZorkWorld
         DefineGrating();
         DefineTrophyScoring();
         DefineCombat();
+        DefineSwordGlow();
         DefineTrollAndCyclops();
         DefineThief();
         DefineDamAndReservoir();
@@ -223,6 +224,36 @@ internal sealed partial class ZorkWorld
         if (droppedWeapon is not null) ctx.PlaceHere(droppedWeapon);
         ctx.Say(winMsg);
         return VerbResult.Done;
+    }
+
+    // The elvish sword warns of nearby danger: a faint glow when a living villain is one room
+    // away, a bright glow when one shares the room. Only reports on change so it never spams.
+    private void DefineSwordGlow()
+    {
+        _b.EveryTurn(ctx =>
+        {
+            int level = SwordGlowLevel(ctx);
+            if (level == ctx.Get(_swordGlow)) return;
+            ctx.Set(_swordGlow, level);
+            ctx.Say(level switch
+            {
+                2 => "Your sword is glowing very brightly.",
+                1 => "Your sword is glowing with a faint blue glow.",
+                _ => "Your sword is no longer glowing.",
+            });
+        }, when: ctx => ctx.Here(Sword));
+    }
+
+    private int SwordGlowLevel(GameContext ctx)
+    {
+        bool ThreatIn(Room? room) => room is not null &&
+            ((!ctx.Get(_trollDefeated) && ctx.RoomOf(Troll) == room) ||
+             (!ctx.Get(_thiefDead) && ctx.RoomOf(Thief) == room));
+
+        Room here = ctx.CurrentRoom;
+        if (ThreatIn(here)) return 2;
+        if (here.Exits.Values.Any(exit => ThreatIn(exit.Destination))) return 1;
+        return 0;
     }
 
     // ENGINE-LIMIT: ZorkSimplifications.Cyclops — lunch/bottle/yell sleep cyclops; no mood daemon or water quantity.

@@ -91,6 +91,7 @@ internal sealed partial class ZorkWorld
     private StateKey<int> _deathCount = null!;
     private StateKey<int> _sandDigs = null!;
     private StateKey<int> _thiefLocation = null!;
+    private StateKey<int> _swordGlow = null!;   // 0 = none, 1 = faint, 2 = bright
 
     internal ZorkWorld(GameBuilder b) => _b = b;
 
@@ -136,6 +137,7 @@ internal sealed partial class ZorkWorld
         _deathCount = _b.State("deaths", 0);
         _sandDigs = _b.State("sand-digs", 0);
         _thiefLocation = _b.State("thief-loc", 0);
+        _swordGlow = _b.State("sword-glow", 0);
     }
 
     private void DefineRooms()

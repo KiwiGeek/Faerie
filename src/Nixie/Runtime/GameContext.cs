@@ -39,6 +39,9 @@ public class GameContext
     public bool Here(Thing thing) => State.IsPresent(thing);
     public bool InRoom(Room room) => State.CurrentRoom == room;
 
+    /// <summary>The room a thing currently sits in, or null if it is carried, worn, or offstage.</summary>
+    public Room? RoomOf(Thing thing) => State.RoomOf(thing);
+
     public void Move(Thing thing, Placement placement) => State.Move(thing, placement);
     public void Take(Thing thing) => State.TakeIntoInventory(thing);
     public void PlaceHere(Thing thing) => State.MoveTo(thing, State.CurrentRoom);

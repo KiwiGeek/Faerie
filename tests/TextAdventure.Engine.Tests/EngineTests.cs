@@ -135,7 +135,7 @@ public class EngineTests
     {
         var (engine, _, _, hall, _, key, chest, _) = BuildWorld();
         chest.Set(Attr.Open);
-        engine.Submit("take key");
+        engine.Submit("take brass key");   // the item's only noun is the full "brass key" (no "key" alias)
         engine.State.Score = 42;
         string snapshot = engine.CreateSnapshot();
 

@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Nixie\Nixie.csproj" />
+    <ProjectReference Include="..\..\src\TextAdventure.Sample.Zork\TextAdventure.Sample.Zork.csproj" />
   </ItemGroup>
 
 </Project>

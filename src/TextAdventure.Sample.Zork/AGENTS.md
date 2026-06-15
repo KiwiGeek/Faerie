@@ -182,13 +182,19 @@ In-game source references use `ZorkSimplifications` (`ZorkWorld.Simplifications.
 
 ---
 
-### 15. Sword proximity glow
+### 15. Sword proximity glow — IMPLEMENTED
 
 **Original:** Sword `number` increases near spirits/troll; messages in Torch Room.
 
-**Engine gap:** No proximity sensor or numeric thing state exposed to daemons.
+**Former engine gap:** Adjacency wasn't reachable from daemons — `GameContext` only exposed
+presence in the *current* room (`Here`/`InRoom`).
 
-**Sample simplification:** Static sword description mentions glow; Torch Room text only.
+**Resolution:** Added `GameContext.RoomOf(Thing)` (wrapping the existing `GameState.RoomOf`), so a
+daemon can locate any thing. `ZorkWorld.DefineSwordGlow` is an `EveryTurn` daemon (gated on the
+sword being present) that grades the glow off living-villain proximity — **bright** when a troll or
+thief shares the room, **faint** when one is in an adjacent room (`CurrentRoom.Exits`), **none**
+otherwise — and reports only on change. Level is held in the `sword-glow` state key, so it survives
+save/restore. No remaining engine gap.
 
 ---
 
