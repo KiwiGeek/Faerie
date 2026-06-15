@@ -49,4 +49,31 @@ public sealed class App : Application
 
     private static void ApplyWindowChrome(Window window, Game game)
     {
-        window.Title = string.IsNullOrWhiteSpace(game.WindowTitle) ? game.Title : game.Wi
+        window.Title = string.IsNullOrWhiteSpace(game.WindowTitle) ? game.Title : game.WindowTitle!;
+
+        if (game.WindowIconUri is not { } iconUri) return;
+        try
+        {
+            using Stream stream = iconUri.StartsWith("avares://", StringComparison.OrdinalIgnoreCase)
+                ? AssetLoader.Open(new Uri(iconUri))
+                : File.OpenRead(iconUri);
+            window.Icon = new WindowIcon(stream);
+        }
+        catch
+        {
+            // No usable icon -> keep the platform default.
+        }
+    }
+
+    private static void WireSaveSystem(GameEngine engine)
+    {
+        string dir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HauntedHouse");
+        string path = Path.Combine(dir, "save.json");
+
+        engine.SaveProvider = () => path;
+        engine.WriteSave = json => { Directory.CreateDirectory(dir); File.WriteAllText(path, json); };
+        engine.RestoreProvider = () => File.Exists(path) ? path : null;
+        engine.ReadSave = p => File.Exists(p) ? File.ReadAllText(p) : null;
+    }
+}

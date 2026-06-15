@@ -25,6 +25,10 @@ public sealed class App : Application
             TerminalWindow window = new();
             ApplyWindowChrome(window, game);
 
+            // Font and caret come from the game definition (the engine ships no fonts).
+            window.Terminal.CursorStyle = game.Cursor;
+            window.Terminal.FontSpec = game.FontSpec;
+
             TerminalBuffer buffer = new(80, 25, new TextStyle(TerminalColor.LightGray, TerminalColor.Black));
             window.Terminal.Buffer = buffer;
 

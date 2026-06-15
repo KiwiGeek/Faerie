@@ -21,7 +21,7 @@ public static class HauntedHouseGame
             .WithMaxScore(100)
             .WithWindowTitle("The Haunted House — a Text Adventure")
             // .WithWindowIcon("avares://HauntedHouse/Assets/icon.ico")
-            .WithFont("avares://HauntedHouse/Assets/Fonts")   // the game embeds its own VGA font
+            .WithFont("avares://HauntedHouse/Assets/Fonts#PxPlus IBM VGA 8x16")   // family name from the TTF's name table, not the filename
             .WithCursor(TerminalCursor.Block)
             .AddStandardVerbs();
 
@@ -303,4 +303,14 @@ public static class HauntedHouseGame
     }
 
     /// <summary>Sets a door on an exit and on its reciprocal so it gates travel in both directions.</summary>
-    private
+    private static void AttachDoor(Room room, Direction direction, Thing door)
+    {
+        if (room.ExitTo(direction) is not { } exit) return;
+
+        exit.Door = door;
+
+        // Mirror the door onto the return exit so it's closed from the far side too.
+        if (exit.Destination.ExitTo(direction.Opposite()) is { } back)
+            back.Door = door;
+    }
+}

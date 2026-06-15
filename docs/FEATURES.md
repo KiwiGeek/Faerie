@@ -83,7 +83,7 @@ names, csproj `PackageId`s, and the avares URIs in sample fonts — do it in one
 - [ ] **Sound & music.** Engine-agnostic audio hooks (play sound effect, loop background music,
   stop/fade), triggered from reactions/daemons; an Avalonia/host implementation. Keep the engine
   free of audio dependencies (interface in engine, impl in host).
-- [ ] **Re-render/reflow backbuffer on zoom & resize.** Glyphs already redraw at the new font size;
+- [x] **Re-render/reflow backbuffer on zoom & resize.** Glyphs already redraw at the new font size;
   remaining work is to re-wrap stored scrollback/live text to the new column count (keep logical
   lines, re-wrap on resize) rather than leaving old wrapping. Today content is preserved top-left
   without reflow (DOS-style).
