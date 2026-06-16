@@ -1,8 +1,9 @@
 using Faerie.Building;
 using Faerie.Model;
 using Faerie.Runtime;
-using Faerie.Tests;
 using Xunit;
+
+namespace Faerie.Tests;
 
 public class OutputFilterTests
 {
