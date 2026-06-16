@@ -31,6 +31,10 @@ public sealed class ParsedCommand
     public Direction? Direction { get; init; }
 
     public Thing? DirectObject { get; init; }
+    /// <summary>When the player names several direct objects ("drop sword and lamp"), every resolved target.</summary>
+    public IReadOnlyList<Thing> DirectObjects { get; init; } = [];
+    /// <summary>True when the player used a bulk quantifier such as "all" or "everything".</summary>
+    public bool IsAll { get; init; }
     public Thing? IndirectObject { get; init; }
     public string? Preposition { get; init; }
 

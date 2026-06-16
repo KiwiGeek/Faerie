@@ -129,7 +129,7 @@ public sealed class GameEngine
                 return;
             }
 
-            RunCommand(verb, command, input);
+            RunCommands(verb, command, input);
             RefreshBars();
             return;
         }
@@ -142,7 +142,7 @@ public sealed class GameEngine
             return;
         }
 
-        RunCommand(verb, command, input);
+        RunCommands(verb, command, input);
 
         // A turn has passed.
         State.TurnCount++;
@@ -161,6 +161,38 @@ public sealed class GameEngine
         // Announce the ending only on the turn it actually happens.
         if (State.IsOver && !wasOver)
             AnnounceEnding();
+    }
+
+    private void RunCommands(Verb verb, ParsedCommand command, string input)
+    {
+        IReadOnlyList<Thing> targets = command.DirectObjects.Count > 0
+            ? command.DirectObjects
+            : command.DirectObject is { } single ? [single] : [];
+
+        if (targets.Count == 0)
+        {
+            RunCommand(verb, command, input);
+            return;
+        }
+
+        foreach (Thing target in targets)
+        {
+            ParsedCommand step = new()
+            {
+                Status = command.Status,
+                Verb = command.Verb,
+                Direction = command.Direction,
+                DirectObject = target,
+                DirectObjects = command.DirectObjects,
+                IsAll = command.IsAll,
+                IndirectObject = command.IndirectObject,
+                Preposition = command.Preposition,
+                DirectObjectText = command.DirectObjectText,
+                IndirectObjectText = command.IndirectObjectText
+            };
+            RunCommand(verb, step, input);
+            if (QuitRequested || State.IsOver) break;
+        }
     }
 
     private void RunCommand(Verb verb, ParsedCommand command, string input)

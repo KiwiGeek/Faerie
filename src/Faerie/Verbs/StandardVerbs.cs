@@ -51,7 +51,7 @@ public static class StandardVerbs
         b.Verbs.Lock = b.DefineVerb(StandardVerbIds.Lock, ["lock"],
             VerbForms.Transitive | VerbForms.Ditransitive, Lock);
 
-        b.Verbs.Put = b.DefineVerb(StandardVerbIds.Put, ["put", "place", "insert", "drop"],
+        b.Verbs.Put = b.DefineVerb(StandardVerbIds.Put, ["put", "place", "insert"],
             VerbForms.Ditransitive | VerbForms.Transitive, Put);
 
         b.Verbs.Read = b.DefineVerb(StandardVerbIds.Read, ["read"], VerbForms.Transitive, Read);

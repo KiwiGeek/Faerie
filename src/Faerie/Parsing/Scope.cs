@@ -1,5 +1,6 @@
 using Faerie.Model;
 using Faerie.Runtime;
+using Faerie.Verbs;
 
 namespace Faerie.Parsing;
 
@@ -75,6 +76,31 @@ public sealed class Scope(GameState state, GameContext? context = null)
                     return false;
             }
         }
+    }
+
+    /// <summary>
+    /// Things matching a bulk quantifier for the given verb (e.g. takeable items for "take all").
+    /// </summary>
+    public IReadOnlyList<Thing> ResolveAll(Verb verb)
+    {
+        List<Thing> results = [];
+        switch (verb.Id)
+        {
+            case Verbs.StandardVerbIds.Take:
+                foreach (Thing thing in VisibleThings().Distinct())
+                {
+                    if (_state.IsCarried(thing)) continue;
+                    if (!thing.Has(Attr.Takeable) || thing.Has(Attr.Fixed)) continue;
+                    if (thing.Has(Attr.Animate)) continue;
+                    results.Add(thing);
+                }
+                break;
+            case Verbs.StandardVerbIds.Drop:
+                results.AddRange(_state.Inventory);
+                break;
+        }
+
+        return results;
     }
 
     /// <summary>
