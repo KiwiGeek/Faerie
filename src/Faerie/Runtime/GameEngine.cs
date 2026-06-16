@@ -30,6 +30,7 @@ public sealed class GameEngine
 
     private readonly Game _game;
     private readonly GameContext _context;
+    private readonly List<ScheduledTimer> _timers;
     private readonly List<string> _undoSnapshots = [];
     private string? _lastSuccessfulCommand;
 
@@ -39,6 +40,7 @@ public sealed class GameEngine
     {
         _game = game;
         State = new GameState(game.World);
+        _timers = [.. game.Timers];
         Out = new OutputWriter(terminal) { BaseStyle = terminal.DefaultStyle };
         Parser = new Parser(game.Verbs);
         Random = randomSeed is { } s ? new Random(s) : new Random();
@@ -180,6 +182,8 @@ public sealed class GameEngine
                 if (IsFinished) break;
                 daemon.Tick(_context);
             }
+
+            TickTimers();
         }
 
         RefreshBars();
@@ -371,6 +375,40 @@ public sealed class GameEngine
         Out.PrintLine($"{{fg:darkgray}}Exits: {exits}.{{/}}");
     }
 
+    // ---- scheduled timers -----------------------------------------------------------------
+
+    internal void ScheduleIn(string? name, int turns, Action<GameContext> action, Func<GameContext, bool>? when = null)
+    {
+        if (name is not null)
+            CancelSchedule(name);
+
+        _timers.Add(new ScheduledTimer
+        {
+            Name = name,
+            DueAtTurn = State.TurnCount + turns + 1,
+            Action = action,
+            Condition = when
+        });
+    }
+
+    internal void CancelSchedule(string name)
+    {
+        foreach (ScheduledTimer timer in _timers)
+        {
+            if (timer.Name == name)
+                timer.Cancelled = true;
+        }
+    }
+
+    private void TickTimers()
+    {
+        foreach (ScheduledTimer timer in _timers)
+        {
+            if (IsFinished) break;
+            timer.Tick(_context);
+        }
+    }
+
     // ---- meta-verb plumbing ---------------------------------------------------------------
 
     public void ShowHelp()
@@ -400,7 +438,7 @@ public sealed class GameEngine
         try
         {
             string slot = SaveProvider();
-            WriteSave(SaveSystem.Capture(State, _game.Daemons));
+            WriteSave(SaveSystem.Capture(State, _game.Daemons, _timers));
             Out.PrintLine("Game saved.");
             _ = slot;
         }
@@ -423,7 +461,7 @@ public sealed class GameEngine
             if (RestoreProvider() is not { } slot) { Out.PrintLine("Restore cancelled."); return; }
             if (ReadSave(slot) is not { } json) { Out.PrintLine("No save found."); return; }
 
-            SaveSystem.Restore(json, State, _game.Daemons);
+            SaveSystem.Restore(json, State, _game.Daemons, _timers);
             _undoSnapshots.Clear();
             Out.PrintLine("Game restored.");
             DescribeCurrentRoom(verbose: true);
@@ -435,7 +473,7 @@ public sealed class GameEngine
     }
 
     /// <summary>Captures the current game to a JSON string (for hosts that manage their own files).</summary>
-    public string CreateSnapshot() => SaveSystem.Capture(State, _game.Daemons);
+    public string CreateSnapshot() => SaveSystem.Capture(State, _game.Daemons, _timers);
 
     /// <summary>Restores game state from a JSON snapshot and clears the undo stack.</summary>
     public void LoadSnapshot(string json)
@@ -444,7 +482,7 @@ public sealed class GameEngine
         _undoSnapshots.Clear();
     }
 
-    private void RestoreSnapshot(string json) => SaveSystem.Restore(json, State, _game.Daemons);
+    private void RestoreSnapshot(string json) => SaveSystem.Restore(json, State, _game.Daemons, _timers);
 
     private void AnnounceEnding()
     {

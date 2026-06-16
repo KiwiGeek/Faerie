@@ -551,28 +551,37 @@ b.EveryTurn(ctx =>
 ```
 
 Run something once, at a specific turn. **Note `AtTurn` takes an absolute turn number, not a delay** — turn 20
-of the whole game, not "20 turns from now". For a relative delay, capture the current turn or count down with a
-state key (as in the bomb example below):
+of the whole game, not "20 turns from now". For a relative delay from game start or from an in-game event, use
+`ScheduleIn`:
 
 ```csharp
 b.AtTurn(20, ctx => ctx.Say("A distant bell tolls. Time is running out."));
 ```
 
-The optional `when:` predicate on `EveryTurn` gates a daemon so it only runs while a condition holds — handy for
-starting a timer or behaviour at a certain point and skipping the per-turn work otherwise:
-
-A classic "the bomb goes off" timer:
+**Relative one-shot timers** — fire after *N player turns*. At build time, `ScheduleIn(N)` counts from turn zero
+before the first command. From running game code, `ctx.ScheduleIn` counts from the *next* turn boundary (the
+scheduling command's turn does not count toward *N*):
 
 ```csharp
-var turnsLeft = b.State("fuse", 5);
-b.EveryTurn(ctx =>
-{
-    int left = ctx.Get(turnsLeft);
-    if (left <= 0) { ctx.Lose("BOOM. The bomb explodes."); return; }
-    ctx.Say($"The fuse hisses. ({left} turns left)");
-    ctx.Set(turnsLeft, left - 1);
-}, when: ctx => /* only after they light it */ ctx.Get(fuseLit));
+b.ScheduleIn(5, ctx => ctx.Say("The fuse explodes."));
+b.ScheduleIn("fuse", 5, ctx => ctx.Say("Boom."), when: ctx => ctx.Get(fuseLit));
+// ctx.CancelSchedule("fuse") drops a named timer before it fires
 ```
+
+The optional `when:` predicate gates a timer so it only fires while a condition holds — same as `EveryTurn`.
+
+A classic "the bomb goes off" timer (manual countdown still works; `ScheduleIn` is simpler once lit):
+
+```csharp
+b.On(match).Before(b.Verbs.Light!, ctx =>
+{
+    ctx.ScheduleIn(5, c => c.Lose("BOOM. The bomb explodes."));
+    return VerbResult.Pass;
+});
+```
+
+Or with a recurring fuse hiss each turn until detonation, keep `EveryTurn` + state; for a silent fuse,
+`ScheduleIn` alone is enough.
 
 ### Rewriting or hiding output (`FilterOutput`)
 
