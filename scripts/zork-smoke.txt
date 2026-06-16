@@ -1,3 +1,0 @@
-# Minimal headless smoke script for Zork
-look
-north
