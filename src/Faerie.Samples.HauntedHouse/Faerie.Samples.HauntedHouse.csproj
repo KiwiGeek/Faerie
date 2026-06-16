@@ -21,6 +21,7 @@
     <ProjectReference Include="..\Faerie\Faerie.csproj" />
     <ProjectReference Include="..\Faerie.Terminal\Faerie.Terminal.csproj" />
     <ProjectReference Include="..\Faerie.Terminal.Avalonia\Faerie.Terminal.Avalonia.csproj" />
+    <ProjectReference Include="..\Faerie.Terminal.Headless\Faerie.Terminal.Headless.csproj" />
   </ItemGroup>
 
   <!-- The game embeds its own font; the engine ships none. The game definition points the

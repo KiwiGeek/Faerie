@@ -32,6 +32,7 @@ The project is named **Faerie** — a nod to **F**luent **A**dventure **E**ngine
 - `Faerie.Terminal` — shared, UI-agnostic terminal model (`TerminalBuffer`, the character-cell framebuffer);
   implements `ITerminal` and is reused by every front end.
 - `Faerie.Terminal.Avalonia` — the Avalonia "fake terminal" front end.
+- `Faerie.Terminal.Headless` — script replay and transcript logging, no UI ([#69](https://github.com/KiwiGeek/Faerie/issues/69)); published on NuGet for third-party games and test harnesses.
 - `Faerie.Terminal.Console` — planned stdout/console front end ([#43](https://github.com/KiwiGeek/Faerie/issues/43)).
 - `Faerie.Samples.Zork`, `Faerie.Samples.HauntedHouse`, `Faerie.Tests` — not published.
 

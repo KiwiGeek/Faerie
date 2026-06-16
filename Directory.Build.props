@@ -9,7 +9,7 @@
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <InvariantGlobalization>true</InvariantGlobalization>
 
-    <!-- Nothing packs unless it opts in with <IsPackable>true</IsPackable> (the three libraries do). -->
+    <!-- Nothing packs unless it opts in with <IsPackable>true</IsPackable> (the four libraries do). -->
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

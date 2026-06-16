@@ -1,14 +1,26 @@
 using Avalonia;
+using Faerie.Terminal.Headless;
 
 namespace Faerie.Samples.HauntedHouse;
 
 internal static class Program
 {
-    // Avalonia configuration; don't use any Avalonia, third-party APIs or any SynchronizationContext
-    // before AppMain is called: things aren't initialized yet and stuff will break.
     [STAThread]
-    public static void Main(string[] args) =>
+    public static void Main(string[] args)
+    {
+        if (HeadlessArgs.TryParse(args, out HeadlessOptions? options, out string? error))
+        {
+            if (options is null)
+            {
+                Console.WriteLine(error);
+                Environment.Exit(error == HeadlessArgs.FormatHelp() ? 0 : 1);
+            }
+
+            Environment.Exit(HeadlessRunner.Run(HauntedHouseGame.Build(), options));
+        }
+
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
 
     public static AppBuilder BuildAvaloniaApp() =>
         AppBuilder.Configure<App>()
