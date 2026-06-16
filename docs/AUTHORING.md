@@ -258,11 +258,18 @@ b.On(thing).Before(b.Verbs.SomeVerb!, ctx =>
 `ctx` is your toolbox inside a reaction. The most useful things on it:
 
 - `ctx.Say("text")` — print a line to the player (supports colour markup, see §11).
+  `ctx.SayInline("text")` prints without a trailing newline.
 - `ctx.Carrying(thing)` / `ctx.Wearing(thing)` / `ctx.Here(thing)` — true/false checks.
+  (`Here` = the thing is in the current room **or** being carried.)
+- `ctx.InRoom(room)` — is the player in this room right now?
+- `ctx.RoomOf(thing)` — the room a thing is currently in, or `null` if it's carried, worn, or off-stage.
+  This is how a reaction or daemon asks "where is X" for anything, not just the current room (see
+  "Querying the world" below).
 - `ctx.Take(thing)`, `ctx.PlaceHere(thing)`, `ctx.Remove(thing)` — move things around.
 - `ctx.MovePlayerTo(room)` — teleport the player.
 - `ctx.Win("text")` / `ctx.Lose("text")` — end the game (see §8).
-- `ctx.DirectObject`, `ctx.IndirectObject` — what the player referred to.
+- `ctx.Random` — a shared `System.Random` for chance-based outcomes (`ctx.Random.Next(6)`).
+- `ctx.DirectObject`, `ctx.IndirectObject` — what the player referred to ("attack troll **with sword**").
 
 ### Example: feed the dog to get past it
 
@@ -311,6 +318,33 @@ painting.OnExamine = ctx => ctx.Say("His eyes seem to follow you around the room
 
 (`OnEnter`, `OnFirstEnter`, `OnTurn` exist on rooms the same way — they're properties you assign with
 `=`, e.g. `room.OnEnter = ctx => { ... };`.)
+
+### Querying the world (where things are)
+
+Reactions and daemons often need to know more than "is it here?". The context gives you spatial queries
+that work for *any* room or thing, not just the player's current location:
+
+- `ctx.RoomOf(thing)` — the room a thing sits in, or `null` if it's carried/worn/off-stage.
+- `ctx.InRoom(room)` — is the player here now?
+- `ctx.CurrentRoom.Exits` — the exits leading out of a room; `.Values` are the `Exit`s, and each
+  `exit.Destination` is the room it leads to. This is how you reason about which rooms are adjacent.
+- `ctx.State.ContentsOf(room)` — every thing currently loose in a given room.
+
+For example, "is a living troll in this room or an adjacent one?" (the basis of the sample's sword-glow
+and combat features):
+
+```csharp
+bool TrollNear(GameContext ctx)
+{
+    if (trollDefeated.Get(ctx)) return false;
+    Room here = ctx.CurrentRoom;
+    if (ctx.RoomOf(troll) == here) return true;                       // same room
+    return here.Exits.Values.Any(e => ctx.RoomOf(troll) == e.Destination);  // one room away
+}
+```
+
+Because these queries are available inside `EveryTurn` daemons too, "creature proximity," "wander toward
+the player," and similar behaviours are ordinary game code — no special engine support required.
 
 ---
 
@@ -436,11 +470,16 @@ b.EveryTurn(ctx =>
 });
 ```
 
-Run something once, after N turns:
+Run something once, at a specific turn. **Note `AtTurn` takes an absolute turn number, not a delay** — turn 20
+of the whole game, not "20 turns from now". For a relative delay, capture the current turn or count down with a
+state key (as in the bomb example below):
 
 ```csharp
 b.AtTurn(20, ctx => ctx.Say("A distant bell tolls. Time is running out."));
 ```
+
+The optional `when:` predicate on `EveryTurn` gates a daemon so it only runs while a condition holds — handy for
+starting a timer or behaviour at a certain point and skipping the per-turn work otherwise:
 
 A classic "the bomb goes off" timer:
 
@@ -454,6 +493,31 @@ b.EveryTurn(ctx =>
     ctx.Set(turnsLeft, left - 1);
 }, when: ctx => /* only after they light it */ ctx.Get(fuseLit));
 ```
+
+### Rewriting or hiding output (`FilterOutput`)
+
+Sometimes you want to change *how the game's text appears* rather than what happens — an echoing room, a
+poisoned/drunk haze, a censored word, mirror writing. Register an output filter; it runs on every line of game
+text just before it's shown, and returns a rewritten string (or `null` to hide the line completely):
+
+```csharp
+// While the player is in the loud room, throw the last word of every line back at them.
+b.FilterOutput((ctx, text) =>
+    ctx.InRoom(loudRoom) ? $"{text}\n(...{text.Split(' ').Last()}...)" : text);
+
+// Hide anything mentioning the wizard until the player has met him.
+b.FilterOutput((ctx, text) =>
+    !ctx.Get(metWizard) && text.Contains("wizard") ? null : text);
+```
+
+Notes:
+
+- Filters run in the order you register them; each sees the previous one's result, and the chain stops as soon
+  as one returns `null` (suppressed).
+- Use the context (`ctx.InRoom`, state keys, etc.) to scope the effect — there's no separate "per-room" API; the
+  predicate *is* the scope.
+- The title bar and status bar are **not** filtered, and a filter is bypassed for any text it prints itself, so
+  it can't loop. Keep filters to pure string work (don't call `ctx.Say` from inside one).
 
 ---
 

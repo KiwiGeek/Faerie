@@ -181,11 +181,18 @@ internal sealed partial class ZorkWorld
             AwardTreasure(ctx, bit, points, $"You have gained {points} points.");
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Combat — instant sword kill; no melee rounds, disarm, or wake-on-leave.
+    // Full melee combat: attacking a villain trades blows over several turns. Either side can miss,
+    // wound, knock the other senseless, disarm, or kill. Your offense is the 'attack' verb; the
+    // villain's offense (plus recovery and your slow healing) runs each turn in CombatRound. An
+    // unconscious villain can be finished off, revives after a few turns, or wakes if you leave.
+    private const int PlayerMaxHp = 5;
+
     private void DefineCombat()
     {
-        _b.On(Troll).Before(_attack, ctx => FightCreature(ctx, Troll, BloodyAxe, _trollDefeated,
-            "The troll swings his axe, but you parry with your sword and run him through. The troll collapses."));
+        _b.On(Troll).Before(_attack, ctx => PlayerStrikes(ctx, Troll, _trollHp, _trollKO, _trollDefeated, "troll", KillTroll));
+        _b.On(Thief).Before(_attack, ctx => PlayerStrikes(ctx, Thief, _thiefHp, _thiefKO, _thiefDead, "thief", KillThief));
+
+        // The cyclops isn't a melee fight in the original — you scare or feed him (see below).
         _b.On(Cyclops).Before(_attack, ctx =>
         {
             if (ctx.Get(_cyclopsDead)) { ctx.Say("The cyclops is already dead."); return VerbResult.Done; }
@@ -199,32 +206,157 @@ internal sealed partial class ZorkWorld
             ctx.Say("The cyclops catches your arm and nearly breaks it.");
             return VerbResult.Done;
         });
-        _b.On(Thief).Before(_attack, ctx =>
-        {
-            if (ctx.Get(_thiefDead)) { ctx.Say("The thief is already dead."); return VerbResult.Done; }
-            if (HasSword(ctx))
-            {
-                ctx.Set(_thiefDead, true);
-                ctx.Remove(Thief);
-                ctx.Say("The thief falls to the floor, dead. His bag spills open.");
-                DropThiefLoot(ctx);
-                return VerbResult.Done;
-            }
-            ctx.Say("The thief dodges your blow and laughs.");
-            return VerbResult.Done;
-        });
+
+        _b.EveryTurn(CombatRound);
     }
 
-    private VerbResult FightCreature(VerbContext ctx, Thing creature, Thing? droppedWeapon, StateKey<bool> defeatedFlag, string winMsg)
+    private void KillTroll(GameContext ctx)
     {
-        if (ctx.Get(defeatedFlag)) { ctx.Say("It's already dead."); return VerbResult.Done; }
-        if (!HasSword(ctx)) { ctx.Say("You don't have a weapon!"); return VerbResult.Done; }
-        ctx.Set(defeatedFlag, true);
-        ctx.Remove(creature);
-        if (droppedWeapon is not null) ctx.PlaceHere(droppedWeapon);
-        ctx.Say(winMsg);
+        ctx.Set(_trollDefeated, true);
+        ctx.Remove(Troll);
+        ctx.PlaceHere(BloodyAxe);
+        ctx.Say("The troll lets out a strangled cry and collapses. His bloody axe clatters to the floor.");
+    }
+
+    private void KillThief(GameContext ctx)
+    {
+        ctx.Set(_thiefDead, true);
+        ctx.Remove(Thief);
+        ctx.Say("The thief falls to the floor, dead. His bag spills open, scattering its contents.");
+        DropThiefLoot(ctx);
+    }
+
+    // ---- your offense (the 'attack' verb) -------------------------------------------------
+
+    private VerbResult PlayerStrikes(VerbContext ctx, Thing villain, StateKey<int> hp, StateKey<int> ko,
+        StateKey<bool> dead, string name, Action<GameContext> kill)
+    {
+        if (ctx.Get(dead)) { ctx.Say($"The {name} is already dead."); return VerbResult.Done; }
+        if (!ctx.Here(villain)) { ctx.Say($"There is no {name} here."); return VerbResult.Done; }
+
+        Thing? weapon = ChosenWeapon(ctx);
+        int power = PowerOf(weapon);
+        if (power == 0)
+        {
+            ctx.Say($"Attacking the {name} with your bare hands is a hopeless proposition.");
+            return VerbResult.Done;
+        }
+        string with = $" with the {weapon!.Name}";
+
+        // A senseless villain is defenceless: finish him.
+        if (ctx.Get(ko) > 0) { kill(ctx); return VerbResult.Done; }
+
+        int roll = ctx.Random.Next(100) + power * 12;   // a finer weapon tips the odds your way
+        if (roll >= 92)
+        {
+            ctx.SayInline($"A masterful stroke{with}! ");
+            kill(ctx);
+        }
+        else if (roll >= 74)
+        {
+            ctx.Set(ko, 2 + ctx.Random.Next(3));
+            ctx.Say($"You catch the {name} square on the head{with}. He crumples senseless to the floor.");
+        }
+        else if (roll >= 40)
+        {
+            int left = ctx.Get(hp) - 1;
+            ctx.Set(hp, left);
+            if (left <= 0) kill(ctx);
+            else ctx.Say($"Your blow lands{with}. The {name} is wounded, but fights on.");
+        }
+        else
+        {
+            ctx.Say($"The {name} parries your attack{with} and counters.");
+        }
         return VerbResult.Done;
     }
+
+    // ---- the villains' offense, recovery, and your slow healing ---------------------------
+
+    private void CombatRound(GameContext ctx)
+    {
+        VillainTurn(ctx, Troll, _trollKO, _trollDefeated, "troll", "axe");
+        if (ctx.State.IsOver) return;
+        VillainTurn(ctx, Thief, _thiefKO, _thiefDead, "thief", "stiletto");
+        if (ctx.State.IsOver) return;
+
+        if (!HostilePresent(ctx))
+        {
+            int hp = ctx.Get(_playerHp);
+            if (hp < PlayerMaxHp) ctx.Set(_playerHp, hp + 1);
+        }
+    }
+
+    private void VillainTurn(GameContext ctx, Thing villain, StateKey<int> ko, StateKey<bool> dead,
+        string name, string weapon)
+    {
+        if (ctx.Get(dead)) return;
+
+        int koLeft = ctx.Get(ko);
+        if (koLeft > 0)
+        {
+            // Leave him senseless and he comes to off-stage; stay, and he slowly revives.
+            if (!ctx.Here(villain)) { ctx.Set(ko, 0); return; }
+            ctx.Set(ko, --koLeft);
+            if (koLeft == 0) ctx.Say($"The {name} stirs, then climbs groggily back to his feet.");
+            return;
+        }
+
+        if (!ctx.Here(villain)) return;
+
+        Thing? yours = BestWeapon(ctx);
+        int roll = ctx.Random.Next(100) + (yours is null ? 18 : 0);   // unarmed, you're easier prey
+        if (roll >= 94)
+        {
+            ctx.Set(_playerHp, 0);
+            ctx.Lose($"The {name}'s {weapon} finds its mark, and the world goes black. You have died.");
+        }
+        else if (roll >= 70)
+        {
+            Wound(ctx, 2, $"The {name}'s {weapon} bites deep. You are badly wounded.");
+        }
+        else if (roll >= 46)
+        {
+            Wound(ctx, 1, $"The {name}'s {weapon} grazes you.");
+        }
+        else if (roll >= 34 && yours is not null)
+        {
+            ctx.Remove(yours);
+            ctx.PlaceHere(yours);
+            ctx.Say($"The {name} knocks the {yours.Name} from your grasp! It falls to the floor.");
+        }
+        else
+        {
+            ctx.Say($"The {name} swings at you and misses.");
+        }
+    }
+
+    private void Wound(GameContext ctx, int amount, string message)
+    {
+        int left = ctx.Get(_playerHp) - amount;
+        ctx.Set(_playerHp, left);
+        if (left <= 0) ctx.Lose("Your wounds are too grave. You sink to the ground, and your adventure ends here.");
+        else ctx.Say(message);
+    }
+
+    // ---- weapon selection -----------------------------------------------------------------
+
+    private Thing? ChosenWeapon(VerbContext ctx) =>
+        ctx.IndirectObject is { } io && IsWeapon(io) && ctx.Carrying(io) ? io : BestWeapon(ctx);
+
+    private Thing? BestWeapon(GameContext ctx) =>
+        ctx.Carrying(Sword) ? Sword :
+        ctx.Carrying(NastyKnife) ? NastyKnife :
+        ctx.Carrying(RustyKnife) ? RustyKnife :
+        ctx.Carrying(BloodyAxe) ? BloodyAxe : null;
+
+    private bool IsWeapon(Thing t) => t == Sword || t == NastyKnife || t == RustyKnife || t == BloodyAxe;
+
+    private int PowerOf(Thing? weapon) => weapon is null ? 0 : weapon == Sword ? 2 : 1;
+
+    private bool HostilePresent(GameContext ctx) =>
+        (!ctx.Get(_trollDefeated) && ctx.Get(_trollKO) == 0 && ctx.Here(Troll)) ||
+        (!ctx.Get(_thiefDead) && ctx.Get(_thiefKO) == 0 && ctx.Here(Thief));
 
     // The elvish sword warns of nearby danger: a faint glow when a living villain is one room
     // away, a bright glow when one shares the room. Only reports on change so it never spams.
@@ -312,7 +444,7 @@ internal sealed partial class ZorkWorld
     {
         _b.EveryTurn(ctx =>
         {
-            if (ctx.Get(_thiefDead) || ctx.State.TurnCount < 20) return;
+            if (ctx.Get(_thiefDead) || ctx.Get(_thiefKO) > 0 || ctx.State.TurnCount < 20) return;
             if (ctx.Random.Next(6) != 0) return;
 
             if (!ctx.Here(Thief) && !ctx.Get(_thiefDead))
@@ -398,8 +530,23 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.LoudRoom — no per-room output filter; see EchoHandler instead.
-    private void DefineLoudRoom() { }
+    // The Loud Room throws every line of output back at you until you master its acoustics (say ECHO).
+    // Implemented with the engine's output-filter seam (GameBuilder.FilterOutput).
+    private void DefineLoudRoom()
+    {
+        _b.FilterOutput((ctx, text) =>
+            ctx.InRoom(LoudRoom) && !ctx.Get(_loudQuieted) && LastWord(text) is { } word
+                ? $"{text}\n{{fg:darkgray}}{word}... {word}...{{/}}"
+                : text);
+    }
+
+    /// <summary>The last run of letters in a (possibly marked-up) line, or null if there is none.</summary>
+    private static string? LastWord(string text)
+    {
+        System.Text.RegularExpressions.MatchCollection words =
+            System.Text.RegularExpressions.Regex.Matches(text, "[A-Za-z]+");
+        return words.Count == 0 ? null : words[^1].Value;
+    }
 
     // ENGINE-LIMIT: ZorkSimplifications.Egg — open egg releases canary; no break-on-drop from tree.
     private void DefineEggAndCanary()
@@ -668,14 +815,18 @@ internal sealed partial class ZorkWorld
     private VerbResult EchoHandler(VerbContext ctx)
     {
         if (!ctx.InRoom(LoudRoom)) { ctx.Say("You hear nothing special."); return VerbResult.Done; }
+
+        // Mastering the acoustics silences the room (stops the output-filter echo) before we speak.
+        ctx.Set(_loudQuieted, true);
+
         string word = ctx.DirectObjectText ?? ctx.DirectObject?.Name ?? "hello";
         if (word.Contains("bar", StringComparison.OrdinalIgnoreCase))
         {
             PlatinumBar.Set(Attr.Concealed, false);
             ctx.PlaceHere(PlatinumBar);
-            ctx.Say("bar bar bar ... A platinum bar appears!");
+            ctx.Say("The acoustics settle. A platinum bar lies on the floor.");
         }
-        else ctx.Say($"{word} ... {word} ... {word} ...");
+        else ctx.Say("The room's echo fades; you can hear yourself think again.");
         return VerbResult.Done;
     }
 

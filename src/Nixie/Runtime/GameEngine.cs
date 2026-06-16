@@ -40,6 +40,18 @@ public sealed class GameEngine
         Random = randomSeed is { } s ? new Random(s) : new Random();
         _context = new GameContext(this, State, Out);
 
+        if (game.OutputFilters.Count > 0)
+            Out.Transform = markup =>
+            {
+                string? text = markup;
+                foreach (Func<GameContext, string, string?> filter in game.OutputFilters)
+                {
+                    if (text is null) break;          // an earlier filter suppressed it
+                    text = filter(_context, text);
+                }
+                return text;
+            };
+
         terminal.ConfigureBars(game.TitleBar is not null, game.StatusBar is not null);
     }
 

@@ -559,7 +559,7 @@ internal sealed partial class ZorkWorld
         {
             if (TrollRoom.ExitTo(dir) is { } exit)
             {
-                exit.Condition = ctx => ctx.Get(_trollDefeated);
+                exit.Condition = ctx => ctx.Get(_trollDefeated) || ctx.Get(_trollKO) > 0;
                 exit.BlockedMessage = "The troll fends you off with a menacing gesture.";
             }
         }

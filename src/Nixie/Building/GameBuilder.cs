@@ -26,6 +26,7 @@ namespace Nixie.Building;
 public sealed class GameBuilder
 {
     private readonly List<TurnDaemon> _daemons = [];
+    private readonly List<Func<GameContext, string, string?>> _outputFilters = [];
     private readonly HashSet<string> _modules = [];
     private readonly Dictionary<string, int> _idCounters = [];
 
@@ -181,6 +182,20 @@ public sealed class GameBuilder
         return this;
     }
 
+    /// <summary>
+    /// Registers an output filter. It runs on every line of game text just before it is shown, receiving
+    /// the context and the marked-up text; return a rewritten string to print, or <c>null</c> to suppress
+    /// the line entirely. Filters run in registration order (each sees the previous one's result), and the
+    /// chain stops as soon as one returns null. Use the context to scope the effect (e.g. only in one room):
+    /// an echoing "loud room", mirror text, or drunk vision. Title/status bars are not affected, and a filter
+    /// must not call back into output (the filter is bypassed for anything it prints, to avoid recursion).
+    /// </summary>
+    public GameBuilder FilterOutput(Func<GameContext, string, string?> filter)
+    {
+        _outputFilters.Add(filter);
+        return this;
+    }
+
     /// <summary>Begins a fluent reaction registration for a thing.</summary>
     public ReactionScope On(Thing thing) => new(this, thing);
 
@@ -253,6 +268,7 @@ public sealed class GameBuilder
             Verbs = Library,
             Reactions = Reactions,
             Daemons = _daemons,
+            OutputFilters = _outputFilters,
             MaxScore = _maxScore,
             OnStart = _onStart,
             TitleBar = _titleBar,

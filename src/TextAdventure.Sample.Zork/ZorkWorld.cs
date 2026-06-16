@@ -92,6 +92,12 @@ internal sealed partial class ZorkWorld
     private StateKey<int> _sandDigs = null!;
     private StateKey<int> _thiefLocation = null!;
     private StateKey<int> _swordGlow = null!;   // 0 = none, 1 = faint, 2 = bright
+    private StateKey<int> _playerHp = null!;    // player's fighting strength; 0 = dead
+    private StateKey<int> _trollHp = null!;
+    private StateKey<int> _thiefHp = null!;
+    private StateKey<int> _trollKO = null!;      // turns the troll stays unconscious (0 = on his feet)
+    private StateKey<int> _thiefKO = null!;
+    private StateKey<bool> _loudQuieted = null!;  // the Loud Room has been silenced
 
     internal ZorkWorld(GameBuilder b) => _b = b;
 
@@ -138,6 +144,12 @@ internal sealed partial class ZorkWorld
         _sandDigs = _b.State("sand-digs", 0);
         _thiefLocation = _b.State("thief-loc", 0);
         _swordGlow = _b.State("sword-glow", 0);
+        _playerHp = _b.State("player-hp", 5);
+        _trollHp = _b.State("troll-hp", 2);
+        _thiefHp = _b.State("thief-hp", 4);
+        _trollKO = _b.State("troll-ko", 0);
+        _thiefKO = _b.State("thief-ko", 0);
+        _loudQuieted = _b.State("loud-quieted", false);
     }
 
     private void DefineRooms()

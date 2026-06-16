@@ -5,6 +5,12 @@ grouped roughly by area. When a gap that is also listed in a sample's `AGENTS.md
 sample) gets implemented, **update that `AGENTS.md`** to mark it done and trim the corresponding
 in-sample simplification.
 
+> **Note on "engine gaps":** most items historically filed as engine gaps turned out to be either
+> unimplemented sample *content* or missing *convenience helpers* — not things the engine couldn't do.
+> Building the combat feature confirmed this (it needed no engine change beyond `ctx.RoomOf`). After review,
+> the only true architectural gap is **output interception** (see below). See the Zork sample's
+> `AGENTS.md` → "Reality check" for the full classification.
+
 ## Naming
 
 The project needs a real name (working title: "Text Adventure Engine"). Candidates to consider:
@@ -53,26 +59,49 @@ names, csproj `PackageId`s, and the avares URIs in sample fonts — do it in one
 
 ## Systems / modules
 
-- [ ] **Combat module** (rounds, weapon damage, creature strength/state, hooks on attack/throw).
-  *(Zork gap #3)*
+- [x] **Combat module** *(Zork gap #3)* — **Built in game code; needed no engine change beyond `ctx.RoomOf`.**
+  Turn-by-turn melee (hit/miss/wound/knockout/disarm/kill), player health, unconscious recovery and
+  wake-on-leave live in the Zork sample (`ZorkWorld.DefineCombat`/`CombatRound`/`PlayerStrikes`/`VillainTurn`).
+  A *reusable* engine combat module remains optional, but this is no longer an engine gap.
 - [ ] **NPC movement / daemons** — pathfinding, creature inventory ("bag"), `Room.IsSacred`,
-  relocate-without-teleport. *(Zork gap #5)*
+  relocate-without-teleport. *(Zork gap #5)* — **Doable today** via an `EveryTurn` daemon calling `State.Move`;
+  what's missing is convenience helpers (wander to a random exit, approach/follow the player), not capability.
 - [ ] **First-class timers & staged rituals** — beyond `EveryTurn`; named countdowns, multi-step
   "ritual" state machine, button/switch groups, room "flooded" state. *(Zork gaps #6, #9)*
 - [ ] **Area hazards** — flame-in-gas-room style on-enter/on-turn hazards (`Attr.Flammable`/flame
   detection). *(Zork gap #7)*
-- [ ] **Per-room command/output filter** — `Room.OnCommand` or an output pipeline hook to rewrite
-  text (e.g. an echoing "loud room"). *(Zork gap #4)*
+- [~] **Per-room command/output filter** *(Zork gap #4)* — **In progress; the one genuine engine gap.** Verbs
+  print straight to a `sealed OutputWriter` with no hook to rewrite text. Adding `OutputWriter.Transform` plus
+  `GameBuilder.FilterOutput((ctx, text) => …)` so a game can rewrite, echo, or suppress output by room/state
+  (echoing "loud room", mirror text, drunk vision). Status/title bars bypass the filter.
 - [ ] **Richer scoring** — `AdjustScore`, trophy-case helper, death penalty/counter, place-visit
   bonuses. *(Zork gap #12)*
 - [ ] **Death/restore behaviors** — death hook to scatter items, randomize placements. *(Zork gap #13)*
-- [ ] **Proximity sensing / numeric thing state surfaced to daemons** (sword glow near monsters).
-  *(Zork gap #15)*
+- [x] **Proximity sensing surfaced to daemons** *(Zork gap #15)* — **Done.** Added `GameContext.RoomOf(Thing)`
+  (wrapping `GameState.RoomOf`); the sword-glow daemon grades none/faint/bright off villain adjacency using
+  `RoomOf` + `Room.Exits`. Numeric per-thing state was never actually missing — `StateKey<int>` already covers
+  it (see the lantern battery).
 - [ ] **Creature mood counters & fluids** (cyclops stages; bottle/water as quantity). *(Zork gap #16)*
 - [ ] **Standard "Infocom" verb bundle** — board, disembark, count, smell, listen, jump, swim, touch,
   wake, poke, lower, raise, fill, pour, burn, rub, shake, cross, enter, etc., as an optional module.
   *(Zork gap #19)*
 - [ ] **Random NPC-encounter system** (gnome/magic-flag style). *(Zork gap #20)*
+
+## Convenience helpers (low-risk, high-leverage)
+
+Fully expressible today, but every game hand-rolls the same pattern. Adding these to the engine shortens ports
+and stops authors from mislabelling them as engine gaps. None of these change what's *possible*.
+
+- [x] **`GameContext.RoomOf(Thing)`** — locate any thing from a reaction or daemon. *Done* (wraps
+  `GameState.RoomOf`); enabled the sword-glow and combat features.
+- [ ] **More scope/spatial queries on `GameContext`** — `ThingsHere()`, `ThingsIn(room)`, `IsAdjacent(room)`,
+  `Nearby(thing)`. Currently you reach through `ctx.State.ContentsOf(...)` and `Room.Exits` by hand.
+- [ ] **Relative scheduler** — `ScheduleIn(turns, action)` / cancelable named timers over today's `EveryTurn` +
+  manual counter (the bomb-fuse / lantern-battery / dam-drain pattern).
+- [ ] **NPC-movement helpers** — wander to a random exit, approach/follow the player, return-home; over raw
+  `State.Move` in a daemon.
+- [ ] **Soft-death hook** — a first-class "die but continue" (relocate player, scatter inventory, dock score,
+  decrement lives) instead of only the terminal `ctx.Lose`. Scriptable today, but every game reinvents it.
 
 ## Presentation / terminal
 

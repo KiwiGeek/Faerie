@@ -46,6 +46,14 @@ public sealed class Game
 
     public IReadOnlyList<TurnDaemon> Daemons { get; init; } = [];
 
+    /// <summary>
+    /// Output filters applied, in order, to every line of game text before it reaches the terminal.
+    /// Each receives the context and the marked-up text and returns a rewritten string, or null to
+    /// suppress it. Installed via <see cref="Building.GameBuilder.FilterOutput"/>. See
+    /// <see cref="Presentation.OutputWriter.Transform"/>.
+    /// </summary>
+    public IReadOnlyList<Func<GameContext, string, string?>> OutputFilters { get; init; } = [];
+
     /// <summary>Maximum achievable score (0 if the game does not use scoring).</summary>
     public int MaxScore { get; init; }
 

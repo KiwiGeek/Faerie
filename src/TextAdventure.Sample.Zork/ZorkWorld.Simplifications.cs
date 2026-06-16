@@ -14,10 +14,12 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §2 — Inflate/deflate only; no river boarding or water-room travel.</summary>
     internal const string BoatAndRiver = nameof(BoatAndRiver);
 
-    /// <summary>AGENTS.md §3 — Instant sword kill; no melee rounds or disarm.</summary>
+    /// <summary>AGENTS.md §3 — IMPLEMENTED: turn-by-turn melee (hit/miss/wound/knockout/disarm/kill),
+    /// player health, unconscious recovery and wake-on-leave. See ZorkWorld.DefineCombat/CombatRound.</summary>
     internal const string Combat = nameof(Combat);
 
-    /// <summary>AGENTS.md §4 — Custom ECHO verb only; other commands not garbled in Loud Room.</summary>
+    /// <summary>AGENTS.md §4 — IMPLEMENTED: the Loud Room echoes all output via the engine's output-filter
+    /// seam (GameBuilder.FilterOutput); ECHO silences it. See ZorkWorld.DefineLoudRoom.</summary>
     internal const string LoudRoom = nameof(LoudRoom);
 
     /// <summary>AGENTS.md §5 — Random steal daemon; no thief bag, roaming, or sacred rooms.</summary>

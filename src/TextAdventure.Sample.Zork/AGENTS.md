@@ -20,6 +20,35 @@ This sample implements the full **map**, **treasures**, and **win path** of Zork
 
 In-game source references use `ZorkSimplifications` (`ZorkWorld.Simplifications.cs`) and inline `// ENGINE-LIMIT:` comments.
 
+### Reality check: "engine gap" vs. unimplemented content
+
+**Read each "Engine gap" line below with scepticism.** When these entries were first written they conflated
+two very different things, and reviewing them while actually building features showed most were mislabelled.
+The combat entry (§3) is the cautionary example: it claimed "no combat system, no creature strength," yet the
+full turn-by-turn fight — rounds, hit/miss/wound/knockout/disarm, player health, recovery, wake-on-leave — was
+built **entirely in game code** on primitives that already existed (`EveryTurn`, `ctx.Random`, `StateKey<int>`,
+`Exit.Condition`, `ctx.Lose`). The only engine change the whole effort required was a one-line `ctx.RoomOf`.
+
+So classify each gap into one of three buckets:
+
+1. **Genuine engine gap** — the engine *cannot* express it cleanly today. After review there is essentially
+   one: **output interception** (§4) — verbs print straight to a `sealed` `OutputWriter` with no hook to
+   rewrite, suppress, or echo the text a verb is about to emit. This is the only item with no clean workaround
+   (you'd otherwise reimplement every verb's output, or wrap the `ITerminal`). *Being addressed now.*
+
+2. **Convenience helpers that would remove boilerplate** — fully doable today, but each game hand-rolls the same
+   pattern. Worth adding to the engine eventually: spatial/scope queries on `GameContext` (`RoomOf` is done;
+   `ThingsHere`/adjacency next), a relative scheduler (`ScheduleIn(n, …)` over today's `EveryTurn` + counter),
+   NPC-movement helpers (wander/approach), a soft-death hook (relocate + penalty rather than only terminal
+   `Lose`), and a carry-capacity subsystem. None of these *block* a port; they just shorten it.
+
+3. **Unimplemented content** — everything else. The engine can already express it; the sample simply doesn't
+   bother (e.g. mirror swaps, the gas room, staged rituals, the full thief AI). These are sample TODOs, not
+   engine work.
+
+The per-gap "Engine improvement" suggestions below remain useful as a wish-list, but treat them as bucket 2/3
+unless they appear in bucket 1 above.
+
 ### 1. Inventory weight and encumbrance
 
 **Original:** Every object has a `size`; total carried weight is capped (~100). Heavy items (gold coffin) cannot be taken from the altar. The drafty-room exit requires empty hands. Climbing the kitchen chimney with a load fails.
@@ -44,27 +73,48 @@ In-game source references use `ZorkSimplifications` (`ZorkWorld.Simplifications.
 
 ---
 
-### 3. Melee combat (troll, thief)
+### 3. Melee combat (troll, thief) — IMPLEMENTED
 
 **Original:** Turn-based fight with strength, disarm, wake-on-leave, troll recovers axe, thief stiletto and special disengage rules.
 
-**Engine gap:** No combat system, no creature strength, no `fightbit` / out-of-combat recovery.
+**Former engine gap:** No combat system, no creature strength, no `fightbit` / out-of-combat recovery — but the
+pieces needed already existed: `EveryTurn` daemons, `ctx.Random`, per-element/global state keys, and `ctx.Lose`.
 
-**Sample simplification:** `attack` with sword = instant kill; lunch/garlic = instant troll defeat; thief dodges without sword (`DefineCombat`, `DefineTrollAndCyclops`).
+**Resolution (`ZorkWorld.DefineCombat` / `PlayerStrikes` / `CombatRound` / `VillainTurn`):** Combat is now a
+turn-by-turn exchange built entirely in game code — no engine change beyond the earlier `ctx.RoomOf`.
+- *Your offense* is the `attack` verb. A weighted `ctx.Random` roll (better with the elvish sword than a knife;
+  bare hands refused) yields kill / knockout / wound / parry against the villain's HP (`troll-hp`, `thief-hp`).
+- *The villain's offense* runs each turn in `CombatRound` while it shares your room: kill / serious wound /
+  graze / disarm (your weapon is flung to the floor) / miss, against player health (`player-hp`); 0 ⇒ `ctx.Lose`.
+- *State machine:* knocked-out villains (`troll-ko`, `thief-ko`) are defenceless (can be finished off), revive
+  after a few turns if you stay, or wake the instant you leave; the troll's exits open while he's down or dead.
+- *Recovery:* you heal slowly when nothing hostile is on its feet beside you. Troll death drops the bloody axe;
+  thief death spills his loot. Cyclops is unchanged (scare/feed, not melee).
 
-**Engine improvement:** Optional combat module: rounds, weapon damage, creature state machine, hooks on `Attack`/`Throw`.
+**Lingering simplification:** no thrown-weapon rules, no per-creature strength growth tied to score, and the
+thief fights to the death/knockout rather than periodically disengaging and vanishing with loot.
 
 ---
 
-### 4. Loud Room command echo
+### 4. Loud Room command echo — IMPLEMENTED *(this was the one genuine engine gap)*
 
 **Original:** In the Loud Room, **every** command’s output is garbled (except `verbose`/`look`). “Take bar” echoes as “bar bar bar” and reveals the platinum bar.
 
-**Engine gap:** No per-room output filter, no hook to rewrite parser/verb messages globally. `ReactionTable.BeforeAny` can block but not mutate standard verb text.
+**Former engine gap:** This was the real one. Verbs printed straight to a `sealed OutputWriter` with no hook to
+rewrite/suppress the text a verb was about to emit; `ReactionTable.BeforeAny` could block but not mutate standard
+verb text. The only workarounds were reimplementing every verb's output or wrapping the `ITerminal`.
 
-**Sample simplification:** Only the custom `echo` verb distorts text; `echo bar` reveals the bar (`EchoHandler`). `DefineLoudRoom` is intentionally empty.
+**Resolution (engine):** Added an output-transform seam — `OutputWriter.Transform` plus
+`GameBuilder.FilterOutput((ctx, text) => …)`. A filter sees every line of game text just before it shows and
+returns a rewritten string, or `null` to suppress it. Filters run in order; the context lets them scope the
+effect by room/state. Title/status bars bypass the filter, and a filter is bypassed for any output it itself
+produces (no recursion).
 
-**Engine improvement:** `Room.OnCommand` or `GameEngine` output pipeline hook: `(room, verb, rawInput) => string?`.
+**Resolution (sample, `ZorkWorld.DefineLoudRoom`):** A `FilterOutput` echoes the last word of every line while
+the player is in the Loud Room and it hasn't been silenced; saying `ECHO` sets `loud-quieted` (and reveals the
+platinum bar), after which output is clean. This replaces the old empty `DefineLoudRoom`/custom-verb-only hack.
+
+**Reusable for:** mirror text, drunk/poisoned vision, "the walls absorb your words," redaction, etc.
 
 ---
 
