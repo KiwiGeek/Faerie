@@ -153,7 +153,7 @@ public static class ThingFluent
     /// <summary>A custom one-line listing for when the thing sits in its original spot in a room.</summary>
     public static Thing InitialText(this Thing thing, string line) { thing.InitialDescription = line; return thing; }
 
-    // Note: OnExamine / OnFirstExamine / OnTake are settable properties on Thing
+    // Note: OnExamine / OnFirstExamine / OnTake / OnDrop are settable properties on Thing
     // (e.g. thing.OnExamine = ctx => ...), not extension methods, to avoid shadowing the property.
 
     // ---- initial placement ----------------------------------------------------------------

@@ -552,9 +552,19 @@ internal sealed partial class ZorkWorld
         return words.Count == 0 ? null : words[^1].Value;
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Egg — open egg releases canary; no break-on-drop from tree.
     private void DefineEggAndCanary()
     {
+        JeweledEgg.OnDrop = ctx =>
+        {
+            if (!ctx.InRoom(UpATree) || ctx.Get(_eggBroken)) return false;
+            ctx.Set(_eggBroken, true);
+            ctx.Remove(JeweledEgg);
+            ctx.PlaceHere(GoldenCanary);
+            ctx.Say("You let go of the egg and it falls to the ground with a sickening crunch. " +
+                    "The egg breaks open, revealing a golden clockwork canary.");
+            return true;
+        };
+
         _b.On(JeweledEgg).Before(_b.Verbs.Open!, ctx =>
         {
             if (ctx.Get(_eggBroken)) return VerbResult.Pass;

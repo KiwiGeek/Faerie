@@ -325,8 +325,25 @@ var painting = b.Scenery("painting").Describe("A portrait of a stern old man.");
 painting.OnExamine = ctx => ctx.Say("His eyes seem to follow you around the room...");
 ```
 
-(`OnEnter`, `OnFirstEnter`, `OnTurn` exist on rooms the same way — they're properties you assign with
+(`OnEnter`, `OnFirstEnter`, `OnTurn`, and `OnAfterDrop` exist on rooms the same way — they're properties you assign with
 `=`, e.g. `room.OnEnter = ctx => { ... };`.)
+
+Thing hooks `OnExamine`, `OnFirstExamine`, `OnTake`, and `OnDrop` work the same way. Return `true` from
+`OnTake` or `OnDrop` to fully handle the action and skip the default verb behaviour:
+
+```csharp
+egg.OnDrop = ctx =>
+{
+    if (!ctx.InRoom(treeRoom)) return false;
+    ctx.Say("The egg shatters on the ground.");
+    ctx.Remove(egg);
+    ctx.PlaceHere(brokenCanary);
+    return true;   // skip the usual "Dropped." placement
+};
+
+cliff.OnAfterDrop = (ctx, thing) =>
+    ctx.Say($"{thing.Name} falls out of sight.");
+```
 
 ### Querying the world (where things are)
 

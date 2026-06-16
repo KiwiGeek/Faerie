@@ -38,5 +38,11 @@ public class Thing : Element
     /// </summary>
     public Func<GameContext, bool>? OnTake { get; set; }
 
+    /// <summary>
+    /// Optional hook invoked when the player drops this thing. Return true if the drop was fully
+    /// handled here (the default drop behaviour is then skipped).
+    /// </summary>
+    public Func<GameContext, bool>? OnDrop { get; set; }
+
     public override string ToString() => $"Thing({Id})";
 }
