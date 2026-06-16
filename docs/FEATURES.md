@@ -49,7 +49,7 @@ Fuzzy typo suggestions; pronoun / "all" / compound commands; AGAIN/G/OOPS/undo; 
 
 ### ENGINE — world model ([#4](https://github.com/KiwiGeek/Faerie/issues/4)–[#6](https://github.com/KiwiGeek/Faerie/issues/6), [#8](https://github.com/KiwiGeek/Faerie/issues/8)–[#9](https://github.com/KiwiGeek/Faerie/issues/9))
 
-Encumbrance; vehicles and water rooms; `OnDrop`; paired mirrors; pass-through exits.
+Encumbrance; vehicles and water rooms; paired mirrors; pass-through exits.
 
 ### ENGINE — systems ([#10](https://github.com/KiwiGeek/Faerie/issues/10)–[#21](https://github.com/KiwiGeek/Faerie/issues/21))
 

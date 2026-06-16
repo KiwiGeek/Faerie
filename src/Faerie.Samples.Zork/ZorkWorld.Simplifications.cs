@@ -46,7 +46,8 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §13 — No treasure scatter on death.</summary>
     internal const string Death = nameof(Death);
 
-    /// <summary>AGENTS.md §14 — Drop from tree breaks egg; open egg also releases canary.</summary>
+    /// <summary>AGENTS.md §14 — IMPLEMENTED: drop from Up a Tree breaks egg (`Thing.OnDrop`);
+    /// open egg or wind canary on Forest Path for bauble. See ZorkWorld.DefineEggAndCanary.</summary>
     internal const string Egg = nameof(Egg);
 
     /// <summary>AGENTS.md §15 — IMPLEMENTED: proximity glow daemon (none/faint/bright). See ZorkWorld.DefineSwordGlow.</summary>
