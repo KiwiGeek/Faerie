@@ -446,7 +446,7 @@ public static class StandardVerbs
         if (thing.Has(Attr.LightSource))
         {
             if (thing.Has(Attr.Lit)) { ctx.Say($"{Cap(The(thing))} {Is(thing)} already lit."); return VerbResult.Done; }
-            bool wasDark = !new Parsing.Scope(ctx.State).IsCurrentRoomLit;
+            bool wasDark = !new Parsing.Scope(ctx.State, ctx).IsCurrentRoomLit;
             thing.Set(Attr.Lit);
             thing.Set(Attr.On);
             ctx.Say($"You light {The(thing)}. A warm glow pushes back the dark.");
@@ -475,7 +475,7 @@ public static class StandardVerbs
             thing.Set(Attr.Lit, false);
             thing.Set(Attr.On, false);
             ctx.Say($"You extinguish {The(thing)}.");
-            if (!new Parsing.Scope(ctx.State).IsCurrentRoomLit)
+            if (!new Parsing.Scope(ctx.State, ctx).IsCurrentRoomLit)
                 ctx.Say("Darkness closes in around you.");
             return VerbResult.Done;
         }

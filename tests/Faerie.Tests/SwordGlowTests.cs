@@ -1,8 +1,9 @@
 ﻿using Faerie.Model;
 using Faerie.Runtime;
-using Faerie.Tests;
 using Faerie.Samples.Zork;
 using Xunit;
+
+namespace Faerie.Tests;
 
 public class SwordGlowTests
 {

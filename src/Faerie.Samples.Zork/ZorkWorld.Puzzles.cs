@@ -1,3 +1,4 @@
+using Faerie.Building;
 using Faerie.Model;
 using Faerie.Runtime;
 using Faerie.Verbs;
@@ -129,9 +130,11 @@ internal sealed partial class ZorkWorld
         _b.On(KitchenWindow).Before(_b.Verbs.Close!, ctx => { ctx.Set(_windowOpen, false); return VerbResult.Pass; });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Grating, GratingLight — no push-through; IsDark cleared manually on open.
+    // ENGINE-LIMIT: ZorkSimplifications.Grating — no push-through from clearing.
     private void DefineGrating()
     {
+        GratingRoom.LitWhen(ctx => ctx.Get(_gratingOpen));
+
         _b.On(Leaves).Before(_move, ctx =>
         {
             Grating.Set(Attr.Concealed, false);
@@ -141,7 +144,6 @@ internal sealed partial class ZorkWorld
         _b.On(Grating).After(_b.Verbs.Open!, ctx =>
         {
             ctx.Set(_gratingOpen, true);
-            GratingRoom.IsDark = false;
             return VerbResult.Pass;
         });
         _b.On(Grating).After(_b.Verbs.Close!, ctx => { ctx.Set(_gratingOpen, false); return VerbResult.Pass; });

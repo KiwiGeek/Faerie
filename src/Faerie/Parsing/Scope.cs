@@ -8,15 +8,19 @@ namespace Faerie.Parsing;
 /// it. Lighting is respected: in a dark room with no light source the player can only sense what
 /// they are carrying.
 /// </summary>
-public sealed class Scope(GameState state)
+public sealed class Scope(GameState state, GameContext? context = null)
 {
     private readonly GameState _state = state;
+    private readonly GameContext? _context = context;
 
-    /// <summary>True if the current room is lit (not dark, or a light source is present).</summary>
+    /// <summary>True if the current room is lit (ambient, not dark, or a light source is present).</summary>
     public bool IsCurrentRoomLit => IsLit(_state.CurrentRoom);
 
     public bool IsLit(Room room)
     {
+        if (_context is not null && room.IsLitFactory?.Invoke(_context) == true)
+            return true;
+
         if (!room.IsDark) return true;
 
         // Any active light source carried or present in the room lights it.

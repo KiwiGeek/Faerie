@@ -96,7 +96,7 @@ public sealed class GameEngine
         if (QuitRequested) return;
         bool wasOver = State.IsOver;
 
-        ParsedCommand command = Parser.Parse(input, new Scope(State), State);
+        ParsedCommand command = Parser.Parse(input, new Scope(State, _context), State);
 
         switch (command.Status)
         {
@@ -130,7 +130,7 @@ public sealed class GameEngine
         }
 
         // Darkness gate.
-        if (!new Scope(State).IsCurrentRoomLit && !DarkSafe.Contains(verb.Id))
+        if (!new Scope(State, _context).IsCurrentRoomLit && !DarkSafe.Contains(verb.Id))
         {
             Out.PrintLine("It's pitch black down here. You can't see a thing.");
             RefreshBars();
@@ -205,7 +205,7 @@ public sealed class GameEngine
     public void DescribeCurrentRoom(bool verbose)
     {
         Room room = State.CurrentRoom;
-        Scope scope = new(State);
+        Scope scope = new(State, _context);
 
         Out.Blank();
         Out.PrintLine($"{{bold}}{{fg:white}}{room.Name}{{/}}{{/}}");

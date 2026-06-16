@@ -109,6 +109,36 @@ public class EngineTests
     }
 
     [Fact]
+    public void LitWhen_AmbientLightWithoutLantern()
+    {
+        GameBuilder b = GameBuilder.Create("Test").AddStandardVerbs();
+        StateKey<bool> windowOpen = b.State("window-open", false);
+        Room hall = b.Room("Hall").Describe("A plain hall.");
+        Room closet = b.Room("Closet").Describe("A musty closet.").Dark()
+            .LitWhen(ctx => ctx.Get(windowOpen));
+        hall.East(closet);
+        b.StartIn(hall);
+        Game game = b.Build();
+
+        InMemoryTerminal term = new();
+        GameEngine engine = new(game, term, randomSeed: 1);
+        engine.Start();
+        term.Reset();
+
+        engine.Submit("east");
+        term.Reset();
+        engine.Submit("look");
+        Assert.Contains("pitch black", term.Output);
+
+        engine.Submit("west");
+        engine.State.Set(windowOpen, true);
+        engine.Submit("east");
+        term.Reset();
+        engine.Submit("look");
+        Assert.Contains("musty closet", term.Output);
+    }
+
+    [Fact]
     public void Ditransitive_PutInContainer()
     {
         var (engine, _, _, _, _, key, chest, _) = BuildWorld();
