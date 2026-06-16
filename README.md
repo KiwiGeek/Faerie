@@ -69,8 +69,7 @@ and selects it with `.WithFont("avares://HauntedHouse/Assets/Fonts")`.
   walkthrough: rooms, items, scenery, containers, NPCs, custom verbs, synonyms, reactions, flags,
   timers, win/lose conditions, doors, dark rooms, the bars, fonts/cursor, the native window title and
   icon, and a full tiny game you can paste and run.
-- [`docs/FEATURES.md`](docs/FEATURES.md) — the roadmap / backlog (graphics, sound, fuzzy typo
-  suggestions, a save/load file browser, and the engine gaps catalogued by the Zork port).
+- [`docs/FEATURES.md`](docs/FEATURES.md) — index of the [GitHub issue backlog](https://github.com/KiwiGeek/Faerie/issues) (engine, Zork port, Avalonia, console).
 
 ## Quick start: defining a game
 
@@ -171,12 +170,9 @@ through the iron gate. It exercises most of the engine (dark rooms and light sou
 containers, a deadly creature gated by an item, a roaming ghost daemon, scoring, both bars) in one
 readable file — a good template to copy.
 
-**Zork I** — a full port of the 1980 classic's map, treasures and win path. Its `AGENTS.md` documents
-where Infocom behaviours are simplified because the engine lacks a system yet; those gaps drive the
-roadmap in `docs/FEATURES.md`.
+**Zork I** — a full port of the 1980 classic's map, treasures and win path. Its `AGENTS.md` and
+[GitHub issues labelled `zork1`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1) track where Infocom behaviours are simplified.
 
 ## Roadmap
 
-See [`docs/FEATURES.md`](docs/FEATURES.md). Highlights: in-window graphics, sound/music, fuzzy
-spelling suggestions, an in-terminal save/load browser, and the systems (weight, vehicles, combat,
-timers) catalogued by the Zork port.
+See [`docs/FEATURES.md`](docs/FEATURES.md) and [GitHub Issues](https://github.com/KiwiGeek/Faerie/issues). Highlights: parser improvements, engine world-model APIs, Zork I fidelity, Avalonia graphics/sound/save browser, and `Faerie.Terminal.Console`.
