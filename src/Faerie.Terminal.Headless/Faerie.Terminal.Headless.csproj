@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Faerie.Terminal.Headless</RootNamespace>
+    <AssemblyName>Faerie.Terminal.Headless</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <IsPackable>true</IsPackable>
+    <PackageId>Faerie.Terminal.Headless</PackageId>
+    <Description>Headless Faerie host: replay commands from a script file and write a plain-text session transcript. No UI.</Description>
+    <PackageTags>text-adventure;interactive-fiction;terminal;game-engine;headless</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Faerie\Faerie.csproj" />
+  </ItemGroup>
+
+</Project>

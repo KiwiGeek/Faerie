@@ -25,6 +25,7 @@
     <ProjectReference Include="..\Faerie\Faerie.csproj" />
     <ProjectReference Include="..\Faerie.Terminal\Faerie.Terminal.csproj" />
     <ProjectReference Include="..\Faerie.Terminal.Avalonia\Faerie.Terminal.Avalonia.csproj" />
+    <ProjectReference Include="..\Faerie.Terminal.Headless\Faerie.Terminal.Headless.csproj" />
   </ItemGroup>
 
 </Project>

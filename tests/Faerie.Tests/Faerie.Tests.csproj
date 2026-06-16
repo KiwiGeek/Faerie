@@ -16,6 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Faerie\Faerie.csproj" />
     <ProjectReference Include="..\..\src\Faerie.Samples.Zork\Faerie.Samples.Zork.csproj" />
+    <ProjectReference Include="..\..\src\Faerie.Terminal.Headless\Faerie.Terminal.Headless.csproj" />
   </ItemGroup>
 
 </Project>

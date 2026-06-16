@@ -21,6 +21,9 @@ Usborne type-in classic) and a full *Zork I* port.
 | Project | What it is |
 | --- | --- |
 | `src/Faerie` | The whole package: the UI-agnostic engine (`Faerie.Model` / `.Building` / `.Verbs` / `.Parsing` / `.Runtime` / `.Presentation`) **and** the Avalonia fake terminal (`Faerie.Terminal`). |
+| `src/Faerie.Terminal` | Shared terminal model (`TerminalBuffer`, `ITerminal`). |
+| `src/Faerie.Terminal.Avalonia` | Avalonia fake-terminal front end. |
+| `src/Faerie.Terminal.Headless` | Script replay + transcript logging (no UI). |
 | `src/Faerie.Samples.HauntedHouse` | A small, fully-worked sample game + Avalonia app host. |
 | `src/Faerie.Samples.Zork` | A complete Zork I port (see its `AGENTS.md` for the engine-gap list it tracks). |
 | `tests/Faerie.Tests` | xUnit tests for the engine (parser, verbs, world, save/load). |
@@ -40,6 +43,16 @@ dotnet run --project src/Faerie.Samples.HauntedHouse
 dotnet run --project src/Faerie.Samples.Zork
 dotnet test
 ```
+
+### Headless script replay
+
+Run a game without opening a window — feed commands from a file and capture a plain-text transcript:
+
+```
+dotnet run --project src/Faerie.Samples.Zork -- --script commands.txt --transcript session.txt
+```
+
+Blank lines and `#` / `;` comment lines are skipped. Each command is logged as `> command` in the transcript. Omit `--script` to launch the Avalonia UI as usual. See `src/Faerie.Terminal.Headless/README.md`.
 
 > Package versions in the `.csproj` files (Avalonia 11.3.0, the xUnit/test-SDK versions) are
 > reasonable defaults — if `restore` complains, bump them to the latest your SDK offers.

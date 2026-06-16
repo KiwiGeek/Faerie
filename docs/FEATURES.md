@@ -33,6 +33,7 @@ The project is named **Faerie** — a nod to **F**luent **A**dventure **E**ngine
   implements `ITerminal` and is reused by every front end.
 - `Faerie.Terminal.Avalonia` — the Avalonia "fake terminal" front end.
 - `Faerie.Terminal.Console` — planned stdout/console front end ([#43](https://github.com/KiwiGeek/Faerie/issues/43)).
+- `Faerie.Terminal.Headless` — script replay and transcript logging, no UI ([#69](https://github.com/KiwiGeek/Faerie/issues/69)).
 - `Faerie.Samples.Zork`, `Faerie.Samples.HauntedHouse`, `Faerie.Tests` — not published.
 
 The bare `Faerie` id is the engine (Serilog/Polly-style discoverability); front ends are `Faerie.Terminal.*`.
