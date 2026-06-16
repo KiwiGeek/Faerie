@@ -27,7 +27,7 @@ internal sealed partial class ZorkWorld
     private Verb _ring = null!;
 
     // ENGINE-LIMIT: ZorkSimplifications.Verbs — only a minimal custom verb set; many Infocom verbs absent.
-    // Go omits "move" so the object-move verb can handle "move rug" (AddStandardVerbs binds move to Go).
+    // Go omits "move" so "move north" does not travel; custom move (registered after AddCoreVerbs) overrides core push for object commands.
     private void DefineCustomVerbs()
     {
         _go = _b.DefineVerb(StandardVerbIds.Go, ["go", "walk", "run", "head"],

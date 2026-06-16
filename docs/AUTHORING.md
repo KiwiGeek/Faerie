@@ -457,6 +457,11 @@ The parser already understands `to with in into on onto at from using under behi
 preposition between two objects. "Nouns" aren't declared separately — any room/thing's `.Called` and
 `.Adjectives` words are the nouns.
 
+**Overlapping verb words:** `AddCoreVerbs()` registers standard verbs first. If you `DefineVerb` with
+words that collide (e.g. Zork's custom `move` shares `move`/`push` with core `push`), register your
+verb **after** the standard set — the parser prefers the last-registered transitive match for object
+commands. Movement still disambiguates on direction (`move north` → Go when Go claims `move`).
+
 ---
 
 ## 8. Win and lose conditions
