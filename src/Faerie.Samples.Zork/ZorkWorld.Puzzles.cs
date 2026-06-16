@@ -380,14 +380,16 @@ internal sealed partial class ZorkWorld
 
     private int SwordGlowLevel(GameContext ctx)
     {
-        bool ThreatIn(Room? room) => room is not null &&
-            ((!ctx.Get(_trollDefeated) && ctx.RoomOf(Troll) == room) ||
-             (!ctx.Get(_thiefDead) && ctx.RoomOf(Thief) == room));
+        int Level(Thing villain, bool defeated)
+        {
+            if (defeated) return 0;
+            Room? room = ctx.RoomOf(villain);
+            if (room is null) return 0;
+            if (room == ctx.CurrentRoom) return 2;
+            return ctx.IsAdjacent(room) ? 1 : 0;
+        }
 
-        Room here = ctx.CurrentRoom;
-        if (ThreatIn(here)) return 2;
-        if (here.Exits.Values.Any(exit => ThreatIn(exit.Destination))) return 1;
-        return 0;
+        return Math.Max(Level(Troll, ctx.Get(_trollDefeated)), Level(Thief, ctx.Get(_thiefDead)));
     }
 
     // ENGINE-LIMIT: ZorkSimplifications.Cyclops — lunch/bottle/yell sleep cyclops; no mood daemon or water quantity.

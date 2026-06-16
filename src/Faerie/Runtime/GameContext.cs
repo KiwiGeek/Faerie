@@ -42,6 +42,34 @@ public class GameContext
     /// <summary>The room a thing currently sits in, or null if it is carried, worn, or offstage.</summary>
     public Room? RoomOf(Thing thing) => State.RoomOf(thing);
 
+    /// <summary>
+    /// Things in <paramref name="room"/>. By default only loose floor items are returned.
+    /// When <paramref name="includePresent"/> is true, also includes things inside in-room
+    /// containers and things carried or worn by the player while in that room (including items
+    /// nested inside carried containers).
+    /// </summary>
+    public IEnumerable<Thing> ThingsIn(Room room, bool includePresent = false) =>
+        includePresent
+            ? World.Things.Where(t => RoomOf(t) == room)
+            : State.ContentsOf(room);
+
+    /// <summary>Things in the player's current room. See <see cref="ThingsIn(Room, bool)"/>.</summary>
+    public IEnumerable<Thing> ThingsHere(bool includePresent = false) => ThingsIn(CurrentRoom, includePresent);
+
+    /// <summary>True if <paramref name="room"/> is one exit away from the current room.</summary>
+    public bool IsAdjacent(Room room) =>
+        CurrentRoom.Exits.Values.Any(e => e.Destination == room);
+
+    /// <summary>
+    /// True if <paramref name="thing"/> is in the current room or in a room one exit away.
+    /// Carried and worn things count as being in the current room.
+    /// </summary>
+    public bool Nearby(Thing thing)
+    {
+        Room? room = RoomOf(thing);
+        return room is not null && (room == CurrentRoom || IsAdjacent(room));
+    }
+
     public void Move(Thing thing, Placement placement) => State.Move(thing, placement);
     public void Take(Thing thing) => State.TakeIntoInventory(thing);
     public void PlaceHere(Thing thing) => State.MoveTo(thing, State.CurrentRoom);
