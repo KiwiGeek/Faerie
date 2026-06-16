@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Zork I (Avalonia)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Haunted House (Avalonia)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.HauntedHouse/Faerie.Samples.HauntedHouse.csproj",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Zork I (Headless)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script ${workspaceFolder}/scripts/zork1-smoketest.txt -o -",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

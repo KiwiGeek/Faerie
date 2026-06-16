@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-solution",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/Faerie.slnx",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-zork",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-haunted-house",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Faerie.Samples.HauntedHouse/Faerie.Samples.HauntedHouse.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "run: Zork I (Avalonia)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "run: Haunted House (Avalonia)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.HauntedHouse/Faerie.Samples.HauntedHouse.csproj",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "run: Zork I (Headless)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-smoketest.txt -o -",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    }
+  ]
+}
