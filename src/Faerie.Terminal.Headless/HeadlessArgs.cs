@@ -17,6 +17,7 @@ public static class HeadlessArgs
         string? transcript = null;
         int? seed = null;
         string? save = null;
+        string? saveDir = null;
         bool helpRequested = false;
 
         for (int i = 0; i < args.Length; i++)
@@ -38,6 +39,9 @@ public static class HeadlessArgs
                     break;
                 case "--save":
                     if (!TryReadValue(args, ref i, out save)) { error = "Missing value for --save."; return true; }
+                    break;
+                case "--save-dir":
+                    if (!TryReadValue(args, ref i, out saveDir)) { error = "Missing value for --save-dir."; return true; }
                     break;
                 case "--help":
                 case "-h":
@@ -72,7 +76,8 @@ public static class HeadlessArgs
             ScriptPath = script,
             TranscriptPath = transcript,
             RandomSeed = seed,
-            SavePath = savePath
+            SavePath = savePath,
+            SaveDirectory = saveDir
         };
         return true;
     }
@@ -86,7 +91,8 @@ public static class HeadlessArgs
           --transcript <path>   Output transcript, or - for stdout (default: <script>.transcript.txt, or - when script is -)
           -o <path>             Alias for --transcript
           --seed <n>            Fixed random seed for reproducible rolls
-          --save <path>         Save-game file path (default: <script>.save.json, or headless.save.json when script is -)
+          --save <path>         Legacy single save file (default: <script>.save.json)
+          --save-dir <path>     Directory for named save slots (SAVE / RESTORE ABC)
           -h, --help            Show this help
 
         Pipe example:

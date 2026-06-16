@@ -31,7 +31,7 @@ public static class HeadlessRunner
             {
                 TranscriptTerminal terminal = new(transcriptWriter);
                 GameEngine engine = new(game, terminal, options.RandomSeed);
-                WireSaveSystem(engine, options.SavePath!);
+                WireSaveSystem(engine, options);
 
                 engine.Start();
 
@@ -79,16 +79,17 @@ public static class HeadlessRunner
             : ScriptReader.ReadCommands(options.ScriptPath);
     }
 
-    private static void WireSaveSystem(GameEngine engine, string savePath)
+    private static void WireSaveSystem(GameEngine engine, HeadlessOptions options)
     {
-        engine.SaveProvider = () => savePath;
-        engine.WriteSave = json =>
+        if (options.SaveDirectory is { } dir)
         {
-            string? dir = Path.GetDirectoryName(savePath);
-            if (!string.IsNullOrEmpty(dir)) Directory.CreateDirectory(dir);
-            File.WriteAllText(savePath, json);
-        };
-        engine.RestoreProvider = () => File.Exists(savePath) ? savePath : null;
-        engine.ReadSave = p => File.Exists(p) ? File.ReadAllText(p) : null;
+            engine.SaveCatalog = new SaveSlotCatalog(dir, "headless");
+            return;
+        }
+
+        string savePath = options.SavePath!;
+        engine.SaveCatalog = new SaveSlotCatalog(
+            Path.GetDirectoryName(savePath) ?? ".",
+            Path.GetFileNameWithoutExtension(savePath));
     }
 }

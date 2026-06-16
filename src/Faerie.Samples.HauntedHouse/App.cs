@@ -70,11 +70,6 @@ public sealed class App : Application
     {
         string dir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "HauntedHouse");
-        string path = Path.Combine(dir, "save.json");
-
-        engine.SaveProvider = () => path;
-        engine.WriteSave = json => { Directory.CreateDirectory(dir); File.WriteAllText(path, json); };
-        engine.RestoreProvider = () => File.Exists(path) ? path : null;
-        engine.ReadSave = p => File.Exists(p) ? File.ReadAllText(p) : null;
+        engine.SaveCatalog = new SaveSlotCatalog(dir, "haunted-house");
     }
 }

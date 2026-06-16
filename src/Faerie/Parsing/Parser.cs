@@ -43,6 +43,18 @@ public sealed class Parser(VerbLibrary verbs)
         // "move rug"). When several verbs share the typed word, pick based on the argument.
         Verb verb = ChooseVerb([.. _verbs.VerbsFor(phrase)], matched, rest);
 
+        // Save/restore slot labels are free text, not in-world nouns ("save a", "restore ABC").
+        if (verb.Id is StandardVerbIds.Save or StandardVerbIds.Restore)
+        {
+            List<string> slotTokens = tokens.Skip(consumed).Where(t => !Noise.Contains(t)).ToList();
+            return new ParsedCommand
+            {
+                Status = ParseStatus.Ok,
+                Verb = verb,
+                DirectObjectText = slotTokens.Count > 0 ? string.Join(' ', slotTokens) : null
+            };
+        }
+
         // 3. Movement verb: the remainder should be a direction.
         if (verb.Id == StandardVerbIds.Go)
         {

@@ -88,10 +88,10 @@ public static class StandardVerbs
             VerbForms.Intransitive, (ctx) => { ctx.Engine.RequestQuit(); return VerbResult.Done; });
 
         b.Verbs.Save = b.DefineVerb(StandardVerbIds.Save, ["save"],
-            VerbForms.Intransitive, (ctx) => { ctx.Engine.RequestSave(); return VerbResult.Done; });
+            VerbForms.Intransitive | VerbForms.Transitive, Save);
 
         b.Verbs.Restore = b.DefineVerb(StandardVerbIds.Restore, ["restore", "load"],
-            VerbForms.Intransitive, (ctx) => { ctx.Engine.RequestRestore(); return VerbResult.Done; });
+            VerbForms.Intransitive | VerbForms.Transitive, Restore);
     }
 
     // ---- handlers -------------------------------------------------------------------------
@@ -544,6 +544,18 @@ public static class StandardVerbs
         ctx.Say(ctx.Engine.MaxScore > 0
             ? $"You have scored {ctx.State.Score} out of a possible {ctx.Engine.MaxScore}, in {ctx.State.TurnCount} turns."
             : $"You have taken {ctx.State.TurnCount} turns.");
+        return VerbResult.Done;
+    }
+
+    private static VerbResult Save(VerbContext ctx)
+    {
+        ctx.Engine.RequestSave(ctx.DirectObjectText);
+        return VerbResult.Done;
+    }
+
+    private static VerbResult Restore(VerbContext ctx)
+    {
+        ctx.Engine.RequestRestore(ctx.DirectObjectText);
         return VerbResult.Done;
     }
 

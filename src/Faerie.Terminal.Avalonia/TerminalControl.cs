@@ -72,6 +72,10 @@ public sealed class TerminalControl : Control
     private bool _blinkOn = true;
     private bool _inputActive;
     private string _input = "";
+    private TaskCompletionSource<string?>? _slotPickTcs;
+    private IReadOnlyList<SaveSlotPicker.SlotOption>? _slotPickOptions;
+    private int _slotPickIndex;
+    private string _slotPickTyped = "";
     private readonly List<string> _commandHistory = [];
     private int _historyIndex = -1;   // index into _commandHistory, or -1 for the live draft line
     private string _historyDraft = "";
@@ -198,6 +202,153 @@ public sealed class TerminalControl : Control
     {
         _inputActive = false;
         InvalidateVisual();
+    }
+
+    /// <summary>Blocking in-terminal slot picker; must run on the UI thread.</summary>
+    internal string? RunSlotPicker(IReadOnlyList<SaveSlotPicker.SlotOption> options, bool forSave)
+    {
+        _slotPickTcs = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _slotPickOptions = options;
+        _slotPickIndex = 0;
+        _slotPickTyped = "";
+        _inputActive = false;
+        Focus();
+        UpdateSlotPickStatus();
+        InvalidateVisual();
+
+        Task<string?> pick = _slotPickTcs.Task;
+        if (!pick.IsCompleted)
+        {
+            var frame = new DispatcherFrame();
+            pick.ContinueWith(static (_, state) => ((DispatcherFrame)state!).Continue = false, frame);
+            Dispatcher.UIThread.PushFrame(frame);
+        }
+
+        return pick.GetAwaiter().GetResult();
+    }
+
+    private void CompleteSlotPick(string? label)
+    {
+        _slotPickTcs?.TrySetResult(label);
+        _slotPickTcs = null;
+        _slotPickOptions = null;
+        _slotPickTyped = "";
+        _buffer?.SetStatusBar(null);
+        InvalidateVisual();
+    }
+
+    private void UpdateSlotPickStatus()
+    {
+        if (_buffer is null || _slotPickOptions is null || _slotPickOptions.Count == 0) return;
+        var opt = _slotPickOptions[_slotPickIndex];
+        string hint = opt.Label is null
+            ? (_slotPickTyped.Length > 0 ? $"New slot: {_slotPickTyped}" : "Type new slot name")
+            : opt.Display.Trim();
+        _buffer.SetStatusBar(StatusLine($"[ {_slotPickIndex + 1}/{_slotPickOptions.Count} ] {hint}"));
+    }
+
+    private static IReadOnlyList<GlyphCell> StatusLine(string text)
+    {
+        var cells = new GlyphCell[80];
+        for (int i = 0; i < cells.Length; i++)
+            cells[i] = new GlyphCell(i < text.Length ? text[i] : ' ', new TextStyle(TerminalColor.Black, TerminalColor.LightGray));
+        return cells;
+    }
+
+    private void HandleSlotPickKey(KeyEventArgs e)
+    {
+        if (_slotPickOptions is null || _slotPickOptions.Count == 0)
+        {
+            CompleteSlotPick(null);
+            e.Handled = true;
+            return;
+        }
+
+        var opt = _slotPickOptions[_slotPickIndex];
+
+        switch (e.Key)
+        {
+            case Key.Escape:
+                CompleteSlotPick(null);
+                e.Handled = true;
+                return;
+            case Key.Enter:
+                if (opt.Label is null)
+                {
+                    if (_slotPickTyped.Length > 0)
+                        CompleteSlotPick(_slotPickTyped.ToUpperInvariant());
+                }
+                else
+                    CompleteSlotPick(opt.Label);
+                e.Handled = true;
+                return;
+            case Key.Up:
+                _slotPickIndex = (_slotPickIndex + _slotPickOptions.Count - 1) % _slotPickOptions.Count;
+                _slotPickTyped = "";
+                UpdateSlotPickStatus();
+                InvalidateVisual();
+                e.Handled = true;
+                return;
+            case Key.Down:
+                _slotPickIndex = (_slotPickIndex + 1) % _slotPickOptions.Count;
+                _slotPickTyped = "";
+                UpdateSlotPickStatus();
+                InvalidateVisual();
+                e.Handled = true;
+                return;
+            case >= Key.D1 and <= Key.D9:
+                int n = (int)e.Key - (int)Key.D1;
+                if (n < _slotPickOptions.Count)
+                {
+                    _slotPickIndex = n;
+                    var chosen = _slotPickOptions[n];
+                    if (chosen.Label is null)
+                    {
+                        UpdateSlotPickStatus();
+                        InvalidateVisual();
+                    }
+                    else
+                        CompleteSlotPick(chosen.Label);
+                }
+                e.Handled = true;
+                return;
+            case >= Key.NumPad1 and <= Key.NumPad9:
+                int np = (int)e.Key - (int)Key.NumPad1;
+                if (np < _slotPickOptions.Count)
+                {
+                    _slotPickIndex = np;
+                    var chosen = _slotPickOptions[np];
+                    if (chosen.Label is null)
+                    {
+                        UpdateSlotPickStatus();
+                        InvalidateVisual();
+                    }
+                    else
+                        CompleteSlotPick(chosen.Label);
+                }
+                e.Handled = true;
+                return;
+        }
+
+        if (opt.Label is null && e.Key is >= Key.A and <= Key.Z)
+        {
+            if (_slotPickTyped.Length < 3)
+            {
+                _slotPickTyped += (char)('A' + ((int)e.Key - (int)Key.A));
+                UpdateSlotPickStatus();
+                InvalidateVisual();
+            }
+            e.Handled = true;
+            return;
+        }
+
+        if (opt.Label is null && e.Key == Key.Back && _slotPickTyped.Length > 0)
+        {
+            _slotPickTyped = _slotPickTyped[..^1];
+            UpdateSlotPickStatus();
+            InvalidateVisual();
+            e.Handled = true;
+        }
     }
 
     protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
@@ -458,6 +609,12 @@ public sealed class TerminalControl : Control
         // Alt+Enter (fullscreen) bubbles up to the window.
         if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Alt))
             return;
+
+        if (_slotPickTcs is not null)
+        {
+            HandleSlotPickKey(e);
+            return;
+        }
 
         // Ctrl-based shortcuts: copy, paste, and zoom.
         if (e.KeyModifiers.HasFlag(KeyModifiers.Control))

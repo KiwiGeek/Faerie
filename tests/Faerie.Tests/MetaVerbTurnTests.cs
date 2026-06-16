@@ -30,8 +30,7 @@ public sealed class MetaVerbTurnTests
     public void MetaVerb_DoesNotAdvanceTurnOrTickHooks(string command)
     {
         (GameEngine engine, _, int[] daemonTicks, int[] onTurnTicks) = BuildTrackedWorld();
-        engine.SaveProvider = () => "slot";
-        engine.WriteSave = _ => { };
+        engine.SaveCatalog = new SaveSlotCatalog(Path.GetTempPath(), "meta-verb-test");
 
         int turnBefore = engine.State.TurnCount;
         engine.Submit(command);
@@ -52,8 +51,7 @@ public sealed class MetaVerbTurnTests
         InMemoryTerminal term = new();
         GameEngine engine = new(b.Build(), term, randomSeed: 1);
         engine.Start();
-        engine.SaveProvider = () => "slot";
-        engine.WriteSave = _ => { };
+        engine.SaveCatalog = new SaveSlotCatalog(Path.GetTempPath(), "meta-verb-test");
 
         engine.Submit("down");
         Assert.Equal(cellar, engine.State.CurrentRoom);

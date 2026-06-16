@@ -81,10 +81,17 @@ public sealed class GameEngine
 
     // Hooks the host wires up for platform-specific behaviour (file dialogs, window close, ...).
     public Action? OnQuit { get; set; }
-    public Func<string>? SaveProvider { get; set; }      // returns a path/slot to save to
-    public Func<string?>? RestoreProvider { get; set; }  // returns a path/slot to restore from, or null to cancel
-    public Action<string>? WriteSave { get; set; }       // persist json to the given path
-    public Func<string, string?>? ReadSave { get; set; } // read json from the given path
+
+    /// <summary>Named save slots under a directory. Preferred over legacy <see cref="SaveProvider"/> hooks.</summary>
+    public SaveSlotCatalog? SaveCatalog { get; set; }
+
+    /// <summary>When <see cref="RequestSave"/> / <see cref="RequestRestore"/> have no slot label, the host may show a picker.</summary>
+    public Func<SaveSlotPickRequest, string?>? PickSaveSlot { get; set; }
+
+    public Func<string>? SaveProvider { get; set; }      // legacy: returns a path to save to
+    public Func<string?>? RestoreProvider { get; set; }  // legacy: returns a path to restore from, or null to cancel
+    public Action<string>? WriteSave { get; set; }       // legacy: persist json to the given path
+    public Func<string, string?>? ReadSave { get; set; } // legacy: read json from the given path
 
     // ---- lifecycle ------------------------------------------------------------------------
 
@@ -441,7 +448,94 @@ public sealed class GameEngine
         OnQuit?.Invoke();
     }
 
-    public void RequestSave()
+    public void RequestSave(string? slotLabel = null) =>
+        PersistSlot(slotLabel, isRestore: false);
+
+    public void RequestRestore(string? slotLabel = null) =>
+        PersistSlot(slotLabel, isRestore: true);
+
+    private void PersistSlot(string? slotLabel, bool isRestore)
+    {
+        if (SaveCatalog is { } catalog)
+        {
+            string? label = ResolveSlotLabel(catalog, slotLabel, isRestore);
+            if (label is null)
+            {
+                Out.PrintLine(isRestore ? "Restore cancelled." : "Save cancelled.");
+                return;
+            }
+
+            if (isRestore)
+                RestoreFromCatalog(catalog, label);
+            else
+                SaveToCatalog(catalog, label);
+            return;
+        }
+
+        if (isRestore)
+            RequestRestoreLegacy();
+        else
+            RequestSaveLegacy();
+    }
+
+    private string? ResolveSlotLabel(SaveSlotCatalog catalog, string? slotLabel, bool isRestore)
+    {
+        if (!string.IsNullOrWhiteSpace(slotLabel))
+            return catalog.NormalizeLabel(slotLabel);
+
+        if (PickSaveSlot is { } pick)
+        {
+            var slots = catalog.ListSlots();
+            if (isRestore && slots.Count == 0)
+            {
+                Out.PrintLine("No save files found.");
+                return null;
+            }
+
+            return pick(new SaveSlotPickRequest(
+                isRestore ? SavePickMode.Restore : SavePickMode.Save,
+                slots));
+        }
+
+        return "";
+    }
+
+    private void SaveToCatalog(SaveSlotCatalog catalog, string? label)
+    {
+        try
+        {
+            catalog.Write(label, SaveSystem.Capture(State, _game.Daemons, _timers));
+            Out.PrintLine($"{catalog.DisplayName(label)} saved.");
+        }
+        catch (Exception ex)
+        {
+            Out.PrintLine($"{{fg:lightred}}Save failed: {ex.Message}{{/}}");
+        }
+    }
+
+    private void RestoreFromCatalog(SaveSlotCatalog catalog, string? label)
+    {
+        try
+        {
+            if (catalog.Read(label) is not { } json)
+            {
+                Out.PrintLine($"{catalog.DisplayName(label)} never saved.");
+                return;
+            }
+
+            SaveSystem.Restore(json, State, _game.Daemons, _timers);
+            _undoSnapshots.Clear();
+            Out.PrintLine($"Restoring from {catalog.DisplayName(label)}");
+            Out.Blank();
+            DescribeCurrentRoom(verbose: true);
+        }
+        catch (Exception ex)
+        {
+            Out.PrintLine($"{{fg:lightred}}Restore failed: {ex.Message}{{/}}");
+        }
+    }
+
+    private void RequestSaveLegacy()
     {
         if (SaveProvider is null || WriteSave is null)
         {
@@ -462,7 +556,7 @@ public sealed class GameEngine
         }
     }
 
-    public void RequestRestore()
+    private void RequestRestoreLegacy()
     {
         if (RestoreProvider is null || ReadSave is null)
         {
