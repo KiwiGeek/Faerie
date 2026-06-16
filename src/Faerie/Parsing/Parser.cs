@@ -154,7 +154,8 @@ public sealed class Parser(VerbLibrary verbs)
         Verb? move = candidates.FirstOrDefault(v => v.Id == StandardVerbIds.Go);
         if (argIsDirection && move is not null) return move;
 
-        Verb? objectVerb = candidates.FirstOrDefault(v =>
+        // Later-registered verbs override standard ones (e.g. Zork's custom "move" after AddCoreVerbs).
+        Verb? objectVerb = candidates.LastOrDefault(v =>
             v.Id != StandardVerbIds.Go && (v.Accepts(VerbForms.Transitive) || v.Accepts(VerbForms.Ditransitive)));
         if (rest.Count > 0 && objectVerb is not null) return objectVerb;
 
