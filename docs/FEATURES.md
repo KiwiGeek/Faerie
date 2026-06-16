@@ -6,17 +6,17 @@ Filter by label:
 
 | Label | Meaning |
 | --- | --- |
-| [`engine`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aengine) | Faerie core engine |
-| [`zork1`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1) | Zork I sample port fidelity |
-| [`avalonia`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aavalonia) | Avalonia front end |
-| [`console`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aconsole) | Console front end |
-| [`deficiency`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Adeficiency) | Genuine engine gap |
-| [`convenience`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aconvenience) | Engine helper (doable today, worth first-class API) |
-| [`content`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Acontent) | Sample content — engine is sufficient |
-| [`parser`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aparser) | Parser and command language |
-| [`world-model`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aworld-model) | Rooms, things, exits |
-| [`systems`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Asystems) | Daemons, scoring, combat, timers |
-| [`presentation`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Apresentation) | Terminal UI, graphics, sound |
+| [`engine`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aengine+is%3Aopen) | Faerie core engine |
+| [`zork1`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1+is%3Aopen) | Zork I sample port fidelity |
+| [`avalonia`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aavalonia+is%3Aopen) | Avalonia front end |
+| [`console`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aconsole+is%3Aopen) | Console front end |
+| [`deficiency`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Adeficiency+is%3Aopen) | Genuine engine gap |
+| [`convenience`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aconvenience+is%3Aopen) | Engine helper (doable today, worth first-class API) |
+| [`content`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Acontent+is%3Aopen) | Sample content — engine is sufficient |
+| [`parser`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aparser+is%3Aopen) | Parser and command language |
+| [`world-model`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Aworld-model+is%3Aopen) | Rooms, things, exits |
+| [`systems`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Asystems+is%3Aopen) | Daemons, scoring, combat, timers |
+| [`presentation`](https://github.com/KiwiGeek/Faerie/issues?q=label%3Apresentation+is%3Aopen) | Terminal UI, graphics, sound |
 
 Title prefixes: **ENGINE:**, **ZORK1:**, **AVALONIA:**, **CONSOLE:**
 
@@ -47,15 +47,15 @@ stay stable.
 
 Fuzzy typo suggestions; pronoun / "all" / compound commands; AGAIN/G/OOPS/undo; optional Infocom verb bundle.
 
-### ENGINE — world model ([#4](https://github.com/KiwiGeek/Faerie/issues/4)–[#9](https://github.com/KiwiGeek/Faerie/issues/9))
+### ENGINE — world model ([#4](https://github.com/KiwiGeek/Faerie/issues/4)–[#6](https://github.com/KiwiGeek/Faerie/issues/6), [#8](https://github.com/KiwiGeek/Faerie/issues/8)–[#9](https://github.com/KiwiGeek/Faerie/issues/9))
 
-Encumbrance; vehicles and water rooms; `OnDrop`; dynamic lighting; paired mirrors; pass-through exits.
+Encumbrance; vehicles and water rooms; `OnDrop`; paired mirrors; pass-through exits.
 
 ### ENGINE — systems ([#10](https://github.com/KiwiGeek/Faerie/issues/10)–[#21](https://github.com/KiwiGeek/Faerie/issues/21))
 
 Scope queries; schedulers; NPC helpers; hazards; scoring; death hooks; soft-death; optional combat module; mood/fluids; random encounters.
 
-### ZORK1 — port fidelity ([#22](https://github.com/KiwiGeek/Faerie/issues/22)–[#39](https://github.com/KiwiGeek/Faerie/issues/39))
+### ZORK1 — port fidelity ([open `zork1` issues](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1+is%3Aopen))
 
 Infocom behaviors simplified in the sample. Each issue cross-links related ENGINE work where applicable.
 See `src/Faerie.Samples.Zork/AGENTS.md` for agent guidance and `ZorkSimplifications` / `ENGINE-LIMIT` markers in source.
@@ -67,17 +67,3 @@ Save/load browser; in-window graphics; sound/music.
 ### CONSOLE ([#43](https://github.com/KiwiGeek/Faerie/issues/43))
 
 `Faerie.Terminal.Console` front end.
-
----
-
-## Completed (not open issues)
-
-| Feature | Notes |
-| --- | --- |
-| Movement vs object disambiguation | Parser picks movement when argument is a direction |
-| Multiple room descriptions | `Room.Brief(...)` + verbose/brief in `DescribeCurrentRoom` |
-| Turn-by-turn melee combat | Built in Zork game code; `ctx.RoomOf` only engine change |
-| Per-room output filter | `OutputWriter.Transform` + `GameBuilder.FilterOutput` |
-| `GameContext.RoomOf(Thing)` | Sword glow, combat, proximity daemons |
-| Sword proximity glow | `ZorkWorld.DefineSwordGlow` |
-| Loud Room echo | `ZorkWorld.DefineLoudRoom` via output filter |

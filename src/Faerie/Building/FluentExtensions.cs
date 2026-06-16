@@ -18,8 +18,18 @@ public static class RoomFluent
     /// <summary>Sets a dynamic brief description shown on re-entry.</summary>
     public static Room Brief(this Room room, Func<GameContext, string> factory) { room.BriefDescriptionFactory = factory; return room; }
 
-    /// <summary>Marks the room as dark (needs a light source to see).</summary>
+    /// <summary>Marks the room as dark (needs a light source or <see cref="LitWhen"/> to see).</summary>
     public static Room Dark(this Room room, bool dark = true) { room.IsDark = dark; return room; }
+
+    /// <summary>
+    /// Ambient light from game state (daylight, open grating, etc.). Composes with <see cref="Dark"/>
+    /// and carried or in-room light sources.
+    /// </summary>
+    public static Room LitWhen(this Room room, Func<GameContext, bool> factory)
+    {
+        room.IsLitFactory = factory;
+        return room;
+    }
 
     /// <summary>
     /// Connects this room to another in a direction. By default the reciprocal exit is created on

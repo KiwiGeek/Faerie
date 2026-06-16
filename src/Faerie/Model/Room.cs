@@ -33,10 +33,17 @@ public sealed class Room : Element
         BriefDescriptionFactory?.Invoke(context) ?? BriefDescription ?? ResolveDescription(context);
 
     /// <summary>
-    /// When true the room is unlit; the player sees nothing useful unless carrying (or the room
-    /// contains) an active light source.
+    /// When true the room is unlit unless <see cref="IsLitFactory"/> returns true or an active
+    /// light source is present.
     /// </summary>
     public bool IsDark { get; set; }
+
+    /// <summary>
+    /// Optional ambient lighting from world state (e.g. daylight through an open grating). When this
+    /// returns true the room is lit regardless of <see cref="IsDark"/>. Carried and in-room light
+    /// sources still illuminate a dark room when this is null or returns false.
+    /// </summary>
+    public Func<GameContext, bool>? IsLitFactory { get; set; }
 
     /// <summary>Optional hook fired the first time the player enters this room.</summary>
     public Action<GameContext>? OnFirstEnter { get; set; }

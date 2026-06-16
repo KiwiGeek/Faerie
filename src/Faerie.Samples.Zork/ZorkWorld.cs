@@ -176,12 +176,8 @@ internal sealed partial class ZorkWorld
         return exit;
     }
 
-    private bool HasLitLight(GameContext ctx) =>
-        ctx.State.Inventory.Concat(ctx.State.Worn).Any(t => t.Has(Attr.LightSource) && t.Has(Attr.Lit)) ||
-        ctx.State.ContentsOf(ctx.CurrentRoom).Any(t => t.Has(Attr.LightSource) && t.Has(Attr.Lit));
-
     private bool InDarkWithoutLight(GameContext ctx) =>
-        ctx.CurrentRoom.IsDark && !HasLitLight(ctx);
+        !new Faerie.Parsing.Scope(ctx.State, ctx).IsCurrentRoomLit;
 
     // ENGINE-LIMIT: ZorkSimplifications.Scoring — one-time treasure bits; no decrement when removing from case.
     private void AwardTreasure(VerbContext ctx, int bit, int points, string message)

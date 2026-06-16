@@ -129,10 +129,18 @@ b.StartIn(clearing);
 
 ### Dark rooms
 
-A dark room shows nothing until the player brings a light source (see Items). 
+A dark room shows nothing until the player brings a light source (see Items) or ambient light applies.
 
 ```csharp
 var cave = b.Room("Dark Cave").Describe("Black as pitch.").Dark();
+```
+
+For lighting that depends on puzzle state (an open grating, a window, etc.), use `LitWhen` with a
+`GameContext` lambda. It composes with `.Dark()` and with carried light sources:
+
+```csharp
+var gratingRoom = b.Room("Grating Room").Describe("...").Dark()
+    .LitWhen(ctx => ctx.Get(gratingOpen));
 ```
 
 ---

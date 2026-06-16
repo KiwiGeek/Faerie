@@ -40,9 +40,6 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §10 — Grating is a gated exit; no push-through from clearing.</summary>
     internal const string Grating = nameof(Grating);
 
-    /// <summary>AGENTS.md §11 — GratingRoom.IsDark cleared manually when grating opens.</summary>
-    internal const string GratingLight = nameof(GratingLight);
-
     /// <summary>AGENTS.md §12 — One-time trophy bits; no death penalty or case removal penalty.</summary>
     internal const string Scoring = nameof(Scoring);
 
