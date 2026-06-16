@@ -279,9 +279,17 @@ public static class StandardVerbs
             return VerbResult.Done;
         }
 
+        if (thing.OnDrop is { } onDrop && onDrop(ctx))
+        {
+            ctx.State.LastReferencedThing = thing;
+            return VerbResult.Done;
+        }
+
+        Room room = ctx.CurrentRoom;
         ctx.PlaceHere(thing);
         ctx.State.LastReferencedThing = thing;
         ctx.Say("Dropped.");
+        room.OnAfterDrop?.Invoke(ctx, thing);
         return VerbResult.Done;
     }
 

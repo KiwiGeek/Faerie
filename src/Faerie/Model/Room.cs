@@ -54,6 +54,12 @@ public sealed class Room : Element
     /// <summary>Optional hook fired at the start of every turn while the player is in this room.</summary>
     public Action<GameContext>? OnTurn { get; set; }
 
+    /// <summary>
+    /// Optional hook fired after a thing is dropped into this room (after it has been placed).
+    /// Not invoked when the thing's <see cref="Thing.OnDrop"/> hook fully handles the drop.
+    /// </summary>
+    public Action<GameContext, Thing>? OnAfterDrop { get; set; }
+
     /// <summary>Adds or replaces an exit. Returns the created exit so callers can refine it.</summary>
     public Exit SetExit(Direction direction, Room destination)
     {
