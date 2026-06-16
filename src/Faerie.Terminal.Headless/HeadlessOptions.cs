@@ -16,7 +16,10 @@ public sealed class HeadlessOptions
     /// <summary>Optional fixed random seed for reproducible play.</summary>
     public int? RandomSeed { get; init; }
 
-    /// <summary>Optional path for save-game JSON when the player types SAVE.</summary>
+    /// <summary>Optional directory for named save slots when the player types SAVE/RESTORE.</summary>
+    public string? SaveDirectory { get; init; }
+
+    /// <summary>Legacy single-file save path when <see cref="SaveDirectory"/> is not set.</summary>
     public string? SavePath { get; init; }
 
     /// <summary>True when <see cref="ScriptPath"/> is <c>-</c> (read from stdin).</summary>
