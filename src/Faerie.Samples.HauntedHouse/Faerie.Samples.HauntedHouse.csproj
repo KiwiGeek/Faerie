@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Faerie.Samples.HauntedHouse</RootNamespace>
+    <AssemblyName>HauntedHouse</AssemblyName>
+    <Nullable>enable</Nullable>
+    <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.0" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.3.0" Condition="'$(Configuration)' == 'Debug'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Faerie\Faerie.csproj" />
+    <ProjectReference Include="..\Faerie.Terminal\Faerie.Terminal.csproj" />
+    <ProjectReference Include="..\Faerie.Terminal.Avalonia\Faerie.Terminal.Avalonia.csproj" />
+  </ItemGroup>
+
+  <!-- The game embeds its own font; the engine ships none. The game definition points the
+       terminal at it via .WithFont("avares://HauntedHouse/Assets/Fonts#PxPlus IBM VGA 8x16"). -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\Fonts\PxPlus_IBM_VGA8.ttf" />
+  </ItemGroup>
+
+</Project>

@@ -1,11 +1,11 @@
-# Nixie
+# Faerie
 
 A fluent C# engine for building old-school **text adventures / interactive fiction**, with a retro
 "fake terminal" front end (Avalonia, so it runs on Windows, macOS and Linux). Define a world in a few
-lines of strongly-typed C#, and Nixie renders it as a glowing character-cell screen — blink, colour,
+lines of strongly-typed C#, and Faerie renders it as a glowing character-cell screen — blink, colour,
 scrollback, zoom and all.
 
-> *Nixie* — a water-faerie of folklore, and the warm orange glow of a Nixie display tube. Apt for an
+> *Faerie* — a water-faerie of folklore, and the warm orange glow of a Faerie display tube. Apt for an
 > engine whose whole job is glowing retro text.
 
 The engine ships as an *empty box*: it assumes nothing about your world and comes with **no** active
@@ -20,24 +20,24 @@ Usborne type-in classic) and a full *Zork I* port.
 
 | Project | What it is |
 | --- | --- |
-| `src/Nixie` | The whole package: the UI-agnostic engine (`Nixie.Model` / `.Building` / `.Verbs` / `.Parsing` / `.Runtime` / `.Presentation`) **and** the Avalonia fake terminal (`Nixie.Terminal`). |
-| `src/TextAdventure.Sample.HauntedHouse` | A small, fully-worked sample game + Avalonia app host. |
-| `src/TextAdventure.Sample.Zork` | A complete Zork I port (see its `AGENTS.md` for the engine-gap list it tracks). |
-| `tests/TextAdventure.Engine.Tests` | xUnit tests for the engine (parser, verbs, world, save/load). |
+| `src/Faerie` | The whole package: the UI-agnostic engine (`Faerie.Model` / `.Building` / `.Verbs` / `.Parsing` / `.Runtime` / `.Presentation`) **and** the Avalonia fake terminal (`Faerie.Terminal`). |
+| `src/Faerie.Samples.HauntedHouse` | A small, fully-worked sample game + Avalonia app host. |
+| `src/Faerie.Samples.Zork` | A complete Zork I port (see its `AGENTS.md` for the engine-gap list it tracks). |
+| `tests/Faerie.Tests` | xUnit tests for the engine (parser, verbs, world, save/load). |
 
-The engine half of Nixie knows nothing about Avalonia: it writes through an `ITerminal` interface and
+The engine half of Faerie knows nothing about Avalonia: it writes through an `ITerminal` interface and
 is fed input by whatever host drives it, so the same game logic runs in the fake terminal or a
 headless test. The engine and terminal live in **one NuGet package** for simplicity — referencing
-`Nixie` brings in Avalonia, which is the intended (and only) front end.
+`Faerie` brings in Avalonia, which is the intended (and only) front end.
 
 ## Building and running
 
 Requires the **.NET 10 SDK**.
 
 ```
-dotnet build TextAdventure.sln
-dotnet run --project src/TextAdventure.Sample.HauntedHouse
-dotnet run --project src/TextAdventure.Sample.Zork
+dotnet build Faerie.sln
+dotnet run --project src/Faerie.Samples.HauntedHouse
+dotnet run --project src/Faerie.Samples.Zork
 dotnet test
 ```
 
@@ -55,7 +55,7 @@ mouse pointer is drawn as an inverted character cell rather than the OS cursor. 
 
 ### Fonts
 
-Nixie ships with **no fonts** (so the package stays light and licence-clean). A game supplies its own
+Faerie ships with **no fonts** (so the package stays light and licence-clean). A game supplies its own
 via `GameBuilder.WithFont(spec)`, where `spec` is a system family name (`"Consolas"`), an Avalonia
 resource font with an explicit family (`"avares://MyGame/Assets/Fonts#PxPlus IBM VGA8"`), or a path to
 an embedded font file/folder (the family name is read from the font automatically). Embed the font in

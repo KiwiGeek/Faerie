@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docs/AUTHORING.md" />
+    <File Path="docs/FEATURES.md" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="src/Faerie.Samples.HauntedHouse/Faerie.Samples.HauntedHouse.csproj" />
+  <Project Path="src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj" />
+  <Project Path="src/Faerie.Terminal.Avalonia/Faerie.Terminal.Avalonia.csproj" />
+  <Project Path="src/Faerie.Terminal/Faerie.Terminal.csproj" />
+  <Project Path="src/Faerie/Faerie.csproj" />
+  <Project Path="tests/Faerie.Tests/Faerie.Tests.csproj" />
+</Solution>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Faerie.Terminal</RootNamespace>
+    <AssemblyName>Faerie.Terminal</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Faerie.Terminal</PackageId>
+    <Description>Shared, UI-agnostic terminal model for the Faerie text-adventure engine: a true-colour character-cell framebuffer (TerminalBuffer) with a non-scrolling title row, an optional status row, scrollback, and styled cells. Implements Faerie's ITerminal and is reused by concrete front ends (e.g. Faerie.Terminal.Avalonia and a future Faerie.Terminal.Console). No UI-toolkit dependency.</Description>
+    <PackageTags>text-adventure;interactive-fiction;terminal;tui;game-engine</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Faerie\Faerie.csproj" />
+  </ItemGroup>
+
+</Project>

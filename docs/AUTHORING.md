@@ -47,8 +47,8 @@ Your game project needs references to two engine projects (add them to your `.cs
 
 ```xml
 <ItemGroup>
-  <ProjectReference Include="..\TextAdventure.Engine\TextAdventure.Engine.csproj" />
-  <ProjectReference Include="..\TextAdventure.Terminal.Avalonia\TextAdventure.Terminal.Avalonia.csproj" />
+  <ProjectReference Include="..\Faerie\Faerie.csproj" />
+  <ProjectReference Include="..\Faerie.Terminal.Avalonia\Faerie.Terminal.Avalonia.csproj" />
 </ItemGroup>
 <ItemGroup>
   <PackageReference Include="Avalonia" Version="11.3.0" />
@@ -57,7 +57,7 @@ Your game project needs references to two engine projects (add them to your `.cs
 </ItemGroup>
 ```
 
-The easiest thing is to **copy the three files** from `TextAdventure.Sample.HauntedHouse`
+The easiest thing is to **copy the three files** from `Faerie.Samples.HauntedHouse`
 (`Program.cs`, `App.cs`, and the `.csproj`) into your own project and just replace
 `HauntedHouseGame.Build()` with your own `MyGame.Build()`. `Program.cs` and `App.cs` are pure
 boilerplate that opens the window and starts the engine — you will almost never touch them.
@@ -65,11 +65,11 @@ boilerplate that opens the window and starts the engine — you will almost neve
 The only file you actually write is your game definition. Everything below goes in one method:
 
 ```csharp
-using TextAdventure.Engine.Building;
-using TextAdventure.Engine.Model;
-using TextAdventure.Engine.Presentation;
-using TextAdventure.Engine.Runtime;
-using TextAdventure.Engine.Verbs;
+using Faerie.Building;
+using Faerie.Model;
+using Faerie.Presentation;
+using Faerie.Runtime;
+using Faerie.Verbs;
 
 public static class MyGame
 {
@@ -578,92 +578,4 @@ return b.Build();
 
 ---
 
-## 13. What the player can do out of the box
-
-After `AddStandardVerbs()`, the player can use: look, examine (x), search, inventory (i), take/get,
-drop, open, close, lock, unlock, put (in/on), read, wear, take off, eat, drink, light/extinguish
-(switch on/off), give, use, wait (z), plus movement (n s e w ne nw se sw up down in out), and the
-meta commands help, score, save, restore, quit. Players can also press **F11 / Alt+Enter** for
-fullscreen, **scroll the mouse wheel** (or PageUp/PageDown) to read back, and **Shift + mouse wheel**
-to change the font size.
-
-(Want only *some* of these? Use `.AddMovement()`, `.AddCoreVerbs()`, `.AddMetaVerbs()` individually
-instead of the `AddStandardVerbs()` omnibus.)
-
----
-
-## 14. A complete tiny game
-
-Paste this whole method, wire it into the sample's `App.cs` (replace `HauntedHouseGame.Build()` with
-`TinyGame.Build()`), and run. It has two rooms, an item, a locked exit, a puzzle, and a win.
-
-```csharp
-using TextAdventure.Engine.Building;
-using TextAdventure.Engine.Model;
-using TextAdventure.Engine.Presentation;
-using TextAdventure.Engine.Runtime;
-using TextAdventure.Engine.Verbs;
-
-public static class TinyGame
-{
-    public static Game Build()
-    {
-        var b = GameBuilder.Create("The Locked Cabin")
-            .WithWindowTitle("The Locked Cabin")
-            .WithMaxScore(10)
-            .WithDefaultTitleBar()
-            .AddStandardVerbs();
-
-        var cabin   = b.Room("Cabin")
-            .Describe("A cramped log cabin. A heavy door leads north. A rug lies on the floor.");
-        var outside = b.Room("Forest Path")
-            .Describe("Cool air and birdsong. You are free.");
-
-        // A key hidden under the rug, revealed by searching it.
-        var key = b.Item("iron key").Adjectives("iron").Describe("A heavy iron key.").Concealed();
-        var rug = b.Scenery("rug").Describe("A threadbare rug. Something might be hidden under it.");
-        key.StartsIn(cabin);
-        cabin.Contains(rug);
-
-        // Searching the rug reveals the key.
-        b.On(rug).Before(b.Verbs.Search!, ctx =>
-        {
-            ctx.Say("You flip the rug aside. An iron key clinks on the floorboards!");
-            return VerbResult.Pass;   // the standard search then reveals concealed items
-        });
-
-        // A locked door between the cabin and freedom.
-        var door = b.Scenery("oak door").Called("door").LockedWith(key);
-        cabin.Contains(door);
-        var exit = cabin.Connect(Direction.North, outside);
-        exit.Door = door;
-
-        // Win on stepping outside.
-        outside.OnEnter = ctx =>
-        {
-            ctx.State.Score += 10;
-            ctx.Win("You stride out into the forest, free at last. (+10) You win!");
-        };
-
-        b.WithIntro("{fg:white}{bold}THE LOCKED CABIN{/}{/}\n\nYou wake on a dirt floor. The door is locked.\nType HELP for commands.");
-        b.StartIn(cabin);
-        return b.Build();
-    }
-}
-```
-
-To solve it the player types: `search rug`, `take key`, `unlock door with key`, `open door`,
-`north`.
-
----
-
-## 15. Where to look next
-
-- `HauntedHouseGame.cs` in the sample is a larger, fully-worked example (dark rooms, a deadly
-  creature gated by an item, a roaming ghost, scoring, two bars). It's a great thing to read and
-  copy from.
-- The `README.md` covers building, running, and the VGA font.
-- Saving works out of the box (`SAVE` / `RESTORE`); keep your puzzle flags as `b.State(...)` and they
-  travel with the save automatically.
-
-Have fun. The engine is an empty box — whatever you put in it is your game.
+## 13. What the 

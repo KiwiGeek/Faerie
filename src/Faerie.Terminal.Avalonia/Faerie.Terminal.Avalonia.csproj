@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Faerie.Terminal.Avalonia</RootNamespace>
+    <AssemblyName>Faerie.Terminal.Avalonia</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Faerie.Terminal.Avalonia</PackageId>
+    <Description>Avalonia "fake terminal" front end for the Faerie text-adventure engine: renders Faerie.Terminal's character-cell framebuffer as a true-colour text screen with blink/underline/bold/inverse, scrollback, zoom, title/status bars, and a game-supplied font and cursor. Ships no fonts of its own.</Description>
+    <PackageTags>text-adventure;interactive-fiction;avalonia;terminal;tui;game-engine</PackageTags>
+  </PropertyGroup>
+
+  <!-- This library deliberately bundles NO fonts. A game supplies its own font (embedded in the
+       game's own assembly as an AvaloniaResource, or a system family) via the game definition. -->
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="11.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Faerie\Faerie.csproj" />
+    <ProjectReference Include="..\Faerie.Terminal\Faerie.Terminal.csproj" />
+  </ItemGroup>
+
+</Project>

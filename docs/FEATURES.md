@@ -11,24 +11,21 @@ in-sample simplification.
 > the only true architectural gap is **output interception** (see below). See the Zork sample's
 > `AGENTS.md` → "Reality check" for the full classification.
 
-## Naming
+## Naming — resolved: **Faerie**
 
-The project needs a real name (working title: "Text Adventure Engine"). Candidates to consider:
+The project is named **Faerie** — a nod to **F**luent **A**dventure **E**ngine ("FAE"). Tagline: *the
+Fluent Adventure Engine*. NuGet/package layout:
 
-- **Lumen** / **Lumin** — "illuminated" text; short, brandable.
-- **Glyphwright** — evokes hand-crafted text screens.
-- **Parsely** / **Parserly** — playful nod to the parser.
-- **Scrivening** / **Scriv** — authorly.
-- **Adventure Foundry**, **StoryForge**, **VerbForge** — "forge a world."
-- **Fathom** — exploration + depth.
-- **Grue** (taken/loaded by Zork connotations — avoid for a neutral engine).
-- **Aventura**, **Questrel**, **Wayfarer**.
-- User suggestion: **FluentAdventureEngine / FAE**. "FAE" is a nice short package prefix; "Faerie"
-  spelling (**Fae**) reads better than the acronym.
+- `Faerie` — the engine / core (UI-agnostic; emits through the `Faerie.Presentation.ITerminal` abstraction).
+- `Faerie.Terminal` — shared, UI-agnostic terminal model (`TerminalBuffer`, the character-cell framebuffer);
+  implements `ITerminal` and is reused by every front end.
+- `Faerie.Terminal.Avalonia` — the Avalonia "fake terminal" front end.
+- `Faerie.Terminal.Console` — planned stdout/console front end.
+- `Faerie.Samples.Zork`, `Faerie.Samples.HauntedHouse`, `Faerie.Tests` — not published.
 
-Recommendation to decide on: a single short noun (e.g. **Lumen** or **Fathom**) for the brand, with
-namespaces like `Fathom.Engine`, `Fathom.Terminal.Avalonia`. Renaming touches namespaces, assembly
-names, csproj `PackageId`s, and the avares URIs in sample fonts — do it in one dedicated pass.
+The bare `Faerie` id is the engine (Serilog/Polly-style discoverability); front ends are `Faerie.Terminal.*`.
+Sample apps keep short `AssemblyName`s (`Zork`, `HauntedHouse`) so the avares font URIs (`avares://Zork/...`)
+stay stable.
 
 ## Parser & language
 
@@ -101,41 +98,4 @@ and stops authors from mislabelling them as engine gaps. None of these change wh
 - [ ] **NPC-movement helpers** — wander to a random exit, approach/follow the player, return-home; over raw
   `State.Move` in a daemon.
 - [ ] **Soft-death hook** — a first-class "die but continue" (relocate player, scatter inventory, dock score,
-  decrement lives) instead of only the terminal `ctx.Lose`. Scriptable today, but every game reinvents it.
-
-## Presentation / terminal
-
-- [ ] **Graphics support.** (Not literally sixel — we render our own surface, not a real terminal.)
-  Allow a game to draw bitmap/vector art into a region of the screen (splash images, room
-  illustrations, a status panel). Likely an `IRegion`/layer API over the framebuffer plus an Avalonia
-  image-draw path, with the text grid composited around/over it.
-- [ ] **Sound & music.** Engine-agnostic audio hooks (play sound effect, loop background music,
-  stop/fade), triggered from reactions/daemons; an Avalonia/host implementation. Keep the engine
-  free of audio dependencies (interface in engine, impl in host).
-- [x] **Re-render/reflow backbuffer on zoom & resize.** Glyphs already redraw at the new font size;
-  remaining work is to re-wrap stored scrollback/live text to the new column count (keep logical
-  lines, re-wrap on resize) rather than leaving old wrapping. Today content is preserved top-left
-  without reflow (DOS-style).
-- [ ] **Mouse cursor as a cell highlight.** Over the game window, hide the system cursor and instead
-  highlight the hovered character cell (inverse/background block), as old text UIs did. Track pointer
-  → cell, draw a highlight in `Render`, restore the system cursor when the pointer leaves.
-- [ ] **TUI file browser for SAVE/RESTORE.** Present an in-terminal (in-grid) file picker for choosing
-  a save slot/file, styled like the rest of the UI. Native OS file dialogs are an acceptable fallback
-  if the TUI picker proves too costly. Today save/restore use a single fixed slot.
-- [ ] **CRT/scanline post-effect** (optional eye-candy toggle).
-
-## Packaging / project shape
-
-- [ ] **NuGet readiness pass.** Done so far: `IsPackable`, `PackageId`, `Description`, tags on the two
-  libraries; the terminal library ships **no** fonts. Still to do: README/license/icon in the
-  packages (`PackageReadmeFile`, `PackageLicenseExpression`, `PackageProjectUrl`,
-  `RepositoryUrl`), SourceLink + deterministic builds, symbol packages (`snupkg`), decide on a
-  minimum Avalonia version range rather than a pin, and validate `dotnet pack` output. Confirm the
-  engine has zero non-BCL dependencies and the terminal package depends only on `Avalonia` (core),
-  not `Avalonia.Desktop`/Themes (those belong to the app).
-- [ ] **Sample app project** kept out of the packable set (it's an exe, already not packable).
-
-## Docs
-
-- [ ] Keep `docs/AUTHORING.md` in sync as features land (fonts/cursor section is current).
-- [ ] Add a "porting a classic" note referencing the Zork sample's `AGENTS.md` gap list.
+  decrement lives) i

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Faerie</RootNamespace>
+    <AssemblyName>Faerie</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <!-- NuGet packaging -->
+    <IsPackable>true</IsPackable>
+    <PackageId>Faerie</PackageId>
+    <Description>Faerie — a fluent, UI-agnostic C# engine for building text adventures / interactive fiction (the "Fluent Adventure Engine"). Rooms, things, creatures and verbs wired by reference (no magic strings); a flexible parser; reactions and daemons; output filters; and JSON save/load. The engine renders through an abstract ITerminal; terminal front ends ship separately (Faerie.Terminal, Faerie.Terminal.Avalonia). Ships no fonts of its own.</Description>
+    <PackageTags>text-adventure;interactive-fiction;game-engine;fluent;parser</PackageTags>
+  </PropertyGroup>
+
+  <!-- The engine has no UI dependency: it writes through the Faerie.Presentation.ITerminal abstraction.
+       A front end (e.g. the Faerie.Terminal.Avalonia package) implements ITerminal. -->
+
+</Project>
