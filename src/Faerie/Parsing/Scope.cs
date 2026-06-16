@@ -10,6 +10,8 @@ namespace Faerie.Parsing;
 /// </summary>
 public sealed class Scope(GameState state, GameContext? context = null)
 {
+    private static readonly HashSet<string> FillerWords = ["of", "from", "with", "in", "on", "at", "the"];
+
     private readonly GameState _state = state;
     private readonly GameContext? _context = context;
 
@@ -42,39 +44,37 @@ public sealed class Scope(GameState state, GameContext? context = null)
 
         if (!IsCurrentRoomLit) yield break;
 
-        foreach (Thing t in EnumerateRoom(_state.CurrentRoom))
-            yield return t;
-    }
-
-    private IEnumerable<Thing> EnumerateRoom(Room room)
-    {
-        foreach (Thing t in _state.ContentsOf(room))
+        Room room = _state.CurrentRoom;
+        foreach (Thing thing in _state.World.Things)
         {
-            if (t.Has(Attr.Concealed)) continue;
-            yield return t;
-            foreach (Thing inner in EnumerateInside(t))
-                yield return inner;
+            if (thing.Has(Attr.Concealed)) continue;
+            if (_state.RoomOf(thing) != room) continue;
+            if (IsInsideClosedOpenable(thing)) continue;
+            yield return thing;
         }
     }
 
-    private IEnumerable<Thing> EnumerateInside(Thing container)
+    /// <summary>True when the thing sits inside a closed, openable container (matches Search verb rules).</summary>
+    private bool IsInsideClosedOpenable(Thing thing)
     {
-        // Contents of open containers and everything on supporters are visible.
-        if (container.Has(Attr.Container) && container.Has(Attr.Open))
-            foreach (Thing t in _state.ContentsOf(container))
+        for (Placement p = _state.PlacementOf(thing);;)
+        {
+            switch (p.Anchor)
             {
-                if (t.Has(Attr.Concealed)) continue;
-                yield return t;
-                foreach (Thing inner in EnumerateInside(t)) yield return inner;
+                case Anchor.Inside when p.Container is { } container:
+                    if (container.Has(Attr.Concealed)) return true;
+                    if (container.Has(Attr.Container) && container.Has(Attr.Openable) && !container.Has(Attr.Open))
+                        return true;
+                    p = _state.PlacementOf(container);
+                    break;
+                case Anchor.On when p.Container is { } supporter:
+                    if (supporter.Has(Attr.Concealed)) return true;
+                    p = _state.PlacementOf(supporter);
+                    break;
+                default:
+                    return false;
             }
-
-        if (container.Has(Attr.Supporter))
-            foreach (Thing t in _state.ContentsOf(container, onTop: true))
-            {
-                if (t.Has(Attr.Concealed)) continue;
-                yield return t;
-                foreach (Thing inner in EnumerateInside(t)) yield return inner;
-            }
+        }
     }
 
     /// <summary>
@@ -114,6 +114,7 @@ public sealed class Scope(GameState state, GameContext? context = null)
         bool headNoun = false;
         foreach (string token in tokens)
         {
+            if (FillerWords.Contains(token)) continue;
             if (!vocab.Contains(token)) return false;
             if (nouns.Contains(token)) headNoun = true;
         }

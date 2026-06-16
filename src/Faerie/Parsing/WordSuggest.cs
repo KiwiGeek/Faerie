@@ -54,6 +54,13 @@ public static class WordSuggest
         bool uppercaseSuggestion = false, int? maxDistance = null)
     {
         IReadOnlyList<string> matches = FindCloseMatches(mistyped, vocabulary, maxDistance);
+        if (matches.Count == 0)
+        {
+            string[] parts = mistyped.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length > 1)
+                matches = FindCloseMatches(parts[^1], vocabulary, maxDistance);
+        }
+
         string? tail = DidYouMean(matches, uppercaseSuggestion);
         if (tail is null) return (message, null);
 
