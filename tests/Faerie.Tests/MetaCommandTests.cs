@@ -54,27 +54,6 @@ public sealed class MetaCommandTests
     }
 
     [Fact]
-    public void Oops_RecallsLastInputForCorrection()
-    {
-        (GameEngine engine, InMemoryTerminal term, _, _, _) = BuildWorld();
-        engine.Submit("tkae lamp");
-        term.Reset();
-        engine.Submit("oops");
-
-        Assert.Equal("tkae lamp", engine.SuggestedInput);
-        Assert.Contains("OK.", term.Output);
-    }
-
-    [Fact]
-    public void Oops_WithNoPriorInput_ReportsNothing()
-    {
-        (GameEngine engine, InMemoryTerminal term, _, _, _) = BuildWorld();
-        engine.Submit("oops");
-
-        Assert.Contains("Nothing to oops", term.Output);
-    }
-
-    [Fact]
     public void Undo_RestoresStateBeforeLastTurn()
     {
         (GameEngine engine, InMemoryTerminal term, Room hall, Room cellar, _) = BuildWorld();

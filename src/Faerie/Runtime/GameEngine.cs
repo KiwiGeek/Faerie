@@ -32,7 +32,6 @@ public sealed class GameEngine
     private readonly GameContext _context;
     private readonly List<string> _undoSnapshots = [];
     private string? _lastSuccessfulCommand;
-    private string? _lastRawInput;
 
     private const int MaxUndoDepth = 50;
 
@@ -94,7 +93,6 @@ public sealed class GameEngine
         _game.OnStart?.Invoke(_context);
         _undoSnapshots.Clear();
         _lastSuccessfulCommand = null;
-        _lastRawInput = null;
         RefreshBars();
     }
 
@@ -115,20 +113,11 @@ public sealed class GameEngine
             return;
         }
 
-        if (IsOops(trimmed))
-        {
-            Oops();
-            return;
-        }
-
         if (IsUndo(trimmed))
         {
             UndoLastTurn();
             return;
         }
-
-        if (trimmed.Length > 0)
-            _lastRawInput = input;
 
         ParsedCommand command = Parser.Parse(input, new Scope(State, _context), State);
 
@@ -212,20 +201,6 @@ public sealed class GameEngine
         Submit(_lastSuccessfulCommand);
     }
 
-    private void Oops()
-    {
-        if (_lastRawInput is null)
-        {
-            Out.PrintLine("Nothing to oops.");
-            RefreshBars();
-            return;
-        }
-
-        SuggestedInput = _lastRawInput;
-        Out.PrintLine("OK.");
-        RefreshBars();
-    }
-
     private void UndoLastTurn()
     {
         if (_undoSnapshots.Count == 0)
@@ -252,9 +227,6 @@ public sealed class GameEngine
     private static bool IsAgain(string trimmed) =>
         trimmed.Equals("again", StringComparison.OrdinalIgnoreCase) ||
         trimmed.Equals("g", StringComparison.OrdinalIgnoreCase);
-
-    private static bool IsOops(string trimmed) =>
-        trimmed.Equals("oops", StringComparison.OrdinalIgnoreCase);
 
     private static bool IsUndo(string trimmed) =>
         trimmed.Equals("undo", StringComparison.OrdinalIgnoreCase);
@@ -407,7 +379,7 @@ public sealed class GameEngine
         Out.PrintLine("Type short commands such as LOOK, EXAMINE LANTERN, TAKE KEY, GO NORTH (or just N),");
         Out.PrintLine("OPEN DOOR, PUT COIN IN SLOT, GIVE BONE TO DOG, INVENTORY (I), WAIT (Z).");
         Out.PrintLine("Movement: N S E W NE NW SE SW UP DOWN IN OUT.");
-        Out.PrintLine("Other commands: SAVE, RESTORE, SCORE, QUIT, AGAIN (G), OOPS, UNDO. Press F11 to toggle fullscreen.");
+        Out.PrintLine("Other commands: SAVE, RESTORE, SCORE, QUIT, AGAIN (G), UNDO. Press F11 to toggle fullscreen.");
     }
 
     public void RequestQuit()
