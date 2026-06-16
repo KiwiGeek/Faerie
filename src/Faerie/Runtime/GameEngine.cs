@@ -28,6 +28,13 @@ public sealed class GameEngine
         StandardVerbIds.Help, StandardVerbIds.Score, StandardVerbIds.Restore, StandardVerbIds.Quit
     ];
 
+    // Meta verbs that read or persist state without advancing the world a turn.
+    private static readonly HashSet<string> NoTurn =
+    [
+        StandardVerbIds.Help, StandardVerbIds.Score, StandardVerbIds.Save,
+        StandardVerbIds.Restore, StandardVerbIds.Quit
+    ];
+
     private readonly Game _game;
     private readonly GameContext _context;
     private readonly List<ScheduledTimer> _timers;
@@ -159,6 +166,13 @@ public sealed class GameEngine
         if (!new Scope(State, _context).IsCurrentRoomLit && !DarkSafe.Contains(verb.Id))
         {
             Out.PrintLine("It's pitch black down here. You can't see a thing.");
+            RefreshBars();
+            return;
+        }
+
+        if (NoTurn.Contains(verb.Id))
+        {
+            RunCommands(verb, command, input, recordForAgain: false);
             RefreshBars();
             return;
         }
