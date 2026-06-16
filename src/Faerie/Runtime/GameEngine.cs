@@ -90,11 +90,15 @@ public sealed class GameEngine
         RefreshBars();
     }
 
+    /// <summary>When the last line failed to parse, a single corrected command the player can accept with Enter.</summary>
+    public string? SuggestedInput { get; private set; }
+
     /// <summary>Processes one line of player input, advancing the world a turn if a command runs.</summary>
     public void Submit(string input)
     {
         if (QuitRequested) return;
         bool wasOver = State.IsOver;
+        SuggestedInput = null;
 
         ParsedCommand command = Parser.Parse(input, new Scope(State, _context), State);
 
@@ -107,6 +111,7 @@ public sealed class GameEngine
             case ParseStatus.UnknownVerb:
             case ParseStatus.UnknownObject:
             case ParseStatus.Ambiguous:
+                SuggestedInput = command.SuggestedInput;
                 Out.PrintLine(command.Message ?? "That doesn't make sense.");
                 RefreshBars();
                 return;

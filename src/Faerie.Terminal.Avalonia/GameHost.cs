@@ -56,6 +56,6 @@ public sealed class GameHost
 
         _engine.Out.Blank();
         _engine.Out.Print(_promptMarkup);
-        _control.BeginInput();
+        _control.BeginInput(_engine.SuggestedInput);
     }
 }

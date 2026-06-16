@@ -72,6 +72,9 @@ public sealed class TerminalControl : Control
     private bool _blinkOn = true;
     private bool _inputActive;
     private string _input = "";
+    private readonly List<string> _commandHistory = [];
+    private int _historyIndex = -1;   // index into _commandHistory, or -1 for the live draft line
+    private string _historyDraft = "";
     private int _scrollOffset;   // rows scrolled up into history (0 = live/bottom)
     private bool _started;
     private string? _fontSpec;
@@ -181,10 +184,12 @@ public sealed class TerminalControl : Control
 
     // ---- input editing --------------------------------------------------------------------
 
-    public void BeginInput()
+    public void BeginInput(string? prefilled = null)
     {
-        _input = "";
+        _input = prefilled ?? "";
         _inputActive = true;
+        _historyIndex = -1;
+        _historyDraft = "";
         Focus();
         InvalidateVisual();
     }
@@ -511,12 +516,64 @@ public sealed class TerminalControl : Control
                 break;
             case Key.Escape:
                 _input = "";
+                _historyIndex = -1;
+                _historyDraft = "";
                 _hasSelection = false;
                 _blockSelect = false;
                 InvalidateVisual();
                 e.Handled = true;
                 break;
+            case Key.Up:
+                RecallHistory(-1);
+                e.Handled = true;
+                break;
+            case Key.Down:
+                RecallHistory(1);
+                e.Handled = true;
+                break;
         }
+    }
+
+    private void RecallHistory(int direction)
+    {
+        if (_commandHistory.Count == 0) return;
+
+        if (_historyIndex < 0 && direction < 0)
+        {
+            _historyDraft = _input;
+            _historyIndex = _commandHistory.Count - 1;
+        }
+        else if (direction < 0)
+        {
+            if (_historyIndex > 0) _historyIndex--;
+        }
+        else if (_historyIndex >= 0)
+        {
+            if (_historyIndex < _commandHistory.Count - 1)
+                _historyIndex++;
+            else
+            {
+                _historyIndex = -1;
+                _input = _historyDraft;
+                _historyDraft = "";
+                InvalidateVisual();
+                return;
+            }
+        }
+        else
+        {
+            return;
+        }
+
+        _input = _commandHistory[_historyIndex];
+        InvalidateVisual();
+    }
+
+    private void PushHistory(string line)
+    {
+        if (line.Length == 0) return;
+        if (_commandHistory.Count > 0 && _commandHistory[^1] == line) return;
+        _commandHistory.Add(line);
     }
 
     private void EchoAndCommit(string line)
@@ -526,7 +583,10 @@ public sealed class TerminalControl : Control
             _buffer.Write(line, _buffer.DefaultStyle);
             _buffer.NewLine();
         }
+        PushHistory(line);
         _input = "";
+        _historyIndex = -1;
+        _historyDraft = "";
         _inputActive = false;
         CommandEntered?.Invoke(line);
     }

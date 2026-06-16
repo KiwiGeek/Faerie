@@ -37,11 +37,19 @@ public sealed class ParsedCommand
     public string? DirectObjectText { get; init; }
     public string? IndirectObjectText { get; init; }
 
+    /// <summary>
+    /// When exactly one corrected command can be inferred, the UI may pre-fill the input line so
+    /// the player can accept it with Enter.
+    /// </summary>
+    public string? SuggestedInput { get; init; }
+
     public IReadOnlyList<Thing> Ambiguities { get; init; } = [];
 
     public static ParsedCommand Empty() => new() { Status = ParseStatus.Empty };
-    public static ParsedCommand Unknown(string message) => new() { Status = ParseStatus.UnknownVerb, Message = message };
-    public static ParsedCommand NoObject(string message) => new() { Status = ParseStatus.UnknownObject, Message = message };
+    public static ParsedCommand Unknown(string message, string? suggestedInput = null) =>
+        new() { Status = ParseStatus.UnknownVerb, Message = message, SuggestedInput = suggestedInput };
+    public static ParsedCommand NoObject(string message, string? suggestedInput = null) =>
+        new() { Status = ParseStatus.UnknownObject, Message = message, SuggestedInput = suggestedInput };
     public static ParsedCommand Ambiguous(string message, IReadOnlyList<Thing> candidates) =>
         new() { Status = ParseStatus.Ambiguous, Message = message, Ambiguities = candidates };
 }
