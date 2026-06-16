@@ -21,6 +21,20 @@
       "request": "launch",
       "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script ${workspaceFolder}/scripts/zork1-smoketest.txt -o -",
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Softporn (Avalonia)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Softporn (Headless)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj -- --script ${workspaceFolder}/scripts/softporn-smoketest.txt -o -",
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
