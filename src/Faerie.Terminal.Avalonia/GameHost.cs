@@ -42,7 +42,7 @@ public sealed class GameHost
     {
         // The control already echoed the line and moved to a fresh row; keep the wrapper in sync.
         _engine.Out.SyncColumn(0);
-        _engine.Submit(line);
+        _engine.SubmitLine(line);
         Prompt();
     }
 
