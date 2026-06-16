@@ -88,6 +88,13 @@ public sealed class GameEngine
     /// <summary>When <see cref="RequestSave"/> / <see cref="RequestRestore"/> have no slot label, the host may show a picker.</summary>
     public Func<SaveSlotPickRequest, string?>? PickSaveSlot { get; set; }
 
+    /// <summary>Mid-turn prompts during verb execution (<see cref="GameContext.PromptLine"/>).</summary>
+    public IPlayerInput? PlayerInput { get; set; }
+
+    internal IPlayerInput RequirePlayerInput() =>
+        PlayerInput ?? throw new InvalidOperationException(
+            "Mid-turn input requires IPlayerInput. Wire PlayerInput on the host or use an in-memory provider in tests.");
+
     public Func<string>? SaveProvider { get; set; }      // legacy: returns a path to save to
     public Func<string?>? RestoreProvider { get; set; }  // legacy: returns a path to restore from, or null to cancel
     public Action<string>? WriteSave { get; set; }       // legacy: persist json to the given path

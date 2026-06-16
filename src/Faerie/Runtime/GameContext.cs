@@ -32,6 +32,22 @@ public class GameContext
     public void SayInline(string markup) => Out.Print(markup);
     public void Blank() => Out.Blank();
 
+    /// <summary>Prints a prompt and blocks until the player enters a line (mid-turn).</summary>
+    public string PromptLine(string prompt)
+    {
+        Out.Print(prompt);
+        return Engine.RequirePlayerInput().ReadLine();
+    }
+
+    /// <summary>Prints a prompt and blocks until the player presses an accepted key (mid-turn).</summary>
+    public char PromptKey(string prompt, ReadOnlySpan<char> validKeys)
+    {
+        Out.Print(prompt);
+        char key = Engine.RequirePlayerInput().ReadKey(validKeys);
+        Out.NewLine();
+        return key;
+    }
+
     // ---- state helpers --------------------------------------------------------------------
 
     public bool Carrying(Thing thing) => State.IsCarried(thing);

@@ -76,6 +76,9 @@ public sealed class TerminalControl : Control
     private IReadOnlyList<SaveSlotPicker.SlotOption>? _slotPickOptions;
     private int _slotPickIndex;
     private string _slotPickTyped = "";
+    private TaskCompletionSource<string>? _linePromptTcs;
+    private TaskCompletionSource<char>? _keyPromptTcs;
+    private ReadOnlyMemory<char> _keyPromptValid;
     private readonly List<string> _commandHistory = [];
     private int _historyIndex = -1;   // index into _commandHistory, or -1 for the live draft line
     private string _historyDraft = "";
@@ -225,6 +228,127 @@ public sealed class TerminalControl : Control
         }
 
         return pick.GetAwaiter().GetResult();
+    }
+
+    /// <summary>Blocking mid-turn line read; must run on the UI thread.</summary>
+    internal string RunLinePrompt()
+    {
+        _linePromptTcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _input = "";
+        _inputActive = true;
+        _historyIndex = -1;
+        _historyDraft = "";
+        Focus();
+        InvalidateVisual();
+
+        Task<string> prompt = _linePromptTcs.Task;
+        if (!prompt.IsCompleted)
+        {
+            var frame = new DispatcherFrame();
+            prompt.ContinueWith(static (_, state) => ((DispatcherFrame)state!).Continue = false, frame);
+            Dispatcher.UIThread.PushFrame(frame);
+        }
+
+        return prompt.GetAwaiter().GetResult();
+    }
+
+    /// <summary>Blocking mid-turn single-key read; must run on the UI thread.</summary>
+    internal char RunKeyPrompt(ReadOnlySpan<char> validKeys)
+    {
+        _keyPromptTcs = new TaskCompletionSource<char>(TaskCreationOptions.RunContinuationsAsynchronously);
+        _keyPromptValid = validKeys.ToArray();
+        _inputActive = false;
+        Focus();
+        InvalidateVisual();
+
+        Task<char> prompt = _keyPromptTcs.Task;
+        if (!prompt.IsCompleted)
+        {
+            var frame = new DispatcherFrame();
+            prompt.ContinueWith(static (_, state) => ((DispatcherFrame)state!).Continue = false, frame);
+            Dispatcher.UIThread.PushFrame(frame);
+        }
+
+        return prompt.GetAwaiter().GetResult();
+    }
+
+    private void CompleteLinePrompt(string line)
+    {
+        if (_buffer is not null)
+        {
+            _buffer.Write(line, _buffer.DefaultStyle);
+            _buffer.NewLine();
+        }
+
+        _linePromptTcs?.TrySetResult(line);
+        _linePromptTcs = null;
+        _input = "";
+        _inputActive = false;
+        InvalidateVisual();
+    }
+
+    private void CompleteKeyPrompt(char key)
+    {
+        if (_buffer is not null)
+        {
+            _buffer.Write(key.ToString(), _buffer.DefaultStyle);
+            _buffer.NewLine();
+        }
+
+        _keyPromptTcs?.TrySetResult(key);
+        _keyPromptTcs = null;
+        InvalidateVisual();
+    }
+
+    private void HandleKeyPromptKey(KeyEventArgs e)
+    {
+        if (e.Key is >= Key.A and <= Key.Z)
+        {
+            char c = (char)('a' + ((int)e.Key - (int)Key.A));
+            if (KeyIsValid(c))
+            {
+                CompleteKeyPrompt(c);
+                e.Handled = true;
+            }
+            return;
+        }
+
+        if (e.Key is >= Key.D0 and <= Key.D9)
+        {
+            char c = (char)('0' + ((int)e.Key - (int)Key.D0));
+            if (KeyIsValid(c))
+            {
+                CompleteKeyPrompt(c);
+                e.Handled = true;
+            }
+            return;
+        }
+
+        if (e.Key is >= Key.NumPad0 and <= Key.NumPad9)
+        {
+            char c = (char)('0' + ((int)e.Key - (int)Key.NumPad0));
+            if (KeyIsValid(c))
+            {
+                CompleteKeyPrompt(c);
+                e.Handled = true;
+            }
+            return;
+        }
+
+        if (e.Key == Key.Y && KeyIsValid('y')) { CompleteKeyPrompt('y'); e.Handled = true; return; }
+        if (e.Key == Key.N && KeyIsValid('n')) { CompleteKeyPrompt('n'); e.Handled = true; return; }
+    }
+
+    private bool KeyIsValid(char c)
+    {
+        ReadOnlySpan<char> valid = _keyPromptValid.Span;
+        for (int i = 0; i < valid.Length; i++)
+        {
+            if (char.ToLowerInvariant(valid[i]) == char.ToLowerInvariant(c))
+                return true;
+        }
+
+        return false;
     }
 
     private void CompleteSlotPick(string? label)
@@ -616,6 +740,12 @@ public sealed class TerminalControl : Control
             return;
         }
 
+        if (_keyPromptTcs is not null)
+        {
+            HandleKeyPromptKey(e);
+            return;
+        }
+
         // Ctrl-based shortcuts: copy, paste, and zoom.
         if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
@@ -660,6 +790,22 @@ public sealed class TerminalControl : Control
         if (!_inputActive) return;
 
         _scrollOffset = 0;
+        if (_linePromptTcs is not null)
+        {
+            switch (e.Key)
+            {
+                case Key.Enter:
+                    CompleteLinePrompt(_input);
+                    e.Handled = true;
+                    return;
+                case Key.Back:
+                    if (_input.Length > 0) _input = _input[..^1];
+                    InvalidateVisual();
+                    e.Handled = true;
+                    return;
+            }
+        }
+
         switch (e.Key)
         {
             case Key.Enter:
