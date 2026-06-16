@@ -26,6 +26,7 @@ namespace Faerie.Building;
 public sealed class GameBuilder
 {
     private readonly List<TurnDaemon> _daemons = [];
+    private readonly List<ScheduledTimer> _timers = [];
     private readonly List<Func<GameContext, string, string?>> _outputFilters = [];
     private readonly HashSet<string> _modules = [];
     private readonly Dictionary<string, int> _idCounters = [];
@@ -183,6 +184,33 @@ public sealed class GameBuilder
     }
 
     /// <summary>
+    /// Schedules a one-shot action to run after <paramref name="turns"/> player turns (relative to
+    /// the current turn count when registered). At build time that is turn zero; from running game
+    /// code use <see cref="GameContext.ScheduleIn"/> instead.
+    /// </summary>
+    public GameBuilder ScheduleIn(int turns, Action<GameContext> action, Func<GameContext, bool>? when = null) =>
+        ScheduleIn(null, turns, action, when);
+
+    /// <summary>
+    /// Like <see cref="ScheduleIn(int, Action{GameContext}, Func{GameContext, bool}?)"/> but with a
+    /// <paramref name="name"/> that <see cref="GameContext.CancelSchedule"/> can cancel.
+    /// </summary>
+    public GameBuilder ScheduleIn(string name, int turns, Action<GameContext> action, Func<GameContext, bool>? when = null)
+    {
+        if (_timers.Any(t => t.Name == name))
+            throw new InvalidOperationException($"A timer named '{name}' is already scheduled.");
+
+        _timers.Add(new ScheduledTimer
+        {
+            Name = name,
+            DueAtTurn = turns,
+            Action = action,
+            Condition = when
+        });
+        return this;
+    }
+
+    /// <summary>
     /// Registers an output filter. It runs on every line of game text just before it is shown, receiving
     /// the context and the marked-up text; return a rewritten string to print, or <c>null</c> to suppress
     /// the line entirely. Filters run in registration order (each sees the previous one's result), and the
@@ -268,6 +296,7 @@ public sealed class GameBuilder
             Verbs = Library,
             Reactions = Reactions,
             Daemons = _daemons,
+            Timers = _timers,
             OutputFilters = _outputFilters,
             MaxScore = _maxScore,
             OnStart = _onStart,

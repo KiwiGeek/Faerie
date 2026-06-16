@@ -90,4 +90,15 @@ public class GameContext
 
     public void Win(string message) => EndGame(true, message);
     public void Lose(string message) => EndGame(false, message);
+
+    /// <summary>Schedules a one-shot action to run after <paramref name="turns"/> player turns.</summary>
+    public void ScheduleIn(int turns, Action<GameContext> action, Func<GameContext, bool>? when = null) =>
+        Engine.ScheduleIn(null, turns, action, when);
+
+    /// <summary>Schedules a named one-shot action; an existing timer with the same name is cancelled.</summary>
+    public void ScheduleIn(string name, int turns, Action<GameContext> action, Func<GameContext, bool>? when = null) =>
+        Engine.ScheduleIn(name, turns, action, when);
+
+    /// <summary>Cancels a named scheduled timer before it fires.</summary>
+    public void CancelSchedule(string name) => Engine.CancelSchedule(name);
 }

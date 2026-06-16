@@ -46,6 +46,9 @@ public sealed class Game
 
     public IReadOnlyList<TurnDaemon> Daemons { get; init; } = [];
 
+    /// <summary>One-shot timers scheduled relative to the turn count.</summary>
+    public IReadOnlyList<ScheduledTimer> Timers { get; init; } = [];
+
     /// <summary>
     /// Output filters applied, in order, to every line of game text before it reaches the terminal.
     /// Each receives the context and the marked-up text and returns a rewritten string, or null to

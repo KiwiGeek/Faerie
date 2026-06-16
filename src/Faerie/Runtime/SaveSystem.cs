@@ -17,7 +17,7 @@ public static class SaveSystem
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public static string Capture(GameState state, IReadOnlyList<TurnDaemon> daemons)
+    public static string Capture(GameState state, IReadOnlyList<TurnDaemon> daemons, IReadOnlyList<ScheduledTimer> timers)
     {
         Snapshot snap = new()
         {
@@ -47,10 +47,17 @@ public static class SaveSystem
         for (int i = 0; i < daemons.Count; i++)
             snap.FiredDaemons.Add(daemons[i].Fired);
 
+        foreach (ScheduledTimer timer in timers)
+        {
+            snap.TimerDueAtTurns.Add(timer.DueAtTurn);
+            snap.TimerFired.Add(timer.Fired);
+            snap.TimerCancelled.Add(timer.Cancelled);
+        }
+
         return JsonSerializer.Serialize(snap, Options);
     }
 
-    public static void Restore(string json, GameState state, IReadOnlyList<TurnDaemon> daemons)
+    public static void Restore(string json, GameState state, IReadOnlyList<TurnDaemon> daemons, IList<ScheduledTimer> timers)
     {
         Snapshot snap = JsonSerializer.Deserialize<Snapshot>(json, Options)
             ?? throw new InvalidDataException("The save file could not be read.");
@@ -82,6 +89,13 @@ public static class SaveSystem
 
         for (int i = 0; i < daemons.Count && i < snap.FiredDaemons.Count; i++)
             daemons[i].Fired = snap.FiredDaemons[i];
+
+        for (int i = 0; i < timers.Count && i < snap.TimerDueAtTurns.Count; i++)
+        {
+            timers[i].DueAtTurn = snap.TimerDueAtTurns[i];
+            timers[i].Fired = snap.TimerFired[i];
+            timers[i].Cancelled = snap.TimerCancelled[i];
+        }
     }
 
     // ---- DTOs -----------------------------------------------------------------------------
@@ -100,6 +114,9 @@ public static class SaveSystem
         public Dictionary<string, long> RoomAttributes { get; set; } = [];
         public Dictionary<string, GlobalValue> Globals { get; set; } = [];
         public List<bool> FiredDaemons { get; set; } = [];
+        public List<int> TimerDueAtTurns { get; set; } = [];
+        public List<bool> TimerFired { get; set; } = [];
+        public List<bool> TimerCancelled { get; set; } = [];
     }
 
     private sealed class PlacementDto
