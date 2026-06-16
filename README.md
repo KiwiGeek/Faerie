@@ -52,6 +52,12 @@ Run a game without opening a window — feed commands from a file and capture a 
 dotnet run --project src/Faerie.Samples.Zork -- --script commands.txt --transcript session.txt
 ```
 
+Use `-` for stdin/stdout:
+
+```
+type commands.txt | dotnet run --project src/Faerie.Samples.Zork -- --script - -o -
+```
+
 Blank lines and `#` / `;` comment lines are skipped. Each command is logged as `> command` in the transcript. Omit `--script` to launch the Avalonia UI as usual. See `src/Faerie.Terminal.Headless/README.md`.
 
 > Package versions in the `.csproj` files (Avalonia 11.3.0, the xUnit/test-SDK versions) are

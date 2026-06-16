@@ -67,6 +67,39 @@ public sealed class HeadlessRunnerTests
     }
 
     [Fact]
+    public void TryParse_StdinScript_DefaultsTranscriptToStdout()
+    {
+        bool parsed = HeadlessArgs.TryParse(["--script", "-"], out HeadlessOptions? options, out string? error);
+        Assert.True(parsed);
+        Assert.Null(error);
+        Assert.NotNull(options);
+        Assert.Equal("-", options!.TranscriptPath);
+        Assert.Equal("headless.save.json", options.SavePath);
+    }
+
+    [Fact]
+    public void Run_WithStreamOverrides_WritesTranscript()
+    {
+        using StringReader script = new("look\n");
+        using StringWriter transcript = new();
+
+        GameBuilder b = GameBuilder.Create("Test").AddStandardVerbs();
+        Room hall = b.Room("Hall").Describe("A hall.");
+        b.StartIn(hall);
+
+        int exit = HeadlessRunner.Run(b.Build(), new HeadlessOptions
+        {
+            ScriptPath = "-",
+            TranscriptPath = "-"
+        }, script, transcript);
+
+        Assert.Equal(0, exit);
+        string log = transcript.ToString();
+        Assert.Contains("> look", log);
+        Assert.Contains("A hall", log);
+    }
+
+    [Fact]
     public void TryParse_WithoutScript_ReturnsFalse()
     {
         bool parsed = HeadlessArgs.TryParse(["--help"], out HeadlessOptions? options, out string? error);

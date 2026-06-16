@@ -9,32 +9,69 @@ public static class HeadlessRunner
     /// Plays <paramref name="game"/> by submitting each line from the script. Returns process exit code
     /// (0 on success, 1 on error).
     /// </summary>
-    public static int Run(Game game, HeadlessOptions options)
+    public static int Run(Game game, HeadlessOptions options) =>
+        Run(game, options, scriptOverride: null, transcriptOverride: null);
+
+    /// <summary>
+    /// Like <see cref="Run(Faerie.Runtime.Game, HeadlessOptions)"/> but allows overriding the script
+    /// input and transcript output streams (for tests). When null, <paramref name="options"/> paths are
+    /// used (<c>-</c> = stdin/stdout).
+    /// </summary>
+    public static int Run(Game game, HeadlessOptions options, TextReader? scriptOverride, TextWriter? transcriptOverride)
     {
         try
         {
-            using StreamWriter transcript = new(options.TranscriptPath, append: false);
-            TranscriptTerminal terminal = new(transcript);
-            GameEngine engine = new(game, terminal, options.RandomSeed);
-            WireSaveSystem(engine, options.SavePath!);
-
-            engine.Start();
-
-            foreach (string command in ScriptReader.ReadCommands(options.ScriptPath))
+            StreamWriter? ownedWriter = null;
+            TextWriter transcriptWriter = transcriptOverride ?? OpenTranscript(options, out ownedWriter);
+            try
             {
-                transcript.WriteLine($"> {command}");
-                transcript.Flush();
-                engine.Submit(command);
-                if (engine.QuitRequested) break;
-            }
+                TranscriptTerminal terminal = new(transcriptWriter);
+                GameEngine engine = new(game, terminal, options.RandomSeed);
+                WireSaveSystem(engine, options.SavePath!);
 
-            return 0;
+                engine.Start();
+
+                foreach (string command in ReadCommands(options, scriptOverride))
+                {
+                    transcriptWriter.WriteLine($"> {command}");
+                    transcriptWriter.Flush();
+                    engine.Submit(command);
+                    if (engine.QuitRequested) break;
+                }
+
+                return 0;
+            }
+            finally
+            {
+                ownedWriter?.Dispose();
+            }
         }
         catch (Exception ex)
         {
             Console.Error.WriteLine($"Headless run failed: {ex.Message}");
             return 1;
         }
+    }
+
+    private static TextWriter OpenTranscript(HeadlessOptions options, out StreamWriter? ownedWriter)
+    {
+        if (options.TranscriptToStdout)
+        {
+            ownedWriter = null;
+            return Console.Out;
+        }
+
+        ownedWriter = new StreamWriter(options.TranscriptPath, append: false);
+        return ownedWriter;
+    }
+
+    private static IEnumerable<string> ReadCommands(HeadlessOptions options, TextReader? scriptOverride)
+    {
+        if (scriptOverride is not null)
+            return ScriptReader.ReadCommands(scriptOverride);
+        return options.ScriptFromStdin
+            ? ScriptReader.ReadCommands(Console.In)
+            : ScriptReader.ReadCommands(options.ScriptPath);
     }
 
     private static void WireSaveSystem(GameEngine engine, string savePath)

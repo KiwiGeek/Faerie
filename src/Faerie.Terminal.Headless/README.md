@@ -34,4 +34,10 @@ dotnet run --project src/Faerie.Samples.Zork -- --script walkthrough.txt --trans
 Script lines starting with `#` or `;` are comments; blank lines are skipped. Each command is logged as
 `> command` in the transcript, followed by stripped game output.
 
+Use `-` for standard input/output:
+
+```bash
+type commands.txt | dotnet run --project src/Faerie.Samples.Zork -- --script - -o -
+```
+
 This package depends only on `Faerie` (which pulls in the engine). It does not reference Avalonia.

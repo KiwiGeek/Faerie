@@ -54,20 +54,25 @@ public static class HeadlessArgs
 
         if (script is null) return false;
 
-        if (!File.Exists(script))
+        bool scriptFromStdin = script == "-";
+        if (!scriptFromStdin && !File.Exists(script))
         {
             error = $"Script file not found: {script}";
             return true;
         }
 
-        transcript ??= Path.ChangeExtension(script, ".transcript.txt");
+        transcript ??= scriptFromStdin ? "-" : Path.ChangeExtension(script, ".transcript.txt");
+
+        string savePath = save ?? (scriptFromStdin
+            ? "headless.save.json"
+            : Path.ChangeExtension(script, ".save.json"));
 
         options = new HeadlessOptions
         {
             ScriptPath = script,
             TranscriptPath = transcript,
             RandomSeed = seed,
-            SavePath = save ?? Path.ChangeExtension(transcript, ".save.json")
+            SavePath = savePath
         };
         return true;
     }
@@ -77,12 +82,15 @@ public static class HeadlessArgs
         """
         Headless mode — replay commands from a script and write a plain-text transcript.
 
-          --script <path>       Input script (one command per line; # and ; comments)
-          --transcript <path>   Output transcript (default: <script>.transcript.txt)
+          --script <path>       Input script, or - for stdin (one command per line; # and ; comments)
+          --transcript <path>   Output transcript, or - for stdout (default: <script>.transcript.txt, or - when script is -)
           -o <path>             Alias for --transcript
           --seed <n>            Fixed random seed for reproducible rolls
-          --save <path>         Save-game file path (default: <transcript>.save.json)
+          --save <path>         Save-game file path (default: <script>.save.json, or headless.save.json when script is -)
           -h, --help            Show this help
+
+        Pipe example:
+          type commands.txt | dotnet run --project src/Faerie.Samples.Zork -- --script - -o -
 
         Omit --script to launch the graphical Avalonia window instead.
         """;
