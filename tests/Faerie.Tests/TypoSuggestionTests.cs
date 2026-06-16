@@ -104,6 +104,15 @@ public sealed class TypoSuggestionTests
     }
 
     [Fact]
+    public void AppendSuggestion_MultiWordTypo_FallsBackToLastToken()
+    {
+        (string msg, string? input) = WordSuggest.AppendSuggestion(
+            "Nope.", "clove of garlik", ["garlic", "clove"], commandPrefix: "take");
+        Assert.Equal("Nope. Did you mean garlic?", msg);
+        Assert.Equal("take garlic", input);
+    }
+
+    [Fact]
     public void SingleOrNull_ReturnsOnlyForOneMatch()
     {
         Assert.Equal("take", WordSuggest.SingleOrNull(["take"]));
