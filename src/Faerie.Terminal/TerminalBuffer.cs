@@ -24,6 +24,7 @@ public sealed class TerminalBuffer : ITerminal
 
     // Wrap cache (rebuilt when content or width changes).
     private List<GlyphCell[]>? _wrapCache;
+    private List<int> _rowLine = [];   // logical-line index each wrapped row belongs to (paragraph map)
     private int _wrapWidth = -1;
     private int _cursorRow;
     private int _cursorCol;
@@ -111,6 +112,16 @@ public sealed class TerminalBuffer : ITerminal
         return _wrapCache!;
     }
 
+    /// <summary>
+    /// Logical-line index for each wrapped row (parallel to <see cref="WrappedRows"/>). Hard newlines
+    /// delimit logical lines; a long line may span several wrapped rows sharing the same index.
+    /// </summary>
+    public IReadOnlyList<int> WrappedRowLines()
+    {
+        WrappedRows();
+        return _rowLine;
+    }
+
     /// <summary>The caret position (wrapped row index and column) at the end of all content.</summary>
     public (int row, int col) CursorPosition()
     {
@@ -137,16 +148,19 @@ public sealed class TerminalBuffer : ITerminal
     {
         int w = Columns;
         List<GlyphCell[]> rows = [];
+        List<int> rowLine = [];
         GlyphCell blank = new(' ', DefaultStyle);
 
         List<GlyphCell> cur = [];
         int lastRowLen = 0;
+        int logicalLine = 0;
 
         void FlushRow()
         {
             GlyphCell[] arr = new GlyphCell[w];
             for (int i = 0; i < w; i++) arr[i] = i < cur.Count ? cur[i] : blank;
             rows.Add(arr);
+            rowLine.Add(logicalLine);
             lastRowLen = cur.Count;
             cur.Clear();
         }
@@ -193,6 +207,7 @@ public sealed class TerminalBuffer : ITerminal
 
             EmitWord();
             FlushRow(); // each logical line ends with a hard break -> at least one display row
+            logicalLine++;
         }
 
         // The caret sits at the end of the final logical line's last display row.
@@ -200,6 +215,7 @@ public sealed class TerminalBuffer : ITerminal
         _cursorCol = lastRowLen;
 
         _wrapCache = rows;
+        _rowLine = rowLine;
         _wrapWidth = w;
     }
 

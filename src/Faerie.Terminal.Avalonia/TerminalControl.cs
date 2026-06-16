@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -16,6 +17,10 @@ namespace Faerie.Terminal.Avalonia;
 /// grid to fit the window. Because the buffer stores logical lines and wraps on demand, zooming and
 /// resizing re-paginate the text automatically. Font and caret come from the game definition via
 /// <see cref="FontSpec"/> and <see cref="CursorStyle"/>.
+///
+/// Text can be selected with a click-drag (double-click selects a word, triple-click a paragraph,
+/// Alt+drag a rectangular block) and copied (Ctrl+C / Ctrl+Insert, or right-click); the clipboard
+/// can be pasted into the current input line (Ctrl+V / Shift+Insert).
 /// </summary>
 public sealed class TerminalControl : Control
 {
@@ -73,6 +78,15 @@ public sealed class TerminalControl : Control
 
     private double _gridOffsetX, _gridOffsetY;   // last render's centring offset (for pointer hit-testing)
     private int _pointerCol = -1, _pointerRow = -1;
+    private int _windowTop;                      // first visible wrapped-row index (set during Render)
+
+    // Text selection, stored in wrapped-row coordinates so it survives scrolling/resizing.
+    private bool _selecting;                     // a left-drag is in progress
+    private bool _hasSelection;                  // a non-empty selection exists
+    private bool _blockSelect;                   // Alt+drag: column-aligned rectangle instead of linear span
+    private int _selAnchorRow, _selAnchorCol;    // where the drag began
+    private int _selEndRow, _selEndCol;          // where it currently ends
+    private static readonly IBrush SelectionBrush = new SolidColorBrush(Color.FromArgb(96, 120, 170, 255));
 
     /// <summary>The font spec from the game definition (see <see cref="TerminalFont"/>). Null = monospace.</summary>
     public string? FontSpec
@@ -196,7 +210,9 @@ public sealed class TerminalControl : Control
 
     private void OnBufferInvalidated() => Dispatcher.UIThread.Post(() =>
     {
-        _scrollOffset = 0; // new output snaps the view back to the bottom
+        _scrollOffset = 0;     // new output snaps the view back to the bottom
+        _hasSelection = false; // ...and invalidates any selection (wrapped rows have shifted)
+        _blockSelect = false;
         InvalidateVisual();
     });
 
@@ -205,7 +221,67 @@ public sealed class TerminalControl : Control
     protected override void OnPointerMoved(PointerEventArgs e)
     {
         base.OnPointerMoved(e);
-        UpdatePointerCell(e.GetPosition(this));
+        Point p = e.GetPosition(this);
+        UpdatePointerCell(p);
+
+        if (_selecting && HitTestText(p, out int row, out int col)
+            && (row != _selEndRow || col != _selEndCol))
+        {
+            _selEndRow = row;
+            _selEndCol = col;
+            _hasSelection = !(row == _selAnchorRow && col == _selAnchorCol);
+            InvalidateVisual();
+        }
+    }
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+        PointerPointProperties props = e.GetCurrentPoint(this).Properties;
+
+        // Right-click copies the current selection (and does nothing if there isn't one).
+        if (props.IsRightButtonPressed)
+        {
+            if (_hasSelection) { CopySelectionAsync(); e.Handled = true; }
+            return;
+        }
+
+        if (!props.IsLeftButtonPressed) return;
+        Focus();
+        if (!HitTestText(e.GetPosition(this), out int row, out int col)) return;
+
+        switch (e.ClickCount)
+        {
+            case 2:                                    // double-click selects the word
+                SelectWord(row, col);
+                break;
+            case 3:                                    // triple-click selects the paragraph (logical line)
+                SelectParagraph(row);
+                break;
+            default:                                   // single click begins a drag selection
+                _selecting = true;
+                _hasSelection = false;
+                _blockSelect = e.KeyModifiers.HasFlag(KeyModifiers.Alt);
+                _selAnchorRow = _selEndRow = row;
+                _selAnchorCol = _selEndCol = col;
+                e.Pointer.Capture(this);
+                InvalidateVisual();
+                break;
+        }
+        e.Handled = true;
+    }
+
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+        bool wasSelecting = _selecting;
+        _selecting = false;
+        e.Pointer.Capture(null);                       // always release (double/triple clicks capture on the first press)
+        if (wasSelecting)
+        {
+            if (!_hasSelection) InvalidateVisual();     // a plain click cleared the selection
+            e.Handled = true;
+        }
     }
 
     protected override void OnPointerExited(PointerEventArgs e)
@@ -237,6 +313,99 @@ public sealed class TerminalControl : Control
             _pointerRow = row;
             InvalidateVisual();
         }
+    }
+
+    /// <summary>
+    /// Maps a pointer position to a cell in the scrolling text area, expressed in wrapped-row
+    /// coordinates (an index into <see cref="TerminalBuffer.WrappedRows"/>) so selections stay put
+    /// when the view scrolls. Rows above/below the text area clamp to its first/last row.
+    /// </summary>
+    private bool HitTestText(Point p, out int wrappedRow, out int col)
+    {
+        wrappedRow = col = 0;
+        if (_buffer is null || _cellWidth <= 0 || _cellHeight <= 0) return false;
+
+        int screenCol = (int)Math.Floor((p.X - _gridOffsetX) / _cellWidth);
+        int screenRow = (int)Math.Floor((p.Y - _gridOffsetY) / _cellHeight);
+
+        col = Math.Clamp(screenCol, 0, _buffer.Columns);
+        screenRow = Math.Clamp(screenRow, _buffer.TextTop, _buffer.TextBottom);
+        wrappedRow = _windowTop + (screenRow - _buffer.TextTop);
+        return true;
+    }
+
+    private (int r0, int c0, int r1, int c1) NormalizedSelection()
+    {
+        int r0 = _selAnchorRow, c0 = _selAnchorCol, r1 = _selEndRow, c1 = _selEndCol;
+        if (r1 < r0 || (r1 == r0 && c1 < c0))
+            (r0, c0, r1, c1) = (r1, c1, r0, c0);
+        return (r0, c0, r1, c1);
+    }
+
+    private GlyphCell[] RowAt(int wrappedRow)
+    {
+        IReadOnlyList<GlyphCell[]> wrapped = _buffer!.WrappedRows();
+        return wrappedRow >= 0 && wrappedRow < wrapped.Count ? wrapped[wrappedRow] : [];
+    }
+
+    private void SetSelection(int r0, int c0, int r1, int c1, bool block = false)
+    {
+        _selAnchorRow = r0; _selAnchorCol = c0;
+        _selEndRow = r1; _selEndCol = c1;
+        _selecting = false;
+        _blockSelect = block;
+        _hasSelection = true;
+        InvalidateVisual();
+    }
+
+    /// <summary>Selects the run of like characters (word, or whitespace) around the clicked cell.</summary>
+    private void SelectWord(int row, int col)
+    {
+        GlyphCell[] cells = RowAt(row);
+        if (cells.Length == 0) { _hasSelection = false; InvalidateVisual(); return; }
+
+        col = Math.Clamp(col, 0, cells.Length - 1);
+        bool space = char.IsWhiteSpace(cells[col].Glyph);
+        int start = col, end = col;
+        while (start > 0 && char.IsWhiteSpace(cells[start - 1].Glyph) == space) start--;
+        while (end < cells.Length - 1 && char.IsWhiteSpace(cells[end + 1].Glyph) == space) end++;
+        SetSelection(row, start, row, end);
+    }
+
+    /// <summary>
+    /// Selects the whole logical line (paragraph) containing the clicked wrapped row, including every
+    /// wrapped segment from the first column through the last non-blank cell on the final segment.
+    /// </summary>
+    private void SelectParagraph(int wrappedRow)
+    {
+        if (_buffer is null) { _hasSelection = false; InvalidateVisual(); return; }
+
+        IReadOnlyList<int> rowLine = _buffer.WrappedRowLines();
+        if (wrappedRow < 0 || wrappedRow >= rowLine.Count)
+        {
+            _hasSelection = false;
+            InvalidateVisual();
+            return;
+        }
+
+        int logical = rowLine[wrappedRow];
+        int start = wrappedRow, end = wrappedRow;
+        while (start > 0 && rowLine[start - 1] == logical) start--;
+        while (end < rowLine.Count - 1 && rowLine[end + 1] == logical) end++;
+
+        GlyphCell[] lastCells = RowAt(end);
+        int lastCol = -1;
+        for (int i = 0; i < lastCells.Length; i++)
+            if (!char.IsWhiteSpace(lastCells[i].Glyph)) lastCol = i;
+
+        if (lastCol < 0)
+        {
+            _hasSelection = false;
+            InvalidateVisual();
+            return;
+        }
+
+        SetSelection(start, 0, end, lastCol);
     }
 
     private int MaxScroll()
@@ -285,11 +454,17 @@ public sealed class TerminalControl : Control
         if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Alt))
             return;
 
-        // Ctrl +/-/0 keyboard zoom.
+        // Ctrl-based shortcuts: copy, paste, and zoom.
         if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
         {
             switch (e.Key)
             {
+                case Key.C or Key.Insert:                 // Ctrl+C / Ctrl+Insert -> copy selection
+                    if (_hasSelection) { CopySelectionAsync(); e.Handled = true; return; }
+                    break;                                // nothing selected: fall through (no-op)
+                case Key.V:                               // Ctrl+V -> paste into the input line
+                    if (_inputActive) { PasteAsync(); e.Handled = true; return; }
+                    break;
                 case Key.OemPlus or Key.Add:
                     ZoomBy(1); e.Handled = true; return;
                 case Key.OemMinus or Key.Subtract:
@@ -297,6 +472,12 @@ public sealed class TerminalControl : Control
                 case Key.D0 or Key.NumPad0:
                     ResetZoom(); e.Handled = true; return;
             }
+        }
+
+        // Shift+Insert -> paste (classic terminal binding).
+        if (e.Key == Key.Insert && e.KeyModifiers.HasFlag(KeyModifiers.Shift) && _inputActive)
+        {
+            PasteAsync(); e.Handled = true; return;
         }
 
         // Scrollback paging works whether or not input is active.
@@ -330,6 +511,8 @@ public sealed class TerminalControl : Control
                 break;
             case Key.Escape:
                 _input = "";
+                _hasSelection = false;
+                _blockSelect = false;
                 InvalidateVisual();
                 e.Handled = true;
                 break;
@@ -362,6 +545,7 @@ public sealed class TerminalControl : Control
         int maxScroll = Math.Max(0, total - visible);
         _scrollOffset = Math.Clamp(_scrollOffset, 0, maxScroll);
         int windowTop = Math.Max(0, total - visible - _scrollOffset);
+        _windowTop = windowTop;
 
         double gridW = _buffer.Columns * _cellWidth;
         double gridH = _buffer.Rows * _cellHeight;
@@ -376,6 +560,9 @@ public sealed class TerminalControl : Control
         {
             for (int screenRow = 0; screenRow < _buffer.Rows; screenRow++)
                 RenderRow(context, screenRow, wrapped, total, windowTop, blankRow);
+
+            if (_hasSelection)
+                RenderSelection(context, windowTop);
 
             if (_inputActive && _scrollOffset == 0)
                 RenderInput(context, windowTop);
@@ -557,6 +744,95 @@ public sealed class TerminalControl : Control
         FillRun(context, row, start, buf.Columns, TerminalColor.Amber);
         for (int i = 0; i < label.Length && start + i < buf.Columns; i++)
             RenderGlyph(context, row, start + i, new GlyphCell(label[i], style));
+    }
+
+    // ---- selection & clipboard ------------------------------------------------------------
+
+    private void RenderSelection(DrawingContext context, int windowTop)
+    {
+        var (r0, c0, r1, c1) = NormalizedSelection();
+        TerminalBuffer buf = _buffer!;
+
+        for (int screenRow = buf.TextTop; screenRow <= buf.TextBottom; screenRow++)
+        {
+            int wrappedIdx = windowTop + (screenRow - buf.TextTop);
+            if (wrappedIdx < r0 || wrappedIdx > r1) continue;
+
+            int startCol = _blockSelect ? c0 : (wrappedIdx == r0 ? c0 : 0);
+            int endCol = _blockSelect
+                ? Math.Min(c1 + 1, buf.Columns)
+                : (wrappedIdx == r1 ? Math.Min(c1 + 1, buf.Columns) : buf.Columns);
+            if (endCol <= startCol) continue;
+
+            double x = startCol * _cellWidth;
+            double y = screenRow * _cellHeight;
+            double w = (endCol - startCol) * _cellWidth;
+            context.FillRectangle(SelectionBrush, new Rect(x, y, w, _cellHeight));
+        }
+    }
+
+    private string? GetSelectedText()
+    {
+        if (!_hasSelection || _buffer is null) return null;
+
+        var (r0, c0, r1, c1) = NormalizedSelection();
+        IReadOnlyList<GlyphCell[]> wrapped = _buffer.WrappedRows();
+        StringBuilder all = new();
+
+        for (int r = r0; r <= r1; r++)
+        {
+            GlyphCell[] cells = r >= 0 && r < wrapped.Count ? wrapped[r] : [];
+            int start = _blockSelect ? c0 : (r == r0 ? c0 : 0);
+            int end = _blockSelect
+                ? Math.Min(c1 + 1, _buffer.Columns)
+                : (r == r1 ? Math.Min(c1 + 1, _buffer.Columns) : _buffer.Columns);
+
+            StringBuilder line = new();
+            for (int c = start; c < end; c++)
+                line.Append(c < cells.Length ? cells[c].Glyph : ' ');
+
+            all.Append(_blockSelect ? line.ToString() : line.ToString().TrimEnd());
+            if (r < r1) all.Append('\n');
+        }
+
+        return all.ToString();
+    }
+
+    private async void CopySelectionAsync()
+    {
+        try
+        {
+            string? text = GetSelectedText();
+            if (string.IsNullOrEmpty(text)) return;
+            if (TopLevel.GetTopLevel(this)?.Clipboard is { } clipboard)
+                await clipboard.SetTextAsync(text);
+        }
+        catch { /* clipboard unavailable -> ignore */ }
+    }
+
+    private async void PasteAsync()
+    {
+        if (!_inputActive) return;
+        try
+        {
+            if (TopLevel.GetTopLevel(this)?.Clipboard is not { } clipboard) return;
+            string? text = await clipboard.GetTextAsync();
+            if (string.IsNullOrEmpty(text)) return;
+
+            // The line editor only appends, so paste a single line: stop at the first newline and
+            // drop any other control characters.
+            int newline = text.IndexOfAny(['\n', '\r']);
+            if (newline >= 0) text = text[..newline];
+
+            StringBuilder sb = new(_input);
+            foreach (char ch in text)
+                if (!char.IsControl(ch)) sb.Append(ch);
+
+            _input = sb.ToString();
+            _scrollOffset = 0;
+            InvalidateVisual();
+        }
+        catch { /* clipboard unavailable -> ignore */ }
     }
 
     // ---- helpers --------------------------------------------------------------------------
