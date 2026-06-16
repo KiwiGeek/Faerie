@@ -115,6 +115,41 @@ public sealed class GameEngine
     /// <summary>When the last line failed to parse, a single corrected command the player can accept with Enter.</summary>
     public string? SuggestedInput { get; private set; }
 
+    /// <summary>
+    /// Processes a line that may contain several commands separated by <c>.</c> or <c>,</c>
+    /// when the comma begins a new verb. Each sub-command runs through <see cref="Submit"/>.
+    /// </summary>
+    public void SubmitLine(string input)
+    {
+        if (QuitRequested) return;
+
+        string trimmed = input.Trim();
+        if (IsAgain(trimmed))
+        {
+            RepeatLastCommand();
+            return;
+        }
+
+        if (IsUndo(trimmed))
+        {
+            UndoLastTurn();
+            return;
+        }
+
+        IReadOnlyList<string> parts = CommandLine.SplitCommands(input, _game.Verbs);
+        if (parts.Count <= 1)
+        {
+            Submit(parts.Count == 1 ? parts[0] : input);
+            return;
+        }
+
+        foreach (string part in parts)
+        {
+            Submit(part);
+            if (QuitRequested || State.IsOver) break;
+        }
+    }
+
     /// <summary>Processes one line of player input, advancing the world a turn if a command runs.</summary>
     public void Submit(string input)
     {

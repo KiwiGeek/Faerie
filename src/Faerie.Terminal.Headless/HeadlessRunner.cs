@@ -39,7 +39,7 @@ public static class HeadlessRunner
                 {
                     transcriptWriter.WriteLine($"> {command}");
                     transcriptWriter.Flush();
-                    engine.Submit(command);
+                    engine.SubmitLine(command);
                     if (engine.QuitRequested) break;
                 }
 
