@@ -7,8 +7,9 @@ namespace Faerie.Parsing;
 /// <summary>
 /// Turns a line of raw text into a <see cref="ParsedCommand"/>. Understands bare directions,
 /// intransitive verbs ("look"), transitive verbs ("take key", "give condom") and ditransitive
-/// verbs joined by a preposition ("give condom to girl", "put key in lock"). Articles and a few
-/// filler words are ignored, and every object is matched through its synonyms and adjectives.
+/// verbs joined by a preposition ("give condom to girl", "put key in lock"). Resolves the pronoun
+/// <c>it</c>, bulk quantifiers (<c>take all</c>), and compound object lists (<c>drop sword and lamp</c>).
+/// Articles and a few filler words are ignored, and every object is matched through its synonyms and adjectives.
 /// </summary>
 public sealed class Parser(VerbLibrary verbs)
 {
@@ -76,30 +77,55 @@ public sealed class Parser(VerbLibrary verbs)
             dobjTokens = rest;
         }
 
-        // 6. Resolve the direct object (if any words remain).
-        Thing? dobj = null;
+        // 6. Resolve the direct object phrase(s).
+        List<List<string>> dobjPhrases = ObjectPhrase.SplitConjuncts(dobjTokens);
+        if (dobjPhrases.Count == 0 && dobjTokens.Count > 0)
+            dobjPhrases = [dobjTokens];
+
+        bool isAll = dobjPhrases.Count == 1 && ObjectPhrase.IsBulkQuantifier(dobjPhrases[0]);
+        List<Thing> directObjects = [];
         string? dobjText = dobjTokens.Count > 0 ? string.Join(' ', dobjTokens) : null;
-        if (dobjTokens.Count > 0)
+
+        if (isAll)
         {
-            NounResolution r = scope.Resolve(dobjTokens);
-            switch (r.Status)
+            directObjects = [.. scope.ResolveAll(verb)];
+            if (directObjects.Count == 0)
             {
-                case NounResolution.Kind.NotFound:
-                {
-                    (string msg, string? suggested) = WordSuggest.AppendSuggestion(
-                        $"You can't see any {dobjText} here.",
-                        dobjText!,
-                        Vocabulary.VisibleNouns(scope),
-                        commandPrefix: phrase);
-                    return ParsedCommand.NoObject(msg, suggested);
-                }
-                case NounResolution.Kind.Ambiguous:
-                    return ParsedCommand.Ambiguous(Disambiguation(r.Candidates), r.Candidates);
-                case NounResolution.Kind.Single:
-                    dobj = r.Thing;
-                    break;
+                string msg = verb.Id == StandardVerbIds.Take
+                    ? "There is nothing here to take."
+                    : verb.Id == StandardVerbIds.Drop
+                        ? "You aren't carrying anything."
+                        : $"You can't {phrase} everything.";
+                return ParsedCommand.NoObject(msg);
             }
         }
+        else if (dobjPhrases.Count > 0)
+        {
+            foreach (List<string> phraseTokens in dobjPhrases)
+            {
+                string phraseText = string.Join(' ', phraseTokens);
+                NounResolution r = scope.Resolve(phraseTokens);
+                switch (r.Status)
+                {
+                    case NounResolution.Kind.NotFound:
+                    {
+                        (string msg, string? suggested) = WordSuggest.AppendSuggestion(
+                            $"You can't see any {phraseText} here.",
+                            phraseText,
+                            Vocabulary.VisibleNouns(scope),
+                            commandPrefix: phrase);
+                        return ParsedCommand.NoObject(msg, suggested);
+                    }
+                    case NounResolution.Kind.Ambiguous:
+                        return ParsedCommand.Ambiguous(Disambiguation(r.Candidates), r.Candidates);
+                    case NounResolution.Kind.Single:
+                        directObjects.Add(r.Thing!);
+                        break;
+                }
+            }
+        }
+
+        Thing? dobj = directObjects.Count > 0 ? directObjects[0] : null;
 
         // 7. Resolve the indirect object.
         Thing? iobj = null;
@@ -134,6 +160,8 @@ public sealed class Parser(VerbLibrary verbs)
             Status = ParseStatus.Ok,
             Verb = verb,
             DirectObject = dobj,
+            DirectObjects = directObjects,
+            IsAll = isAll,
             IndirectObject = iobj,
             Preposition = preposition,
             DirectObjectText = dobjText,
@@ -154,10 +182,13 @@ public sealed class Parser(VerbLibrary verbs)
         Verb? move = candidates.FirstOrDefault(v => v.Id == StandardVerbIds.Go);
         if (argIsDirection && move is not null) return move;
 
-        // Later-registered verbs override standard ones (e.g. Zork's custom "move" after AddCoreVerbs).
-        Verb? objectVerb = candidates.LastOrDefault(v =>
-            v.Id != StandardVerbIds.Go && (v.Accepts(VerbForms.Transitive) || v.Accepts(VerbForms.Ditransitive)));
-        if (rest.Count > 0 && objectVerb is not null) return objectVerb;
+        if (rest.Count > 0)
+        {
+            // Later-registered verbs override standard ones (e.g. Zork's custom "move" after AddCoreVerbs).
+            Verb? objectVerb = candidates.LastOrDefault(v =>
+                v.Id != StandardVerbIds.Go && (v.Accepts(VerbForms.Transitive) || v.Accepts(VerbForms.Ditransitive)));
+            if (objectVerb is not null) return objectVerb;
+        }
 
         if (rest.Count == 0)
             return candidates.FirstOrDefault(v => v.Accepts(VerbForms.Intransitive)) ?? fallback;
@@ -226,8 +257,10 @@ public sealed class Parser(VerbLibrary verbs)
 
     private static List<string> Tokenize(string input)
     {
+        // Commas join object lists the same way "and" does ("drop sword, lamp").
+        string normalized = input.Trim().ToLowerInvariant().Replace(",", " and ");
         List<string> tokens = [];
-        foreach (string raw in input.Trim().ToLowerInvariant().Split([' ', '\t', ',', '.', '!', '?'], StringSplitOptions.RemoveEmptyEntries))
+        foreach (string raw in normalized.Split([' ', '\t', '.', '!', '?'], StringSplitOptions.RemoveEmptyEntries))
             tokens.Add(raw);
         return tokens;
     }

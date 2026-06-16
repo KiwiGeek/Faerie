@@ -43,9 +43,9 @@ stay stable.
 
 ## Open issues (by area)
 
-### ENGINE — parser ([#1](https://github.com/KiwiGeek/Faerie/issues/1)–[#3](https://github.com/KiwiGeek/Faerie/issues/3), [#19](https://github.com/KiwiGeek/Faerie/issues/19))
+### ENGINE — parser ([#3](https://github.com/KiwiGeek/Faerie/issues/3), [#19](https://github.com/KiwiGeek/Faerie/issues/19))
 
-Fuzzy typo suggestions; pronoun / "all" / compound commands; AGAIN/G/OOPS/undo; optional Infocom verb bundle.
+Pronoun / "all" / compound commands; AGAIN/G/OOPS/undo; optional Infocom verb bundle.
 
 ### ENGINE — world model ([#4](https://github.com/KiwiGeek/Faerie/issues/4)–[#6](https://github.com/KiwiGeek/Faerie/issues/6), [#8](https://github.com/KiwiGeek/Faerie/issues/8)–[#9](https://github.com/KiwiGeek/Faerie/issues/9))
 
