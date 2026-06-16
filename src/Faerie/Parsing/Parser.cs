@@ -33,7 +33,7 @@ public sealed class Parser(VerbLibrary verbs)
 
         // 2. Match the verb (longest phrase wins).
         if (!_verbs.TryMatchVerb(tokens, out Verb matched, out int consumed))
-            return ParsedCommand.Unknown($"I don't know how to \"{tokens[0]}\".");
+            return UnknownVerbFailure(tokens, scope);
 
         string phrase = string.Join(' ', tokens.Take(consumed));
         List<string> rest = tokens.Skip(consumed).Where(t => !Articles.Contains(t) && !Noise.Contains(t)).ToList();
@@ -49,7 +49,8 @@ public sealed class Parser(VerbLibrary verbs)
                 return new ParsedCommand { Status = ParseStatus.Ok, Verb = verb, Direction = dir };
             if (rest.Count == 0)
                 return ParsedCommand.NoObject("Go where?");
-            return ParsedCommand.Unknown($"\"{string.Join(' ', rest)}\" isn't a direction.");
+            (string dirMsg, string? dirInput) = UnknownDirectionMessage(verb, rest);
+            return ParsedCommand.Unknown(dirMsg, dirInput);
         }
 
         // 4. No objects -> intransitive.
@@ -84,7 +85,14 @@ public sealed class Parser(VerbLibrary verbs)
             switch (r.Status)
             {
                 case NounResolution.Kind.NotFound:
-                    return ParsedCommand.NoObject($"You can't see any {dobjText} here.");
+                {
+                    (string msg, string? suggested) = WordSuggest.AppendSuggestion(
+                        $"You can't see any {dobjText} here.",
+                        dobjText!,
+                        Vocabulary.VisibleNouns(scope),
+                        commandPrefix: phrase);
+                    return ParsedCommand.NoObject(msg, suggested);
+                }
                 case NounResolution.Kind.Ambiguous:
                     return ParsedCommand.Ambiguous(Disambiguation(r.Candidates), r.Candidates);
                 case NounResolution.Kind.Single:
@@ -102,7 +110,17 @@ public sealed class Parser(VerbLibrary verbs)
             switch (r.Status)
             {
                 case NounResolution.Kind.NotFound:
-                    return ParsedCommand.NoObject($"You can't see any {iobjText} here.");
+                {
+                    string prefix = preposition is null
+                        ? phrase
+                        : $"{phrase} {dobjText} {preposition}";
+                    (string msg, string? suggested) = WordSuggest.AppendSuggestion(
+                        $"You can't see any {iobjText} here.",
+                        iobjText!,
+                        Vocabulary.VisibleNouns(scope),
+                        commandPrefix: prefix);
+                    return ParsedCommand.NoObject(msg, suggested);
+                }
                 case NounResolution.Kind.Ambiguous:
                     return ParsedCommand.Ambiguous(Disambiguation(r.Candidates), r.Candidates);
                 case NounResolution.Kind.Single:
@@ -144,6 +162,56 @@ public sealed class Parser(VerbLibrary verbs)
             return candidates.FirstOrDefault(v => v.Accepts(VerbForms.Intransitive)) ?? fallback;
 
         return fallback;
+    }
+
+    private ParsedCommand UnknownVerbFailure(IReadOnlyList<string> tokens, Scope scope)
+    {
+        string verbToken = tokens[0];
+        List<string> rest = tokens.Skip(1).Where(t => !Articles.Contains(t) && !Noise.Contains(t)).ToList();
+
+        string? verbFix = WordSuggest.SingleOrNull(
+            WordSuggest.FindCloseMatches(verbToken, Vocabulary.VerbLeadingWords(_verbs)));
+
+        string? nounFix = null;
+        if (rest.Count > 0)
+        {
+            string objText = string.Join(' ', rest);
+            nounFix = WordSuggest.SingleOrNull(
+                WordSuggest.FindCloseMatches(objText, Vocabulary.VisibleNouns(scope)));
+        }
+
+        string message = $"I don't know how to \"{verbToken}\".";
+        string? suggestedInput = null;
+
+        if (verbFix is not null && nounFix is not null)
+        {
+            suggestedInput = $"{verbFix} {nounFix}";
+            message += $" Did you mean {suggestedInput}?";
+        }
+        else if (verbFix is not null)
+        {
+            suggestedInput = verbFix;
+            message += $" Did you mean {verbFix}?";
+        }
+        else if (nounFix is not null)
+        {
+            message += $" Did you mean {nounFix}?";
+        }
+
+        return ParsedCommand.Unknown(message, suggestedInput);
+    }
+
+    private (string message, string? suggestedInput) UnknownDirectionMessage(Verb verb, List<string> rest)
+    {
+        string bad = string.Join(' ', rest);
+        string token = rest[^1];
+        IReadOnlyList<string> matches = WordSuggest.FindCloseMatches(token, Vocabulary.DirectionWords());
+        if (matches.Count == 0 || !DirectionExtensions.TryParse(matches[0], out Direction dir))
+            return ($"\"{bad}\" isn't a direction.", null);
+
+        string display = $"{verb.Words[0].ToUpperInvariant()} {dir.ToString().ToUpperInvariant()}";
+        string suggestedInput = $"{verb.Words[0]} {dir.Words()[0]}";
+        return ($"\"{bad}\" isn't a direction. Did you mean {display}?", suggestedInput);
     }
 
     private static string Disambiguation(IReadOnlyList<Thing> candidates)

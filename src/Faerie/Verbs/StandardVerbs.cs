@@ -145,13 +145,17 @@ public static class StandardVerbs
         }
         thing.OnExamine?.Invoke(ctx);
 
-        ctx.Say(thing.ResolveDescription(ctx));
+        string description = thing.ResolveDescription(ctx);
+        ctx.Say(description);
 
         if (thing.Has(Attr.LightSource))
             ctx.Say(thing.Has(Attr.Lit) ? $"{Cap(The(thing))} {Is(thing)} lit." : $"{Cap(The(thing))} {Is(thing)} not lit.");
 
         if (thing.Has(Attr.Openable) && !thing.Has(Attr.Open))
-            ctx.Say($"{Cap(The(thing))} {Is(thing)} closed.");
+        {
+            if (!description.Contains("closed", StringComparison.OrdinalIgnoreCase))
+                ctx.Say($"{Cap(The(thing))} {Is(thing)} closed.");
+        }
         else if (thing.Has(Attr.Container) && thing.Has(Attr.Open))
             ListContents(ctx, thing);
 

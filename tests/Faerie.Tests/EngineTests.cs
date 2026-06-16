@@ -153,6 +153,46 @@ public class EngineTests
     }
 
     [Fact]
+    public void Examine_ClosedContainer_AppendsClosedWhenDescriptionOmitsIt()
+    {
+        var (engine, term, _, _, _, _, chest, _) = BuildWorld();
+        term.Reset();
+        engine.Submit("examine chest");
+        Assert.Contains("A wooden chest.", term.Output);
+        Assert.Contains("The chest is closed.", term.Output);
+    }
+
+    [Fact]
+    public void Examine_ClosedContainer_SkipsRedundantClosedLine()
+    {
+        GameBuilder b = GameBuilder.Create("Test").AddStandardVerbs();
+        Room hall = b.Room("Hall").Describe("A hall.");
+        Thing mailbox = b.Scenery("small mailbox").Called("mailbox")
+            .Describe("The small mailbox is closed.").Container(open: false);
+        mailbox.StartsIn(hall);
+        b.StartIn(hall);
+        InMemoryTerminal term = new();
+        GameEngine engine = new(b.Build(), term, randomSeed: 1);
+        engine.Start();
+        term.Reset();
+
+        engine.Submit("look mailbox");
+        int closedCount = CountOccurrences(term.Output, "The small mailbox is closed.");
+        Assert.Equal(1, closedCount);
+    }
+
+    private static int CountOccurrences(string haystack, string needle)
+    {
+        int count = 0, index = 0;
+        while ((index = haystack.IndexOf(needle, index, StringComparison.Ordinal)) >= 0)
+        {
+            count++;
+            index += needle.Length;
+        }
+        return count;
+    }
+
+    [Fact]
     public void UnknownVerb_IsReported()
     {
         var (engine, term, _, _, _, _, _, _) = BuildWorld();
