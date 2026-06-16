@@ -109,7 +109,9 @@ The parser is not limited to "verb noun": it understands bare verbs (`look`), ba
 transitive forms (`take key`, `give bone`) and ditransitive forms joined by a preposition (`give bone
 to dog`, `put coin in slot`, `unlock door with key`). The pronoun `it` (and `them`) refers to the
 last-mentioned thing; `take all` / `drop all` act on every applicable object; compound lists work
-too (`drop sword and lamp`, or `drop sword, lamp`). A word that is both a movement and an object
+too (`drop sword and lamp`, or `drop sword, lamp`). Classic meta commands: `AGAIN` / `G` repeats
+the last action, `OOPS` recalls your previous line for correction, and `UNDO` reverses the last
+turn. A word that is both a movement and an object
 verb disambiguates on its argument — `move north` travels, `move rug` acts on the rug. When several
 object verbs share the same word (e.g. core `push` and your own `move` both accept `move`), the
 **last-registered** verb wins — define custom verbs after `AddCoreVerbs()` to override standard ones.

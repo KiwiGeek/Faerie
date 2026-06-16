@@ -30,6 +30,11 @@ public sealed class GameEngine
 
     private readonly Game _game;
     private readonly GameContext _context;
+    private readonly List<string> _undoSnapshots = [];
+    private string? _lastSuccessfulCommand;
+    private string? _lastRawInput;
+
+    private const int MaxUndoDepth = 50;
 
     public GameEngine(Game game, ITerminal terminal, int? randomSeed = null)
     {
@@ -87,6 +92,9 @@ public sealed class GameEngine
 
         EnterRoom(State.CurrentRoom, firstDescription: true);
         _game.OnStart?.Invoke(_context);
+        _undoSnapshots.Clear();
+        _lastSuccessfulCommand = null;
+        _lastRawInput = null;
         RefreshBars();
     }
 
@@ -99,6 +107,28 @@ public sealed class GameEngine
         if (QuitRequested) return;
         bool wasOver = State.IsOver;
         SuggestedInput = null;
+
+        string trimmed = input.Trim();
+        if (IsAgain(trimmed))
+        {
+            RepeatLastCommand();
+            return;
+        }
+
+        if (IsOops(trimmed))
+        {
+            Oops();
+            return;
+        }
+
+        if (IsUndo(trimmed))
+        {
+            UndoLastTurn();
+            return;
+        }
+
+        if (trimmed.Length > 0)
+            _lastRawInput = input;
 
         ParsedCommand command = Parser.Parse(input, new Scope(State, _context), State);
 
@@ -129,7 +159,7 @@ public sealed class GameEngine
                 return;
             }
 
-            RunCommands(verb, command, input);
+            RunCommands(verb, command, input, recordForAgain: false);
             RefreshBars();
             return;
         }
@@ -142,7 +172,14 @@ public sealed class GameEngine
             return;
         }
 
-        RunCommands(verb, command, input);
+        ExecuteTurn(verb, command, input);
+    }
+
+    private void ExecuteTurn(Verb verb, ParsedCommand command, string input)
+    {
+        bool wasOver = State.IsOver;
+        PushUndoSnapshot();
+        RunCommands(verb, command, input, recordForAgain: true);
 
         // A turn has passed.
         State.TurnCount++;
@@ -163,7 +200,66 @@ public sealed class GameEngine
             AnnounceEnding();
     }
 
-    private void RunCommands(Verb verb, ParsedCommand command, string input)
+    private void RepeatLastCommand()
+    {
+        if (_lastSuccessfulCommand is null)
+        {
+            Out.PrintLine("You haven't done anything yet!");
+            RefreshBars();
+            return;
+        }
+
+        Submit(_lastSuccessfulCommand);
+    }
+
+    private void Oops()
+    {
+        if (_lastRawInput is null)
+        {
+            Out.PrintLine("Nothing to oops.");
+            RefreshBars();
+            return;
+        }
+
+        SuggestedInput = _lastRawInput;
+        Out.PrintLine("OK.");
+        RefreshBars();
+    }
+
+    private void UndoLastTurn()
+    {
+        if (_undoSnapshots.Count == 0)
+        {
+            Out.PrintLine("Nothing to undo.");
+            RefreshBars();
+            return;
+        }
+
+        string snap = _undoSnapshots[^1];
+        _undoSnapshots.RemoveAt(_undoSnapshots.Count - 1);
+        RestoreSnapshot(snap);
+        Out.PrintLine("[Previous turn undone.]");
+        RefreshBars();
+    }
+
+    private void PushUndoSnapshot()
+    {
+        _undoSnapshots.Add(CreateSnapshot());
+        if (_undoSnapshots.Count > MaxUndoDepth)
+            _undoSnapshots.RemoveAt(0);
+    }
+
+    private static bool IsAgain(string trimmed) =>
+        trimmed.Equals("again", StringComparison.OrdinalIgnoreCase) ||
+        trimmed.Equals("g", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsOops(string trimmed) =>
+        trimmed.Equals("oops", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsUndo(string trimmed) =>
+        trimmed.Equals("undo", StringComparison.OrdinalIgnoreCase);
+
+    private void RunCommands(Verb verb, ParsedCommand command, string input, bool recordForAgain)
     {
         IReadOnlyList<Thing> targets = command.DirectObjects.Count > 0
             ? command.DirectObjects
@@ -172,6 +268,8 @@ public sealed class GameEngine
         if (targets.Count == 0)
         {
             RunCommand(verb, command, input);
+            if (recordForAgain)
+                _lastSuccessfulCommand = input;
             return;
         }
 
@@ -193,6 +291,9 @@ public sealed class GameEngine
             RunCommand(verb, step, input);
             if (QuitRequested || State.IsOver) break;
         }
+
+        if (recordForAgain)
+            _lastSuccessfulCommand = input;
     }
 
     private void RunCommand(Verb verb, ParsedCommand command, string input)
@@ -306,7 +407,7 @@ public sealed class GameEngine
         Out.PrintLine("Type short commands such as LOOK, EXAMINE LANTERN, TAKE KEY, GO NORTH (or just N),");
         Out.PrintLine("OPEN DOOR, PUT COIN IN SLOT, GIVE BONE TO DOG, INVENTORY (I), WAIT (Z).");
         Out.PrintLine("Movement: N S E W NE NW SE SW UP DOWN IN OUT.");
-        Out.PrintLine("Other commands: SAVE, RESTORE, SCORE, QUIT. Press F11 to toggle fullscreen.");
+        Out.PrintLine("Other commands: SAVE, RESTORE, SCORE, QUIT, AGAIN (G), OOPS, UNDO. Press F11 to toggle fullscreen.");
     }
 
     public void RequestQuit()
@@ -351,6 +452,7 @@ public sealed class GameEngine
             if (ReadSave(slot) is not { } json) { Out.PrintLine("No save found."); return; }
 
             SaveSystem.Restore(json, State, _game.Daemons);
+            _undoSnapshots.Clear();
             Out.PrintLine("Game restored.");
             DescribeCurrentRoom(verbose: true);
         }
@@ -363,8 +465,14 @@ public sealed class GameEngine
     /// <summary>Captures the current game to a JSON string (for hosts that manage their own files).</summary>
     public string CreateSnapshot() => SaveSystem.Capture(State, _game.Daemons);
 
-    /// <summary>Restores game state from a JSON snapshot.</summary>
-    public void LoadSnapshot(string json) => SaveSystem.Restore(json, State, _game.Daemons);
+    /// <summary>Restores game state from a JSON snapshot and clears the undo stack.</summary>
+    public void LoadSnapshot(string json)
+    {
+        RestoreSnapshot(json);
+        _undoSnapshots.Clear();
+    }
+
+    private void RestoreSnapshot(string json) => SaveSystem.Restore(json, State, _game.Daemons);
 
     private void AnnounceEnding()
     {
