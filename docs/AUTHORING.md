@@ -270,9 +270,10 @@ b.On(thing).Before(b.Verbs.SomeVerb!, ctx =>
 - `ctx.Carrying(thing)` / `ctx.Wearing(thing)` / `ctx.Here(thing)` — true/false checks.
   (`Here` = the thing is in the current room **or** being carried.)
 - `ctx.InRoom(room)` — is the player in this room right now?
-- `ctx.RoomOf(thing)` — the room a thing is currently in, or `null` if it's carried, worn, or off-stage.
-  This is how a reaction or daemon asks "where is X" for anything, not just the current room (see
-  "Querying the world" below).
+- `ctx.RoomOf(thing)` — the room a thing ultimately belongs to, or `null` if it is off-stage.
+  Carried, worn, and nested items resolve to the player's current room (see "Querying the world" below).
+- `ctx.ThingsHere()` / `ctx.ThingsIn(room)` — enumerate things in a room (see "Querying the world").
+- `ctx.IsAdjacent(room)` / `ctx.Nearby(thing)` — proximity checks for daemons and reactions.
 - `ctx.Take(thing)`, `ctx.PlaceHere(thing)`, `ctx.Remove(thing)` — move things around.
 - `ctx.MovePlayerTo(room)` — teleport the player.
 - `ctx.Win("text")` / `ctx.Lose("text")` — end the game (see §8).
@@ -329,30 +330,79 @@ painting.OnExamine = ctx => ctx.Say("His eyes seem to follow you around the room
 
 ### Querying the world (where things are)
 
-Reactions and daemons often need to know more than "is it here?". The context gives you spatial queries
-that work for *any* room or thing, not just the player's current location:
+Reactions and daemons often need to know more than "is it here?". `GameContext` provides spatial
+queries that work for *any* room or thing, not just the player's current location.
 
-- `ctx.RoomOf(thing)` — the room a thing sits in, or `null` if it's carried/worn/off-stage.
-- `ctx.InRoom(room)` — is the player here now?
-- `ctx.CurrentRoom.Exits` — the exits leading out of a room; `.Values` are the `Exit`s, and each
-  `exit.Destination` is the room it leads to. This is how you reason about which rooms are adjacent.
-- `ctx.State.ContentsOf(room)` — every thing currently loose in a given room.
+#### Single-thing checks
 
-For example, "is a living troll in this room or an adjacent one?" (the basis of the sample's sword-glow
-and combat features):
+- `ctx.RoomOf(thing)` — the room a thing ultimately sits in, or `null` if it is off-stage.
+  The engine walks the containment chain: a key inside a chest in the hall resolves to the hall; a
+  coin inside a bag in your inventory resolves to your **current** room while you are carrying the bag.
+- `ctx.InRoom(room)` — is the player in this room right now?
+- `ctx.Here(thing)` — is the thing in the current room **or** being carried/worn? (Parser scope only;
+  does not include adjacent rooms.)
+- `ctx.Nearby(thing)` — is the thing in the current room **or** one exit away? Carried and worn
+  things count as being in the current room. Useful for proximity daemons (sword glow, smell, sound).
+
+#### Adjacency
+
+- `ctx.IsAdjacent(room)` — is there an exit from the **current** room leading directly to
+  `room`? Replaces hand-rolling `ctx.CurrentRoom.Exits.Values.Any(e => e.Destination == room)`.
+
+#### Enumerating things in a room
+
+- `ctx.ThingsHere()` / `ctx.ThingsIn(room)` — things in a room. By default these return only
+  **loose** floor items (the same set as `ctx.State.ContentsOf(room)`): not things inside
+  containers, and not things you are carrying.
+
+Pass `includePresent: true` for the broader "everything whose ultimate room is here" set:
 
 ```csharp
-bool TrollNear(GameContext ctx)
+ctx.ThingsHere();                             // loose floor items only
+ctx.ThingsHere(includePresent: true);         // loose + in-room containers + your inventory
+ctx.ThingsIn(kitchen, includePresent: true);  // same for any room
+```
+
+With `includePresent: true`, the query follows `RoomOf` and therefore includes:
+
+- loose items on the floor;
+- items inside containers that are in the room (open or closed);
+- items you are carrying or wearing **while you are in that room**;
+- items nested inside carried containers (a coin inside a bag in your pack).
+
+Carried items only count for the room you are **currently** in. Pick up a lamp in the hall and walk
+south — the lamp is no longer returned by `ThingsIn(hall, includePresent: true)`.
+
+#### Examples
+
+Creature proximity (the basis of the Zork sample's sword-glow feature):
+
+```csharp
+int ThreatLevel(GameContext ctx, Thing villain, bool defeated)
 {
-    if (trollDefeated.Get(ctx)) return false;
-    Room here = ctx.CurrentRoom;
-    if (ctx.RoomOf(troll) == here) return true;                       // same room
-    return here.Exits.Values.Any(e => ctx.RoomOf(troll) == e.Destination);  // one room away
+    if (defeated) return 0;
+    Room? room = ctx.RoomOf(villain);
+    if (room is null) return 0;
+    if (room == ctx.CurrentRoom) return 2;          // same room — bright glow
+    return ctx.IsAdjacent(room) ? 1 : 0;            // one room away — faint glow
 }
 ```
 
-Because these queries are available inside `EveryTurn` daemons too, "creature proximity," "wander toward
-the player," and similar behaviours are ordinary game code — no special engine support required.
+Or simply `ctx.Nearby(villain)` when you only need a yes/no "in this room or next door?" check.
+
+Scanning a room for a hidden treasure (including inside containers, but not your pockets unless
+you are standing there):
+
+```csharp
+bool PlatinumBarInRoom(GameContext ctx, Room room) =>
+    ctx.ThingsIn(room, includePresent: true).Any(t => t == platinumBar);
+```
+
+Because these queries are available inside `EveryTurn` daemons too, "creature proximity," "wander
+toward the player," and similar behaviours are ordinary game code — no special engine support required.
+
+Lower-level access remains on `ctx.State` (`ContentsOf`, `Inventory`, `PlacementOf`, …) when you need
+finer control than these helpers provide.
 
 ---
 
