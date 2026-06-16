@@ -21,6 +21,10 @@ public static class HeadlessRunner
     {
         try
         {
+            bool useStdin = scriptOverride is null && options.ScriptFromStdin;
+            bool useStdout = transcriptOverride is null && options.TranscriptToStdout;
+            ParentConsole.AttachIfNeeded(useStdin, useStdout);
+
             StreamWriter? ownedWriter = null;
             TextWriter transcriptWriter = transcriptOverride ?? OpenTranscript(options, out ownedWriter);
             try
@@ -57,8 +61,9 @@ public static class HeadlessRunner
     {
         if (options.TranscriptToStdout)
         {
-            ownedWriter = null;
-            return Console.Out;
+            // leaveOpen: true — stdout must stay open; Dispose() still flushes before Environment.Exit.
+            ownedWriter = new StreamWriter(Console.OpenStandardOutput(), leaveOpen: true) { AutoFlush = true };
+            return ownedWriter;
         }
 
         ownedWriter = new StreamWriter(options.TranscriptPath, append: false);
