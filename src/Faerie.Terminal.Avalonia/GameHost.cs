@@ -21,6 +21,7 @@ public sealed class GameHost
         _control.CommandEntered += OnCommandEntered;
 
         _engine.PickSaveSlot = request => SaveSlotPicker.Pick(_control, _engine.Out, request);
+        _engine.PlayerInput = new TerminalPlayerInput(_control);
 
         // The game starts once the control has laid out and sized its buffer to the window.
         _control.Ready += Start;

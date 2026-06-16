@@ -33,14 +33,21 @@ public static class HeadlessRunner
                 GameEngine engine = new(game, terminal, options.RandomSeed);
                 WireSaveSystem(engine, options);
 
+                var script = new Queue<string>(ReadCommands(options, scriptOverride));
+                void LogScriptLine(string line)
+                {
+                    transcriptWriter.WriteLine($"> {line}");
+                    transcriptWriter.Flush();
+                }
+
+                engine.PlayerInput = new ScriptPlayerInput(script, LogScriptLine);
                 engine.Start();
 
-                foreach (string command in ReadCommands(options, scriptOverride))
+                while (script.Count > 0 && !engine.QuitRequested)
                 {
-                    transcriptWriter.WriteLine($"> {command}");
-                    transcriptWriter.Flush();
+                    string command = script.Dequeue();
+                    LogScriptLine(command);
                     engine.SubmitLine(command);
-                    if (engine.QuitRequested) break;
                 }
 
                 return 0;
