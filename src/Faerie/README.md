@@ -13,6 +13,7 @@ front ends ship separately:
 
 - [`Faerie.Terminal`](https://www.nuget.org/packages/Faerie.Terminal) — shared character-cell terminal model.
 - [`Faerie.Terminal.Avalonia`](https://www.nuget.org/packages/Faerie.Terminal.Avalonia) — Avalonia "fake terminal" front end.
+- [`Faerie.Terminal.Headless`](https://www.nuget.org/packages/Faerie.Terminal.Headless) — script replay and transcript logging (no UI).
 
 ```csharp
 var b = GameBuilder.Create("My Adventure").AddStandardVerbs();

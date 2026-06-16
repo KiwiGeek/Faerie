@@ -6,9 +6,10 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
 
+    <!-- NuGet packaging -->
     <IsPackable>true</IsPackable>
     <PackageId>Faerie.Terminal.Headless</PackageId>
-    <Description>Headless Faerie host: replay commands from a script file and write a plain-text session transcript. No UI.</Description>
+    <Description>Headless Faerie host for automated testing and CI: replay player commands from a script file and write a plain-text session transcript (input and stripped output). No UI dependency — reference from your own game or test project alongside Faerie.</Description>
     <PackageTags>text-adventure;interactive-fiction;terminal;game-engine;headless</PackageTags>
   </PropertyGroup>
 
