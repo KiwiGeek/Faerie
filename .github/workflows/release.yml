@@ -1,0 +1,46 @@
+name: release
+
+# Publishes the three NuGet packages (Faerie, Faerie.Terminal, Faerie.Terminal.Avalonia)
+# whenever you push a version tag, e.g.  git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags: [ 'v*' ]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write           # required for NuGet Trusted Publishing (OIDC)
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # MinVer derives the version from the tag
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - run: dotnet restore
+      - run: dotnet build -c Release --no-restore
+      - run: dotnet test -c Release --no-build --verbosity normal
+
+      # Packs only IsPackable=true projects -> the 3 libraries (.nupkg + .snupkg).
+      - run: dotnet pack -c Release --no-build -o ${{ github.workspace }}/artifacts
+
+      # Exchange GitHub's OIDC token for a short-lived (1 hour) nuget.org API key.
+      - name: NuGet login (OIDC -> temporary API key)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ secrets.NUGET_USER }}   # your nuget.org profile name (NOT your email)
+
+      - name: Push packages
+        run: >
+          dotnet nuget push "artifacts/*.nupkg"
+          --api-key ${{ steps.login.outputs.NUGET_API_KEY }}
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

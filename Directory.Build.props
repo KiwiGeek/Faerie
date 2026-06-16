@@ -1,5 +1,6 @@
 <Project>
 
+  <!-- ============================ Build settings (all projects) ============================ -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -7,6 +8,55 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!-- Nothing packs unless it opts in with <IsPackable>true</IsPackable> (the three libraries do). -->
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
+
+  <!-- ===================== Shared NuGet metadata (used by packable projects) ===================== -->
+  <!-- TODO: set these two to your real GitHub owner/repo, then every URL below is correct. -->
+  <PropertyGroup>
+    <RepoOwner>KiwiGeek</RepoOwner>
+    <RepoName>Faerie</RepoName>
+
+    <Authors>$(RepoOwner)</Authors>
+    <Company>$(RepoOwner)</Company>
+    <Product>Faerie</Product>
+    <Copyright>Copyright (c) $(RepoOwner)</Copyright>
+
+    <PackageProjectUrl>https://github.com/$(RepoOwner)/$(RepoName)</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/$(RepoOwner)/$(RepoName)</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Reproducible, debuggable packages -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+
+    <!-- After your first release, set this to the previous version to catch breaking API changes:
+         <EnablePackageValidation>true</EnablePackageValidation>
+         <PackageValidationBaselineVersion>x.y.z</PackageValidationBaselineVersion> -->
+  </PropertyGroup>
+
+  <!-- Versioning from git tags (MinVer reads tags like v1.2.3) + Source Link for step-into debugging.
+       PrivateAssets=all so these never become package dependencies. -->
+  <ItemGroup>
+    <PackageReference Include="MinVer" Version="6.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+  </PropertyGroup>
+
+  <!-- Pack each packable project's own README.md into the package (NuGet requires the file be packed). -->
+  <ItemGroup Condition="'$(IsPackable)' == 'true' And Exists('README.md')">
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>
