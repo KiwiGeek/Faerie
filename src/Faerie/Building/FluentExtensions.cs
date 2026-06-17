@@ -18,6 +18,12 @@ public static class RoomFluent
     /// <summary>Sets a dynamic brief description shown on re-entry.</summary>
     public static Room Brief(this Room room, Func<GameContext, string> factory) { room.BriefDescriptionFactory = factory; return room; }
 
+    /// <summary>Sets the one-line title shown in Sierra-style room banners.</summary>
+    public static Room ShortTitle(this Room room, string title) { room.ShortTitle = title; return room; }
+
+    /// <summary>Sets a dynamic one-line title for Sierra-style room banners.</summary>
+    public static Room ShortTitle(this Room room, Func<GameContext, string> factory) { room.ShortTitleFactory = factory; return room; }
+
     /// <summary>Marks the room as dark (needs a light source or <see cref="LitWhen"/> to see).</summary>
     public static Room Dark(this Room room, bool dark = true) { room.IsDark = dark; return room; }
 

@@ -97,6 +97,9 @@ public class GameContext
     /// <summary>Moves the player to a room, firing the room's enter hooks and describing it.</summary>
     public void MovePlayerTo(Room room) => Engine.MovePlayerTo(room);
 
+    /// <summary>Prints the per-turn room banner when the game uses one (Sierra-style).</summary>
+    public void PrintRoomBanner() => Engine.PrintRoomBanner();
+
     /// <summary>Ends the game. <paramref name="won"/> selects the win or lose framing.</summary>
     public void EndGame(bool won, string? message = null)
     {

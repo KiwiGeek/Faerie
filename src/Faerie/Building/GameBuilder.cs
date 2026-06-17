@@ -41,6 +41,9 @@ public sealed class GameBuilder
     private Action<GameContext>? _onStart;
     private Func<GameContext, BarContent>? _titleBar;
     private Func<GameContext, BarContent>? _statusBar;
+    private RoomBannerStyle _roomBannerStyle;
+    private string? _inputPrompt;
+    private int _roomBannerSeparatorWidth = 40;
 
     private GameBuilder(string title) => Title = title;
 
@@ -164,6 +167,24 @@ public sealed class GameBuilder
                 Style = new TextStyle(TerminalColor.Black, TerminalColor.LightGray, TextAttributes.Bold)
             };
         };
+        return this;
+    }
+
+    /// <summary>
+    /// Enables Sierra-style room banners after each turn: short title, items in sight, other areas,
+    /// and a separator row. Long room prose is shown once on first visit and on LOOK.
+    /// </summary>
+    public GameBuilder WithSierraRoomBanner(string prompt = "What shall I do? ")
+    {
+        _roomBannerStyle = RoomBannerStyle.Sierra;
+        _inputPrompt = prompt;
+        return this;
+    }
+
+    /// <summary>Sets the width of the <c>=</c> separator row for Sierra room banners.</summary>
+    public GameBuilder WithRoomBannerSeparatorWidth(int width)
+    {
+        _roomBannerSeparatorWidth = width;
         return this;
     }
 
@@ -301,7 +322,10 @@ public sealed class GameBuilder
             MaxScore = _maxScore,
             OnStart = _onStart,
             TitleBar = _titleBar,
-            StatusBar = _statusBar
+            StatusBar = _statusBar,
+            RoomBannerStyle = _roomBannerStyle,
+            InputPrompt = _inputPrompt,
+            RoomBannerSeparatorWidth = _roomBannerSeparatorWidth
         };
     }
 
