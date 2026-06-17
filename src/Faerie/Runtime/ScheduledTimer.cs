@@ -2,8 +2,9 @@ namespace Faerie.Runtime;
 
 /// <summary>
 /// A one-shot action scheduled to run when <see cref="GameState.TurnCount"/> reaches
-/// <see cref="DueAtTurn"/>. Registered via <see cref="Building.GameBuilder.ScheduleIn"/> or
-/// <see cref="GameContext.ScheduleIn"/>.
+/// <see cref="DueAtTurn"/>. Registered via
+/// <see cref="Faerie.Building.GameBuilder.ScheduleIn(int, System.Action{Faerie.Runtime.GameContext}, System.Func{Faerie.Runtime.GameContext, bool}?)"/> or
+/// <see cref="Faerie.Runtime.GameContext.ScheduleIn(int, System.Action{Faerie.Runtime.GameContext}, System.Func{Faerie.Runtime.GameContext, bool}?)"/>.
 /// </summary>
 public sealed class ScheduledTimer
 {

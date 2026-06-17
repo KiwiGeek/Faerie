@@ -3,6 +3,7 @@ using System.Text;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Media;
 using Avalonia.Threading;
 using Faerie.Presentation;
@@ -1179,7 +1180,7 @@ public sealed class TerminalControl : Control
         try
         {
             if (TopLevel.GetTopLevel(this)?.Clipboard is not { } clipboard) return;
-            string? text = await clipboard.GetTextAsync();
+            string? text = await clipboard.TryGetTextAsync();
             if (string.IsNullOrEmpty(text)) return;
 
             // The line editor only appends, so paste a single line: stop at the first newline and
