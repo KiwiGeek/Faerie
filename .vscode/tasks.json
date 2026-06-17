@@ -60,6 +60,14 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
     },
     {
+      "label": "run: Sierra Demo (Avalonia)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.SierraDemo/Faerie.Samples.SierraDemo.csproj",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
       "label": "run: Zork I (Headless)",
       "type": "shell",
       "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-smoketest.txt -o -",

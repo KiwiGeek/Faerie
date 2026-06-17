@@ -8,6 +8,7 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="src/Faerie.Samples.HauntedHouse/Faerie.Samples.HauntedHouse.csproj" />
+  <Project Path="src/Faerie.Samples.SierraDemo/Faerie.Samples.SierraDemo.csproj" />
   <Project Path="src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj" />
   <Project Path="src/Faerie.Terminal.Avalonia/Faerie.Terminal.Avalonia.csproj" />
   <Project Path="src/Faerie.Terminal.Headless/Faerie.Terminal.Headless.csproj" />

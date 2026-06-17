@@ -41,9 +41,9 @@ public sealed class GameBuilder
     private Action<GameContext>? _onStart;
     private Func<GameContext, BarContent>? _titleBar;
     private Func<GameContext, BarContent>? _statusBar;
-    private RoomBannerStyle _roomBannerStyle;
+    private RoomPresentation? _roomPresentation;
+    private int _sierraSeparatorWidth = 40;
     private string? _inputPrompt;
-    private int _roomBannerSeparatorWidth = 40;
 
     private GameBuilder(string title) => Title = title;
 
@@ -171,20 +171,32 @@ public sealed class GameBuilder
     }
 
     /// <summary>
-    /// Enables Sierra-style room banners after each turn: short title, items in sight, other areas,
-    /// and a separator row. Long room prose is shown once on first visit and on LOOK.
+    /// Installs custom room describe and per-turn refresh hooks. See <see cref="RoomPresentations"/>
+    /// for presets.
     /// </summary>
-    public GameBuilder WithSierraRoomBanner(string prompt = "What shall I do? ")
+    public GameBuilder WithRoomPresentation(RoomPresentation presentation)
     {
-        _roomBannerStyle = RoomBannerStyle.Sierra;
-        _inputPrompt = prompt;
+        _roomPresentation = presentation;
+        if (presentation.InputPrompt is { } prompt)
+            _inputPrompt = prompt;
         return this;
     }
 
-    /// <summary>Sets the width of the <c>=</c> separator row for Sierra room banners.</summary>
+    /// <summary>
+    /// Enables Sierra-style room banners after each turn: short title, items in sight, other areas,
+    /// and a separator row. Long room prose is shown once on first visit and on LOOK.
+    /// </summary>
+    public GameBuilder WithSierraRoomBanner(string prompt = "What shall I do? ") =>
+        WithRoomPresentation(RoomPresentations.Sierra(new SierraRoomPresentationOptions
+        {
+            Prompt = prompt,
+            SeparatorWidth = _sierraSeparatorWidth
+        }));
+
+    /// <summary>Sets the width of the <c>=</c> separator row for Sierra room presentation.</summary>
     public GameBuilder WithRoomBannerSeparatorWidth(int width)
     {
-        _roomBannerSeparatorWidth = width;
+        _sierraSeparatorWidth = width;
         return this;
     }
 
@@ -323,9 +335,8 @@ public sealed class GameBuilder
             OnStart = _onStart,
             TitleBar = _titleBar,
             StatusBar = _statusBar,
-            RoomBannerStyle = _roomBannerStyle,
-            InputPrompt = _inputPrompt,
-            RoomBannerSeparatorWidth = _roomBannerSeparatorWidth
+            RoomPresentation = _roomPresentation,
+            InputPrompt = _inputPrompt
         };
     }
 

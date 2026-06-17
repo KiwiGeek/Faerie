@@ -16,6 +16,20 @@
       "cwd": "${workspaceFolder}"
     },
     {
+      "name": "Sierra Demo (Avalonia)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.SierraDemo/Faerie.Samples.SierraDemo.csproj",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Sierra Demo (Headless)",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.SierraDemo/Faerie.Samples.SierraDemo.csproj -- --script ${workspaceFolder}/scripts/sierrademo-smoketest.txt --transcript ${workspaceFolder}/scripts/sierrademo-out.txt",
+      "cwd": "${workspaceFolder}"
+    },
+    {
       "name": "Zork I (Headless)",
       "type": "node-terminal",
       "request": "launch",

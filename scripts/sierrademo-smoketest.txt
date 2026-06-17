@@ -1,0 +1,8 @@
+look
+open door
+east
+take lantern
+west
+look
+take beer
+wait
