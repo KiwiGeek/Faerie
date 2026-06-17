@@ -69,15 +69,15 @@ public sealed class Game
     /// <summary>Builds the status bar content for the current turn. Null disables the status bar.</summary>
     public Func<GameContext, BarContent>? StatusBar { get; init; }
 
-    /// <summary>Per-turn room presentation style. Defaults to Infocom-style prose.</summary>
-    public RoomBannerStyle RoomBannerStyle { get; init; }
+    /// <summary>
+    /// Optional room describe / per-turn refresh hooks. Null uses built-in Infocom-style presentation.
+    /// </summary>
+    public RoomPresentation? RoomPresentation { get; init; }
 
     /// <summary>
     /// Optional input prompt shown by the host (e.g. Sierra's "What shall I do?"). Null keeps the
-    /// host default.
+    /// host default. Usually set via <see cref="RoomPresentation.InputPrompt"/> or
+    /// <see cref="Building.GameBuilder.WithSierraRoomBanner"/>.
     /// </summary>
     public string? InputPrompt { get; init; }
-
-    /// <summary>Width of the <c>=</c> separator row in <see cref="RoomBannerStyle.Sierra"/> mode.</summary>
-    public int RoomBannerSeparatorWidth { get; init; } = 40;
 }

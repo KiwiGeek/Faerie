@@ -120,7 +120,7 @@ public sealed class GameEngine
         _undoSnapshots.Clear();
         _lastSuccessfulCommand = null;
         RefreshBars();
-        PrintRoomBannerIfEnabled();
+        RefreshRoomDisplayIfEnabled();
     }
 
     /// <summary>When the last line failed to parse, a single corrected command the player can accept with Enter.</summary>
@@ -256,7 +256,7 @@ public sealed class GameEngine
         RefreshBars();
 
         if (!IsFinished)
-            PrintRoomBannerIfEnabled();
+            RefreshRoomDisplayIfEnabled();
 
         // Announce the ending only on the turn it actually happens.
         if (State.IsOver && !wasOver)
@@ -382,26 +382,29 @@ public sealed class GameEngine
         }
 
         if (!IsFinished)
-            DescribeCurrentRoom(verbose: firstDescription);
+            PresentRoom(firstDescription ? RoomDescribeMoment.FirstEnter : RoomDescribeMoment.ReEnter);
+    }
+
+    /// <summary>Describes the current room for the given moment (enter, look, lighting, …).</summary>
+    public void PresentRoom(RoomDescribeMoment moment)
+    {
+        if (_game.RoomPresentation?.DescribeRoom is { } custom)
+        {
+            custom(new RoomDescribeContext(_context, State.CurrentRoom, moment));
+            return;
+        }
+
+        PresentRoomInfocom(moment);
     }
 
     /// <summary>Prints the current room's heading, description, contents and exits.</summary>
-    public void DescribeCurrentRoom(bool verbose)
+    public void DescribeCurrentRoom(bool verbose) =>
+        PresentRoom(verbose ? RoomDescribeMoment.Look : RoomDescribeMoment.ReEnter);
+
+    private void PresentRoomInfocom(RoomDescribeMoment moment)
     {
         Room room = State.CurrentRoom;
         Scope scope = new(State, _context);
-
-        if (_game.RoomBannerStyle == RoomBannerStyle.Sierra)
-        {
-            if (verbose)
-            {
-                if (scope.IsLit(room))
-                    Out.PrintLine(room.ResolveDescription(_context));
-                else
-                    Out.PrintLine("It is pitch dark, and you can see nothing.");
-            }
-            return;
-        }
 
         Out.Blank();
         Out.PrintLine($"{{bold}}{{fg:white}}{room.Name}{{/}}{{/}}");
@@ -412,12 +415,32 @@ public sealed class GameEngine
             return;
         }
 
-        // Full description on LOOK / first visit; the shorter brief on re-entry to a known room.
-        Out.PrintLine(verbose ? room.ResolveDescription(_context) : room.ResolveBrief(_context));
+        bool fullDescription = moment is RoomDescribeMoment.FirstEnter
+            or RoomDescribeMoment.Look
+            or RoomDescribeMoment.LightingChanged;
+
+        Out.PrintLine(fullDescription ? room.ResolveDescription(_context) : room.ResolveBrief(_context));
 
         DescribeContents(room);
         DescribeExits(room);
     }
+
+    /// <summary>Legacy name for <see cref="RefreshRoomDisplay"/>.</summary>
+    public void PrintRoomBanner() => RefreshRoomDisplay();
+
+    /// <summary>Runs the configured per-turn room refresh hook, if any.</summary>
+    public void RefreshRoomDisplay()
+    {
+        _game.RoomPresentation?.RefreshRoomDisplay?.Invoke(_context);
+    }
+
+    private void RefreshRoomDisplayIfEnabled()
+    {
+        if (_game.RoomPresentation?.RefreshRoomDisplay is not null)
+            RefreshRoomDisplay();
+    }
+
+    // ---- describe helpers (Infocom default) -----------------------------------------------
 
     private void DescribeContents(Room room)
     {
@@ -455,27 +478,6 @@ public sealed class GameEngine
         if (room.Exits.Count == 0) return;
         string exits = JoinWithAnd(room.Exits.Keys.Select(d => d.ToDisplayString()));
         Out.PrintLine($"{{fg:darkgray}}Exits: {exits}.{{/}}");
-    }
-
-    /// <summary>Prints the configured per-turn room banner, if any.</summary>
-    public void PrintRoomBanner()
-    {
-        if (_game.RoomBannerStyle == RoomBannerStyle.Sierra)
-            RoomBanner.PrintSierra(_context, Out, BannerSeparatorWidth());
-    }
-
-    private void PrintRoomBannerIfEnabled()
-    {
-        if (_game.RoomBannerStyle != RoomBannerStyle.None)
-            PrintRoomBanner();
-    }
-
-    private int BannerSeparatorWidth()
-    {
-        int configured = _game.RoomBannerSeparatorWidth;
-        if (configured > 0)
-            return configured;
-        return Math.Max(1, Terminal.Columns);
     }
 
     // ---- scheduled timers -----------------------------------------------------------------

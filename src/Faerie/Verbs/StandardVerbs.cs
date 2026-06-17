@@ -462,7 +462,7 @@ public static class StandardVerbs
             thing.Set(Attr.Lit);
             thing.Set(Attr.On);
             ctx.Say($"You light {The(thing)}. A warm glow pushes back the dark.");
-            if (wasDark) ctx.Engine.DescribeCurrentRoom(verbose: true);
+            if (wasDark) ctx.Engine.PresentRoom(RoomDescribeMoment.LightingChanged);
             return VerbResult.Done;
         }
 

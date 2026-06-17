@@ -5,7 +5,7 @@ using Faerie.Presentation;
 namespace Faerie.Runtime;
 
 /// <summary>Prints compact per-turn room summaries for Sierra-style games.</summary>
-internal static class RoomBanner
+public static class RoomBanner
 {
     public static void PrintSierra(GameContext context, OutputWriter output, int separatorWidth)
     {

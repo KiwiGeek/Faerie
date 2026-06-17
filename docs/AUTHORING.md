@@ -661,25 +661,64 @@ b.WithStatusBar(ctx => new BarContent
 You can fully style your own title bar with `WithTitleBar(...)` the same way. Leave the status bar
 unset and there simply won't be one.
 
-### Sierra-style room banners
+### Room presentation hooks
 
-Infocom-style games print a heading, prose, and inline “You can see … / Exits: …” when you enter or
-look. **Sierra / Hi-Res Adventure** games (e.g. *Softporn Adventure*) use a different layout:
+By default, Faerie describes rooms Infocom-style: bold room name, prose, “You can see …”, and
+“Exits: …” on enter and look. Hi-Res / Sierra games use a different layout and timing. Rather than
+hard-coding styles in the engine, games install optional **room presentation hooks**:
+
+| Hook | When the engine calls it |
+| --- | --- |
+| `DescribeRoom` | First enter, re-enter, `LOOK`, and when a light source makes a dark room visible |
+| `RefreshRoomDisplay` | After game start and at the end of each turn |
+
+```csharp
+b.WithRoomPresentation(new RoomPresentation
+{
+    DescribeRoom = ctx =>
+    {
+        if (ctx.Moment == RoomDescribeMoment.ReEnter) return;
+        ctx.Out.PrintLine(ctx.Room.ResolveDescription(ctx.Context));
+    },
+    RefreshRoomDisplay = ctx => ctx.Say($"--- {ctx.CurrentRoom.Name} ---"),
+    InputPrompt = "> "
+});
+```
+
+`RoomDescribeMoment` values: `FirstEnter`, `ReEnter`, `Look`, `LightingChanged`. The engine decides
+**when**; your hook decides **what** to print.
+
+When no presentation is installed, built-in Infocom behaviour is used. To redraw manually from game
+code, call `ctx.RefreshRoomDisplay()` (alias: `ctx.PrintRoomBanner()`).
+
+#### Sierra preset
+
+`WithSierraRoomBanner()` is sugar for `RoomPresentations.Sierra(...)`:
+
+```csharp
+var b = GameBuilder.Create("My Hi-Res Game")
+    .AddStandardVerbs()
+    .WithRoomBannerSeparatorWidth(40)          // optional; 0 = terminal width
+    .WithSierraRoomBanner();                  // default prompt: "What shall I do? "
+```
+
+Or explicitly:
+
+```csharp
+b.WithRoomPresentation(RoomPresentations.Sierra(new SierraRoomPresentationOptions
+{
+    Prompt = "What shall I do? ",
+    SeparatorWidth = 40
+}));
+```
+
+The Sierra preset:
 
 1. **Long prose once** — full room description on first visit and on `LOOK` (or “It is pitch dark…”
    when the room is unlit and you have no light).
 2. **Compact banner every turn** — short title, comma-separated items, comma-separated exit
    destinations, then a row of `=` characters.
-3. **Prompt** — e.g. `What shall I do?` at the bottom (the Avalonia host reads this from the game).
-
-Opt in on the builder:
-
-```csharp
-var b = GameBuilder.Create("My Hi-Res Game")
-    .AddStandardVerbs()
-    .WithSierraRoomBanner()                    // default prompt: "What shall I do? "
-    .WithRoomBannerSeparatorWidth(40);         // optional; default 40
-```
+3. **Prompt** — copied to the game for the Avalonia host.
 
 Set a banner title per room with `.ShortTitle(...)` (see [Short titles](#short-titles-sierra-style-banners)).
 Exit lines use each destination's short title. Blocked exits (closed doors, failed conditions) are
@@ -690,8 +729,6 @@ When the room is lit, the banner lists visible non-scenery things physically in 
 print until a lit light source is present.
 
 Re-entry to an already-visited room skips the long prose; the banner still redraws every turn.
-
-To print the banner yourself (e.g. from a custom hook), call `ctx.PrintRoomBanner()`.
 
 ### Native OS window title and icon
 
