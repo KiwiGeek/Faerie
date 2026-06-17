@@ -186,18 +186,18 @@ public sealed class GameBuilder
     /// <summary>
     /// Schedules a one-shot action to run after <paramref name="turns"/> player turns (relative to
     /// the current turn count when registered). At build time that is turn zero; from running game
-    /// code use <see cref="GameContext.ScheduleIn"/> instead.
+    /// code use <see cref="Runtime.GameContext.ScheduleIn(int, System.Action{Runtime.GameContext}, System.Func{Runtime.GameContext, bool}?)"/> instead.
     /// </summary>
     public GameBuilder ScheduleIn(int turns, Action<GameContext> action, Func<GameContext, bool>? when = null) =>
-        ScheduleIn(null, turns, action, when);
+        ScheduleIn(name: null, turns, action, when);
 
     /// <summary>
     /// Like <see cref="ScheduleIn(int, Action{GameContext}, Func{GameContext, bool}?)"/> but with a
     /// <paramref name="name"/> that <see cref="GameContext.CancelSchedule"/> can cancel.
     /// </summary>
-    public GameBuilder ScheduleIn(string name, int turns, Action<GameContext> action, Func<GameContext, bool>? when = null)
+    public GameBuilder ScheduleIn(string? name, int turns, Action<GameContext> action, Func<GameContext, bool>? when = null)
     {
-        if (_timers.Any(t => t.Name == name))
+        if (name is not null && _timers.Any(t => t.Name == name))
             throw new InvalidOperationException($"A timer named '{name}' is already scheduled.");
 
         _timers.Add(new ScheduledTimer

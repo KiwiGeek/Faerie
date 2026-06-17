@@ -17,7 +17,7 @@
        game's own assembly as an AvaloniaResource, or a system family) via the game definition. -->
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.3.0" />
+    <PackageReference Include="Avalonia" Version="11.3.14" />
   </ItemGroup>
 
   <ItemGroup>
