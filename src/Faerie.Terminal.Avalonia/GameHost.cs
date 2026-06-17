@@ -58,7 +58,10 @@ public sealed class GameHost
         }
 
         _engine.Out.Blank();
-        _engine.Out.Print(_promptMarkup);
+        if (_engine.InputPrompt is { } prompt)
+            _engine.Out.Print(prompt);
+        else
+            _engine.Out.Print(_promptMarkup);
         _control.BeginInput(_engine.SuggestedInput);
     }
 }

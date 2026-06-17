@@ -95,6 +95,32 @@ public sealed class SpatialQueryTests
     }
 
     [Fact]
+    public void IsLocatedIn_ExcludesCarriedItems()
+    {
+        Fixture f = Build();
+        Assert.True(f.Ctx.LocatedIn(f.Lamp, f.Hall));
+        f.Ctx.Take(f.Lamp);
+        Assert.False(f.Ctx.LocatedIn(f.Lamp, f.Hall));
+        Assert.True(f.Ctx.Here(f.Lamp));
+    }
+
+    [Fact]
+    public void ThingsLocatedIn_IncludesNestedContentsButNotInventory()
+    {
+        Fixture f = Build();
+        List<Thing> hall = f.Ctx.ThingsLocatedIn(f.Hall).ToList();
+        Assert.Contains(f.Lamp, hall);
+        Assert.Contains(f.Key, hall);
+        Assert.Contains(f.Coin, hall);
+        Assert.DoesNotContain(f.Goblin, hall);
+
+        f.Ctx.Take(f.Lamp);
+        hall = f.Ctx.ThingsLocatedIn(f.Hall).ToList();
+        Assert.DoesNotContain(f.Lamp, hall);
+        Assert.Contains(f.Key, hall);
+    }
+
+    [Fact]
     public void ThingsIn_IncludePresent_ContainsItemsInsideCarriedContainer()
     {
         Fixture f = Build();

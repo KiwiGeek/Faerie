@@ -33,6 +33,19 @@ public sealed class Room : Element
         BriefDescriptionFactory?.Invoke(context) ?? BriefDescription ?? ResolveDescription(context);
 
     /// <summary>
+    /// Optional one-line title for Sierra-style room banners. When null, <see cref="Element.Name"/>
+    /// is used.
+    /// </summary>
+    public string? ShortTitle { get; set; }
+
+    /// <summary>Dynamic short title; overrides <see cref="ShortTitle"/> when set.</summary>
+    public Func<GameContext, string>? ShortTitleFactory { get; set; }
+
+    /// <summary>Resolves the banner title, falling back to <see cref="Element.Name"/>.</summary>
+    public string ResolveShortTitle(GameContext context) =>
+        ShortTitleFactory?.Invoke(context) ?? ShortTitle ?? Name;
+
+    /// <summary>
     /// When true the room is unlit unless <see cref="IsLitFactory"/> returns true or an active
     /// light source is present.
     /// </summary>

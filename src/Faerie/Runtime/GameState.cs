@@ -136,6 +136,14 @@ public sealed class GameState
     /// <summary>True if the thing is in the player's current room (directly or via a container).</summary>
     public bool IsPresent(Thing thing) => RoomOf(thing) == CurrentRoom || IsCarried(thing);
 
+    /// <summary>
+    /// True when the thing is physically in <paramref name="room"/> (including inside in-room
+    /// containers). Carried and worn items return false — use <see cref="IsPresent"/> or
+    /// <see cref="RoomOf"/> when inventory should count as being in the current room.
+    /// </summary>
+    public bool IsLocatedIn(Thing thing, Room room) =>
+        !IsCarried(thing) && RoomOf(thing) == room;
+
     internal IReadOnlyDictionary<Thing, Placement> RawLocations => _locations;
     internal void RestoreLocation(Thing thing, Placement placement) => _locations[thing] = placement;
 }

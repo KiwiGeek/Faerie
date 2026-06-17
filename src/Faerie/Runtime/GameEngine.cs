@@ -75,6 +75,9 @@ public sealed class GameEngine
     public ITerminal Terminal => Out.Terminal;
     public int MaxScore => _game.MaxScore;
 
+    /// <summary>Optional input prompt for the host (Sierra-style games).</summary>
+    public string? InputPrompt => _game.InputPrompt;
+
     /// <summary>True once the player has quit or the game has ended.</summary>
     public bool IsFinished => State.IsOver || QuitRequested;
     public bool QuitRequested { get; private set; }
@@ -117,6 +120,7 @@ public sealed class GameEngine
         _undoSnapshots.Clear();
         _lastSuccessfulCommand = null;
         RefreshBars();
+        PrintRoomBannerIfEnabled();
     }
 
     /// <summary>When the last line failed to parse, a single corrected command the player can accept with Enter.</summary>
@@ -251,6 +255,9 @@ public sealed class GameEngine
 
         RefreshBars();
 
+        if (!IsFinished)
+            PrintRoomBannerIfEnabled();
+
         // Announce the ending only on the turn it actually happens.
         if (State.IsOver && !wasOver)
             AnnounceEnding();
@@ -384,6 +391,18 @@ public sealed class GameEngine
         Room room = State.CurrentRoom;
         Scope scope = new(State, _context);
 
+        if (_game.RoomBannerStyle == RoomBannerStyle.Sierra)
+        {
+            if (verbose)
+            {
+                if (scope.IsLit(room))
+                    Out.PrintLine(room.ResolveDescription(_context));
+                else
+                    Out.PrintLine("It is pitch dark, and you can see nothing.");
+            }
+            return;
+        }
+
         Out.Blank();
         Out.PrintLine($"{{bold}}{{fg:white}}{room.Name}{{/}}{{/}}");
 
@@ -436,6 +455,27 @@ public sealed class GameEngine
         if (room.Exits.Count == 0) return;
         string exits = JoinWithAnd(room.Exits.Keys.Select(d => d.ToDisplayString()));
         Out.PrintLine($"{{fg:darkgray}}Exits: {exits}.{{/}}");
+    }
+
+    /// <summary>Prints the configured per-turn room banner, if any.</summary>
+    public void PrintRoomBanner()
+    {
+        if (_game.RoomBannerStyle == RoomBannerStyle.Sierra)
+            RoomBanner.PrintSierra(_context, Out, BannerSeparatorWidth());
+    }
+
+    private void PrintRoomBannerIfEnabled()
+    {
+        if (_game.RoomBannerStyle != RoomBannerStyle.None)
+            PrintRoomBanner();
+    }
+
+    private int BannerSeparatorWidth()
+    {
+        int configured = _game.RoomBannerSeparatorWidth;
+        if (configured > 0)
+            return configured;
+        return Math.Max(1, Terminal.Columns);
     }
 
     // ---- scheduled timers -----------------------------------------------------------------
