@@ -53,6 +53,22 @@ public sealed class Scope(GameState state, GameContext? context = null)
             if (IsInsideClosedOpenable(thing)) continue;
             yield return thing;
         }
+
+        foreach (Thing thing in OrderableStock(room))
+            yield return thing;
+    }
+
+    /// <summary>Offstage catalog items whose vendor is in <paramref name="room"/>.</summary>
+    private IEnumerable<Thing> OrderableStock(Room room)
+    {
+        foreach (Thing thing in _state.World.Things)
+        {
+            if (!thing.Has(Attr.Orderable) || thing.Has(Attr.Concealed)) continue;
+            if (_state.RoomOf(thing) is not null) continue;
+            if (thing.Vendor is not { } vendor) continue;
+            if (!_state.IsLocatedIn(vendor, room)) continue;
+            yield return thing;
+        }
     }
 
     /// <summary>True when the thing sits inside a closed, openable container (matches Search verb rules).</summary>

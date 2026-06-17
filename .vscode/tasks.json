@@ -44,6 +44,19 @@
       "problemMatcher": "$msCompile"
     },
     {
+      "label": "build-softporn",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj",
+        "/property:GenerateFullPaths=true",
+        "/consoleloggerparameters:NoSummary;ForceNoAlign"
+      ],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
       "label": "run: Zork I (Avalonia)",
       "type": "shell",
       "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj",
@@ -63,6 +76,22 @@
       "label": "run: Zork I (Headless)",
       "type": "shell",
       "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-smoketest.txt -o -",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "run: Softporn Adventure (Avalonia)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "run: Softporn Adventure (Headless)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj -- --script scripts/softporn-smoketest.txt -o -",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "none",
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }

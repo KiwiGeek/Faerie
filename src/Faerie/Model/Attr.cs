@@ -74,5 +74,11 @@ public enum Attr : long
     Plural = 1L << 20,
 
     /// <summary>Suppresses the automatic "(initial)" description listing in a room.</summary>
-    Scenery = 1L << 21
+    Scenery = 1L << 21,
+
+    /// <summary>
+    /// Can be ordered by name when <see cref="Thing.Vendor"/> is present in the current room,
+    /// even if the thing itself is still offstage.
+    /// </summary>
+    Orderable = 1L << 22
 }

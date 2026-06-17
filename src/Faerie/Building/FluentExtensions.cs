@@ -147,6 +147,17 @@ public static class ThingFluent
     public static Thing Edible(this Thing thing) { thing.Set(Attr.Edible); thing.Set(Attr.Takeable); return thing; }
     public static Thing Drinkable(this Thing thing) { thing.Set(Attr.Drinkable); return thing; }
 
+    /// <summary>
+    /// Names this stock item for purchase when <paramref name="vendor"/> is in the current room,
+    /// even before the item has been spawned into the world.
+    /// </summary>
+    public static Thing OrderableFrom(this Thing thing, Thing vendor)
+    {
+        thing.Set(Attr.Orderable);
+        thing.Vendor = vendor;
+        return thing;
+    }
+
     public static Thing Readable(this Thing thing, string text)
     {
         thing.Set(Attr.Readable);

@@ -33,7 +33,7 @@ public sealed class ScriptPlayerInput : IPlayerInput
         foreach (char valid in validKeys)
         {
             if (char.ToLowerInvariant(valid) == c)
-                return c;
+                return valid;
         }
 
         return c;

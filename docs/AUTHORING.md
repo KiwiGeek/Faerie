@@ -246,6 +246,20 @@ exit.Door = door;                                    // now you must open the do
 
 The player unlocks it with `unlock door with key` (while carrying the key), then `open door`.
 
+### Orderable stock (offstage catalog items)
+
+When a shopkeeper sells items that are not physically on the floor yet, mark the stock with
+`OrderableFrom(vendor)`. The item stays offstage, but the parser can still resolve its name while
+the vendor is in the current room (for example `buy wine`). It does **not** appear in Sierra room
+banners until it has been spawned.
+
+```csharp
+var waitress = b.Creature("waitress").StartsIn(disco);
+var wine = b.Item("wine").OrderableFrom(waitress);
+```
+
+Wire your `buy` verb to check that the item is still offstage before placing it in the room.
+
 ### Readable things
 
 ```csharp
