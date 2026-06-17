@@ -23,20 +23,20 @@ internal sealed partial class SoftpornWorld
                 x1 = ctx.Random.Next(symbolCount);
                 x2 = ctx.Random.Next(symbolCount);
                 x3 = ctx.Random.Next(symbolCount);
-                Thread.Sleep(30);
-                ctx.SayInline($"\r{symbols[x1]}{symbols[x2],5}{symbols[x3],5}");
+                ctx.Delay(30);
+                ctx.OverwriteLine($"{symbols[x1]}{symbols[x2],5}{symbols[x3],5}");
             }
 
             ctx.Out.NewLine();
             if (x1 == x2 && x2 == x3)
             {
                 ctx.Say("Triples!!!!!! You win $1500");
-                ctx.Set(_money, Money(ctx) + 15);
+                AdjustMoney(ctx, 15);
             }
             else if (x1 == x2 || x2 == x3 || x3 == x1)
             {
                 ctx.Say("A pair!  You win $300");
-                ctx.Set(_money, Money(ctx) + 3);
+                AdjustMoney(ctx, 3);
             }
             else
             {
@@ -152,25 +152,25 @@ internal sealed partial class SoftpornWorld
 
             CheckPlayer:
                 while (player > 21 && playerSoft > 0) { playerSoft--; player -= 10; }
-                Thread.Sleep(delay);
+                ctx.Delay(delay);
                 ctx.Say($"Your total is {player}.");
                 if (player > 21)
                 {
-                    Thread.Sleep(delay);
+                    ctx.Delay(delay);
                     ctx.Say("Busted!");
                     Spend(ctx, bet);
                     roundOver = true;
                 }
                 else if (playerSoft == 2 && player == 21)
                 {
-                    Thread.Sleep(delay);
+                    ctx.Delay(delay);
                     ctx.Say("You've got a ***BLACKJACK***");
-                    ctx.Set(_money, Money(ctx) + bet + bet);
+                    AdjustMoney(ctx, bet + bet);
                     roundOver = true;
                 }
                 else if (dealerSoft == 2 && dealer == 21)
                 {
-                    Thread.Sleep(delay);
+                    ctx.Delay(delay);
                     ctx.Say("The dealer has a ***BLACKJACK***");
                     Spend(ctx, bet);
                     roundOver = true;
@@ -187,7 +187,7 @@ internal sealed partial class SoftpornWorld
 
             DealerTurn:
                 while (dealer > 21 && dealerSoft > 0) { dealerSoft--; dealer -= 10; }
-                Thread.Sleep(delay);
+                ctx.Delay(delay);
                 ctx.Say($"The dealer has {dealer}");
                 if (dealer < 17)
                 {
@@ -197,19 +197,19 @@ internal sealed partial class SoftpornWorld
 
                 if (dealer > 21 || player > dealer)
                 {
-                    Thread.Sleep(delay);
+                    ctx.Delay(delay);
                     ctx.Say("You win!!");
-                    ctx.Set(_money, Money(ctx) + bet);
+                    AdjustMoney(ctx, bet);
                 }
                 else if (player < dealer)
                 {
-                    Thread.Sleep(delay);
+                    ctx.Delay(delay);
                     ctx.Say("You lose!");
                     Spend(ctx, bet);
                 }
                 else
                 {
-                    Thread.Sleep(delay);
+                    ctx.Delay(delay);
                     ctx.Say("Tie!");
                 }
 

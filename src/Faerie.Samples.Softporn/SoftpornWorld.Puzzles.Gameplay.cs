@@ -1,68 +1,67 @@
 using Faerie.Model;
 using Faerie.Runtime;
 using Faerie.Verbs;
-using static Faerie.Verbs.StandardVerbIds;
 
 namespace Faerie.Samples.Softporn;
 
 internal sealed partial class SoftpornWorld
 {
     private bool InBarArea(GameContext ctx) =>
-        ctx.CurrentRoom == R(SoftpornIds.Hallway) || ctx.CurrentRoom == R(SoftpornIds.Bathroom) ||
-        ctx.CurrentRoom == R(SoftpornIds.Bar) || ctx.CurrentRoom == R(SoftpornIds.BarStreet) ||
-        ctx.CurrentRoom == R(SoftpornIds.Backroom) || ctx.CurrentRoom == R(SoftpornIds.Dumpster) ||
-        ctx.CurrentRoom == R(SoftpornIds.BrokenRoom) || ctx.CurrentRoom == R(SoftpornIds.WindowLedge) ||
-        ctx.CurrentRoom == R(SoftpornIds.HookerBedroom) || ctx.CurrentRoom == R(SoftpornIds.HookerBalcony);
+        ctx.CurrentRoom == Hallway || ctx.CurrentRoom == Bathroom ||
+        ctx.CurrentRoom == Bar || ctx.CurrentRoom == BarStreet ||
+        ctx.CurrentRoom == Backroom || ctx.CurrentRoom == Dumpster ||
+        ctx.CurrentRoom == BrokenRoom || ctx.CurrentRoom == WindowLedge ||
+        ctx.CurrentRoom == HookerBedroom || ctx.CurrentRoom == HookerBalcony;
 
     private bool InCasinoArea(GameContext ctx) =>
-        ctx.CurrentRoom == R(SoftpornIds.CasinoStreet) || ctx.CurrentRoom == R(SoftpornIds.MarriageCenter) ||
-        ctx.CurrentRoom == R(SoftpornIds.Casino) || ctx.CurrentRoom == R(SoftpornIds.TwentyOneRoom) ||
-        ctx.CurrentRoom == R(SoftpornIds.Lobby) || ctx.CurrentRoom == R(SoftpornIds.HoneymoonSuite) ||
-        ctx.CurrentRoom == R(SoftpornIds.HotelHallway) || ctx.CurrentRoom == R(SoftpornIds.HoneymoonBalcony) ||
-        ctx.CurrentRoom == R(SoftpornIds.HotelDesk);
+        ctx.CurrentRoom == CasinoStreet || ctx.CurrentRoom == MarriageCenter ||
+        ctx.CurrentRoom == Casino || ctx.CurrentRoom == TwentyOneRoom ||
+        ctx.CurrentRoom == Lobby || ctx.CurrentRoom == HoneymoonSuite ||
+        ctx.CurrentRoom == HotelHallway || ctx.CurrentRoom == HoneymoonBalcony ||
+        ctx.CurrentRoom == HotelDesk;
 
     private bool InDiscoArea(GameContext ctx) =>
-        ctx.CurrentRoom == R(SoftpornIds.PhoneBooth) || ctx.CurrentRoom == R(SoftpornIds.Disco) ||
-        ctx.CurrentRoom == R(SoftpornIds.DiscoStreet) || ctx.CurrentRoom == R(SoftpornIds.DiscoEntrance) ||
-        ctx.CurrentRoom == R(SoftpornIds.Pharmacy);
+        ctx.CurrentRoom == PhoneBooth || ctx.CurrentRoom == Disco ||
+        ctx.CurrentRoom == DiscoStreet || ctx.CurrentRoom == DiscoEntrance ||
+        ctx.CurrentRoom == Pharmacy;
 
     private bool InPenthouseArea(GameContext ctx) =>
-        ctx.CurrentRoom == R(SoftpornIds.PenthouseFoyer) || ctx.CurrentRoom == R(SoftpornIds.Jacuzzi) ||
-        ctx.CurrentRoom == R(SoftpornIds.Kitchen) || ctx.CurrentRoom == R(SoftpornIds.Garden) ||
-        ctx.CurrentRoom == R(SoftpornIds.LivingRoom) || ctx.CurrentRoom == R(SoftpornIds.PenthousePorch);
+        ctx.CurrentRoom == PenthouseFoyer || ctx.CurrentRoom == Jacuzzi ||
+        ctx.CurrentRoom == Kitchen || ctx.CurrentRoom == Garden ||
+        ctx.CurrentRoom == LivingRoom || ctx.CurrentRoom == PenthousePorch;
 
     private bool InPublic(GameContext ctx) =>
-        ctx.CurrentRoom == R(SoftpornIds.CasinoStreet) || ctx.CurrentRoom == R(SoftpornIds.Casino) ||
-        ctx.CurrentRoom == R(SoftpornIds.TwentyOneRoom) || ctx.CurrentRoom == R(SoftpornIds.Lobby) ||
-        ctx.CurrentRoom == R(SoftpornIds.HotelDesk) || ctx.CurrentRoom == R(SoftpornIds.DiscoStreet) ||
-        ctx.CurrentRoom == R(SoftpornIds.DiscoEntrance);
+        ctx.CurrentRoom == CasinoStreet || ctx.CurrentRoom == Casino ||
+        ctx.CurrentRoom == TwentyOneRoom || ctx.CurrentRoom == Lobby ||
+        ctx.CurrentRoom == HotelDesk || ctx.CurrentRoom == DiscoStreet ||
+        ctx.CurrentRoom == DiscoEntrance;
 
     private void ApplyAreaUpdates(GameContext ctx)
     {
         if (InBarArea(ctx))
         {
-            MoveProp(ctx, SoftpornIds.Sign, SoftpornIds.BarStreet);
-            MoveProp(ctx, SoftpornIds.Taxi, SoftpornIds.BarStreet);
-            MoveProp(ctx, SoftpornIds.Button, SoftpornIds.Bar);
+            MoveProp(ctx, Sign, BarStreet);
+            MoveProp(ctx, Taxi, BarStreet);
+            MoveProp(ctx, Button, Bar);
         }
         else if (InCasinoArea(ctx))
         {
-            MoveProp(ctx, SoftpornIds.Sign, SoftpornIds.CasinoStreet);
-            MoveProp(ctx, SoftpornIds.Taxi, SoftpornIds.CasinoStreet);
-            MoveProp(ctx, SoftpornIds.Button, SoftpornIds.HotelDesk);
-            MoveProp(ctx, SoftpornIds.Elevator, SoftpornIds.HotelDesk);
+            MoveProp(ctx, Sign, CasinoStreet);
+            MoveProp(ctx, Taxi, CasinoStreet);
+            MoveProp(ctx, Button, HotelDesk);
+            MoveProp(ctx, Elevator, HotelDesk);
         }
         else if (InDiscoArea(ctx))
         {
-            MoveProp(ctx, SoftpornIds.Sign, SoftpornIds.DiscoStreet);
-            MoveProp(ctx, SoftpornIds.Taxi, SoftpornIds.DiscoStreet);
-            MoveProp(ctx, SoftpornIds.Telephone, SoftpornIds.PhoneBooth);
+            MoveProp(ctx, Sign, DiscoStreet);
+            MoveProp(ctx, Taxi, DiscoStreet);
+            MoveProp(ctx, Telephone, PhoneBooth);
         }
         else if (InPenthouseArea(ctx))
         {
-            MoveProp(ctx, SoftpornIds.Button, SoftpornIds.PenthouseFoyer);
-            MoveProp(ctx, SoftpornIds.Elevator, SoftpornIds.PenthouseFoyer);
-            MoveProp(ctx, SoftpornIds.Telephone, SoftpornIds.PenthousePorch);
+            MoveProp(ctx, Button, PenthouseFoyer);
+            MoveProp(ctx, Elevator, PenthouseFoyer);
+            MoveProp(ctx, Telephone, PenthousePorch);
         }
 
         if (!ctx.InRoom(Bar))
@@ -71,7 +70,7 @@ internal sealed partial class SoftpornWorld
         if (!ctx.InRoom(DiscoEntrance))
             ctx.Set(_doorWestOpen, false);
 
-        if (!ctx.Carrying(T(SoftpornIds.Stool)) && !ctx.LocatedIn(T(SoftpornIds.Stool), Garden))
+        if (!ctx.Carrying(T(Stool)) && !ctx.LocatedIn(T(Stool), Garden))
             ctx.Set(_stoolClimbed, false);
 
         if (ctx.Get(_rubberWorn) && InPublic(ctx) && ctx.Random.Next(8) == 5)
@@ -81,70 +80,153 @@ internal sealed partial class SoftpornWorld
         }
     }
 
-    private void MoveProp(GameContext ctx, string thingId, string roomId)
+    private void MoveProp(GameContext ctx, Thing thing, Room room)
     {
-        Thing thing = T(thingId);
-        Room room = R(roomId);
         if (!ctx.Carrying(thing) && ctx.RoomOf(thing) != room)
             ctx.Move(thing, Placement.InRoom(room));
     }
 
     private void DefineExamines()
     {
-        Examine(SoftpornIds.Hooker, ctx => SayLong(ctx, 31));
-        Examine(SoftpornIds.Girl, ctx =>
+        Examine(Hooker, ctx => SayLong(ctx,
+"""
+Oh no!!! I paid for this?!?!?! This beast is really ugly!!!! Jeezzzz....
+I hope I don't get the clap from this hooker................. Well ... she
+seems to be annoyed that I haven't jumped on her yet ... go to it, stud!!!!
+"""));
+        Examine(Girl, ctx =>
         {
-            if (ctx.InRoom(Jacuzzi)) SayLong(ctx, 35);
-            else if (ctx.InRoom(R(SoftpornIds.Disco)) || ctx.InRoom(R(SoftpornIds.MarriageCenter))) SayLong(ctx, 34);
+            if (ctx.InRoom(Jacuzzi)) SayLong(ctx,
+"""
+What a beautiful face!!! She's leaning back in the jacuzzi with her eyes
+closed and seems extremely relaxed. The water is bubbling up around her...
+She's so beautiful ........ a guy really could fall in love with a girl
+like this. I presume her name is 'Eve' ... at least that's what the towel
+next to her has embrodiered on it.
+""");
+            else if (ctx.InRoom(Disco) || ctx.InRoom(MarriageCenter)) SayLong(ctx,
+"""
+Cute and innocent!! Just the way I like my women.
+Oh - this girl is great! She has a beautiful California tan ... and pert
+little breasts ... a trim waist ..... and well rounded hips!!
+I dream about getting this nice a girl. I hope you play this game well
+enough so I can have my jolly with her!
+You could make your puppet a very happy man...................
+""");
             else ctx.Say("She slaps me and yells 'Pervert!!!!!'");
         });
-        Examine(SoftpornIds.Blonde, ctx => SayLong(ctx, 40));
-        Examine(SoftpornIds.Billboard, ctx => SayLong(ctx, 63));
-        Examine(SoftpornIds.Graffiti, ctx => SoftpornMessages.SayBlock(ctx, 59, 62));
-        Examine(SoftpornIds.Peephole, ctx =>
+        Examine(Blonde, ctx => SayLong(ctx,
+"""
+She's wearing the tightest jeans! Wow ... what a body!!!!! 36-24-35!! This
+girls derriere is sensational!! And the shirt? See through - and what I see
+I like!
+As my eyes reluctantly roam from her body, I see bright blue eyes - and a
+smile that dazzles me. I think she likes me!
+"""));
+        Examine(Billboard, ctx => SayLong(ctx,
+"""
++---------------------------------------------------+
+|        For those who desire the best:             |
+|   Announcing, the most exclusive, the exciting,   |
+|             the hottest spot in town,             |
+|          ***************************              |
+|          * SWINGING SINGLE'S DISCO *              |
+|          ***************************              |
++---------------------------------------------------+
+"""));
+        Examine(Graffiti, ctx => SayLong(ctx,
+"""
++-------------------------------------------------------------------+
+|                                                                   |
+|                  At my PC is where I sit                          |
+|              when I feel like fondling it's bits!       I    h    |
+|                                                         '    e    |
+|                  C  The password is:                    d    r    |
+|                  o     A                            a             |
+|                  m  S  n   Bellybutton              l       f     |
+|                  P  p  C                d           i       l     |
+|                  e  u  I                r           k       o     |
+|                  e  t  I        y       e       e       p         |
+|                  t  k        e          e       c       p         |
+|                  h  r        e          t       i                 |
+|                  e  b        s    i     o       e                 |
+|                  y  e        f    h     e       s                 |
+|                     f        r    a     v       n                 |
+|                  P  o        e    l     e       i                 |
+|                  o  r        a    l         b                     |
+|                  k  e        k          b                         |
+|                  e  s                   l                         |
+|                  e                                                |
++-------------------------------------------------------------------+
+"""));
+        Examine(Peephole, ctx =>
         {
             if (ctx.Get(_holePeeped)) ctx.Say("All windows at the hotel across the road have their curtains shut.");
-            else { SayLong(ctx, 55); ctx.Set(_holePeeped, true); }
+            else
+            {
+                SayLong(ctx,
+"""
+Hmmmm ..... this is a Peeping Tom's paradise!!!!!
+Across the road is another hotel. Aha! The curtains are open at one window!
+The bathroom door opens and a girl walks out. Holy cow! Her boobs are huge -
+and look at the sway as she strides across the room!
+Now she's taking a large sausage-shaped object and looks at it longinly!
+Damn! She shuts the curtain!
+""");
+                ctx.Set(_holePeeped, true);
+            }
         });
-        Examine(SoftpornIds.Desk, ctx =>
+        Examine(Desk, ctx =>
         {
-            if (ctx.Get(_drawerOpen)) RevealHere(ctx, SoftpornIds.Newspaper);
+            if (ctx.Get(_drawerOpen)) RevealHere(ctx, Newspaper);
             else ctx.Say("It's drawer is shut");
         });
-        Examine(SoftpornIds.Washbasin, ctx => RevealHere(ctx, SoftpornIds.Ring));
-        Examine(SoftpornIds.Garbage, ctx => RevealHere(ctx, SoftpornIds.AppleCore));
-        Examine(SoftpornIds.AppleCore, ctx => RevealHere(ctx, SoftpornIds.Seeds));
-        Examine(SoftpornIds.Ashtray, ctx => RevealHere(ctx, SoftpornIds.Passcard));
-        Examine(SoftpornIds.Rack, ctx => RevealHere(ctx, SoftpornIds.Magazine));
-        Examine(SoftpornIds.Tree, ctx => RevealHere(ctx, SoftpornIds.Apple));
-        Examine(SoftpornIds.Plant, ctx =>
+        Examine(Washbasin, ctx => RevealHere(ctx, Ring));
+        Examine(Garbage, ctx => RevealHere(ctx, AppleCore));
+        Examine(AppleCore, ctx => RevealHere(ctx, Seeds));
+        Examine(Ashtray, ctx => RevealHere(ctx, Passcard));
+        Examine(Rack, ctx => RevealHere(ctx, Magazine));
+        Examine(Tree, ctx => RevealHere(ctx, Apple));
+        Examine(Plant, ctx =>
         {
-            if (IsOffstage(ctx, T(SoftpornIds.Bushes)))
+            if (IsOffstage(ctx, T(Bushes)))
             {
                 ctx.Say("There's a group of bushes behind it!!");
-                ctx.PlaceHere(T(SoftpornIds.Bushes));
+                ctx.PlaceHere(T(Bushes));
             }
             else CantDoThat(ctx);
         });
-        Examine(SoftpornIds.Newspaper, ctx =>
+        Examine(Newspaper, ctx =>
         {
-            if (ctx.Carrying(T(SoftpornIds.Newspaper))) SayLong(ctx, 32);
+            if (ctx.Carrying(T(Newspaper))) SayLong(ctx,
+"""
+It's the gambler's gazette!!
+There's an article here which tells how to activate the games at the
+Adventurer's Hotel. It says that Blackjack can be played by entering
+'Play 21'. The slot machines can be started with 'Play Slot'.
+""");
             else ctx.Say("I don't have it!!");
         });
-        Examine(SoftpornIds.Magazine, ctx =>
+        Examine(Magazine, ctx =>
         {
-            if (ctx.Carrying(T(SoftpornIds.Magazine))) SayLong(ctx, 33);
+            if (ctx.Carrying(T(Magazine))) SayLong(ctx,
+"""
+Hmmmm ..... an interesting magazine with a nice centerfold!
+The feature article is about how to pick up an innocent girl at a disco.
+It says - 'Shower her with presents. Dancing won't hurt either. And wine
+is always good to get thing moving!'
+""");
             else ctx.Say("I don't have it!!");
         });
-        Examine(SoftpornIds.Mirror, ctx => ctx.Say("There's a pervert looking back at me!!"));
-        Examine(SoftpornIds.Toilet, ctx => ctx.Say("Hasn't been flushed in ages! Stinks!!!"));
-        Examine(SoftpornIds.Businessman, ctx => ctx.Say("He looks like a whiskey drinker to me!!"));
-        Examine(SoftpornIds.Button, ctx => ctx.Say("Says Push."));
-        Examine(SoftpornIds.Bartender, ctx => ctx.Say("He's waiting for me to buy something!"));
-        Examine(SoftpornIds.Pimp, ctx => ctx.Say("He's wearing a button proclaiming -- Support your local Pimp, gimme $2000!!!"));
-        _b.On(T(SoftpornIds.Tv)).Before(_b.Verbs.Examine!, ctx =>
+        Examine(Mirror, ctx => ctx.Say("There's a pervert looking back at me!!"));
+        Examine(Toilet, ctx => ctx.Say("Hasn't been flushed in ages! Stinks!!!"));
+        Examine(Businessman, ctx => ctx.Say("He looks like a whiskey drinker to me!!"));
+        Examine(Button, ctx => ctx.Say("Says Push."));
+        Examine(Bartender, ctx => ctx.Say("He's waiting for me to buy something!"));
+        Examine(Pimp, ctx => ctx.Say("He's wearing a button proclaiming -- Support your local Pimp, gimme $2000!!!"));
+        _softporn.On(T(Tv)).Before(_softporn.Verbs.Examine!, ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.ControlUnit)))
+            if (!ctx.Carrying(T(ControlUnit)))
             {
                 ctx.Say("To watch TV, I need the remote control unit!!");
                 return VerbResult.Done;
@@ -152,9 +234,9 @@ internal sealed partial class SoftpornWorld
             WatchTv(ctx);
             return VerbResult.Done;
         });
-        Examine(SoftpornIds.SlotMachines, ctx => ctx.Say("Playing them might be more fun...."));
-        Examine(SoftpornIds.Bum, ctx => ctx.Say("He grumbles -- I'll tell you a story for a bottle of wine....."));
-        Examine(SoftpornIds.DoorWest, ctx =>
+        Examine(SlotMachines, ctx => ctx.Say("Playing them might be more fun...."));
+        Examine(Bum, ctx => ctx.Say("He grumbles -- I'll tell you a story for a bottle of wine....."));
+        Examine(DoorWest, ctx =>
         {
             if (ctx.Get(_doorWestOpen)) ctx.Say("The door is open");
             else
@@ -163,44 +245,44 @@ internal sealed partial class SoftpornWorld
                 ctx.Say("'Entry by showing passcard - Club members and their guests only!'");
             }
         });
-        Examine(SoftpornIds.Telephone, ctx =>
+        Examine(Telephone, ctx =>
         {
-            if (ctx.InRoom(R(SoftpornIds.PhoneBooth)))
+            if (ctx.InRoom(PhoneBooth))
                 ctx.Say("A number is there - Call 555-6969 for a good time!");
             else
                 ctx.Say("I see nothing special");
         });
-        Examine(SoftpornIds.Wallet, ctx =>
+        Examine(Wallet, ctx =>
         {
             if (Money(ctx) > 0) ctx.Say($"I've got ${Money(ctx)}00 in it.");
             else ctx.Say("It's empty!");
         });
-        Examine(SoftpornIds.Rubber, ctx =>
+        Examine(Rubber, ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.Rubber))) { ctx.Say("I don't have it!!"); return; }
+            if (!ctx.Carrying(T(Rubber))) { ctx.Say("I don't have it!!"); return; }
             ctx.Say($"It's {ctx.Get(_rubberColor)}, {ctx.Get(_rubberFlavor)}-flavored, " +
                     $"{ctx.Get(_rubberLubricated)}, and {ctx.Get(_rubberRibbed)}");
         });
-        Examine(SoftpornIds.Pills, ctx =>
+        Examine(Pills, ctx =>
         {
             ctx.Say("The label on the bottle says");
             ctx.Say("'Want to drive someone crazy with lust?? Try this!!!!'");
         });
-        Examine(SoftpornIds.Closet, ctx =>
+        Examine(Closet, ctx =>
         {
             if (ctx.Get(_closetOpen))
             {
-                if (ctx.LocatedIn(T(SoftpornIds.Doll), ctx.CurrentRoom))
+                if (ctx.LocatedIn(T(Doll), ctx.CurrentRoom))
                     ctx.Say("It's open");
-                RevealHere(ctx, SoftpornIds.Doll);
+                RevealHere(ctx, Doll);
             }
             else
                 ctx.Say("It's closed");
         });
-        Examine(SoftpornIds.Sink, ctx => ctx.Say("The sign over the sink says 'Water on or off to operate'"));
-        Examine(SoftpornIds.Elevator, ctx => ctx.Say("It's doors are closed"));
-        Examine(SoftpornIds.Dealer, ctx => ctx.Say("He's waiting for me to play"));
-        Examine(SoftpornIds.Cabinet, ctx =>
+        Examine(Sink, ctx => ctx.Say("The sign over the sink says 'Water on or off to operate'"));
+        Examine(Elevator, ctx => ctx.Say("It's doors are closed"));
+        Examine(Dealer, ctx => ctx.Say("He's waiting for me to play"));
+        Examine(Cabinet, ctx =>
         {
             if (!ctx.Get(_stoolClimbed))
             {
@@ -209,44 +291,44 @@ internal sealed partial class SoftpornWorld
             }
             if (ctx.Get(_cabinetOpen))
             {
-                if (ctx.LocatedIn(T(SoftpornIds.Pitcher), ctx.CurrentRoom))
+                if (ctx.LocatedIn(T(Pitcher), ctx.CurrentRoom))
                     ctx.Say("It's open");
-                RevealHere(ctx, SoftpornIds.Pitcher);
+                RevealHere(ctx, Pitcher);
             }
             else
                 ctx.Say("It's closed");
         });
-        Examine(SoftpornIds.Bushes, ctx => ctx.Say("Entering them would be kinky!!!!"));
-        Examine(SoftpornIds.Sign, ctx => ctx.Say("It says 'Hail taxi here'"));
-        Examine(SoftpornIds.Flowers, ctx => ctx.Say("They look beautiful!!!"));
-        Examine(SoftpornIds.Doll, ctx =>
+        Examine(Bushes, ctx => ctx.Say("Entering them would be kinky!!!!"));
+        Examine(Sign, ctx => ctx.Say("It says 'Hail taxi here'"));
+        Examine(Flowers, ctx => ctx.Say("They look beautiful!!!"));
+        Examine(Doll, ctx =>
         {
             if (ctx.Get(_dollInflated))
                 ctx.Say("It's inflated");
             else
                 ctx.Say("It's rolled up in a little ball");
         });
-        Examine(SoftpornIds.Pitcher, ctx =>
+        Examine(Pitcher, ctx =>
         {
             if (ctx.Get(_pitcherFull))
                 ctx.Say("It's full of water");
             else
                 ctx.Say("It's empty");
         });
-        Examine(SoftpornIds.Curtain, ctx => ctx.Say("It's on the east wall"));
-        Examine(SoftpornIds.Waitress, ctx => ctx.Say("She ignores you!"));
-        Examine(SoftpornIds.Radio, ctx => ctx.Say("Maybe I should listen..."));
-        Examine(SoftpornIds.Window, ctx => ctx.Say("The window looks into a room. But I can't see too much from here."));
+        Examine(Curtain, ctx => ctx.Say("It's on the east wall"));
+        Examine(Waitress, ctx => ctx.Say("She ignores you!"));
+        Examine(Radio, ctx => ctx.Say("Maybe I should listen..."));
+        Examine(Window, ctx => ctx.Say("The window looks into a room. But I can't see too much from here."));
     }
 
-    private void Examine(string thingId, Action<GameContext> handler)
+    private void Examine(Thing thing, Action<GameContext> handler)
     {
-        T(thingId).OnExamine = handler;
+        thing.OnExamine = handler;
     }
 
     private void DefineContainers()
     {
-        _b.On(T(SoftpornIds.Desk)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(Desk)).Before(_softporn.Verbs.Open!, ctx =>
         {
             if (ctx.Get(_drawerOpen))
             {
@@ -256,7 +338,7 @@ internal sealed partial class SoftpornWorld
             ctx.Set(_drawerOpen, true);
             return VerbResult.Done;
         });
-        _b.On(T(SoftpornIds.Desk)).Before(_b.Verbs.Close!, ctx =>
+        _softporn.On(T(Desk)).Before(_softporn.Verbs.Close!, ctx =>
         {
             if (!ctx.Get(_drawerOpen))
             {
@@ -264,11 +346,11 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Set(_drawerOpen, false);
-            ctx.Remove(T(SoftpornIds.Newspaper));
+            ctx.Remove(T(Newspaper));
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Closet)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(Closet)).Before(_softporn.Verbs.Open!, ctx =>
         {
             if (ctx.Get(_closetOpen))
             {
@@ -276,13 +358,13 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Set(_closetOpen, true);
-            RevealHere(ctx, SoftpornIds.Doll);
+            RevealHere(ctx, Doll);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Cabinet)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(Cabinet)).Before(_softporn.Verbs.Open!, ctx =>
         {
-            if (!ctx.Get(_stoolClimbed) && !ctx.Carrying(T(SoftpornIds.Stool)))
+            if (!ctx.Get(_stoolClimbed) && !ctx.Carrying(T(Stool)))
             {
                 ctx.Say("I can't reach it!!");
                 return VerbResult.Done;
@@ -293,11 +375,11 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Set(_cabinetOpen, true);
-            RevealHere(ctx, SoftpornIds.Pitcher);
+            RevealHere(ctx, Pitcher);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Closet)).Before(_b.Verbs.Close!, ctx =>
+        _softporn.On(T(Closet)).Before(_softporn.Verbs.Close!, ctx =>
         {
             if (!ctx.Get(_closetOpen))
             {
@@ -305,11 +387,11 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Set(_closetOpen, false);
-            ctx.Remove(T(SoftpornIds.Doll));
+            ctx.Remove(T(Doll));
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Cabinet)).Before(_b.Verbs.Close!, ctx =>
+        _softporn.On(T(Cabinet)).Before(_softporn.Verbs.Close!, ctx =>
         {
             if (!ctx.Get(_stoolClimbed)) { ctx.Say("I can't reach it!"); return VerbResult.Done; }
             if (!ctx.Get(_cabinetOpen))
@@ -318,11 +400,11 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Set(_cabinetOpen, false);
-            ctx.Remove(T(SoftpornIds.Pitcher));
+            ctx.Remove(T(Pitcher));
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.DoorWest)).Before(_b.Verbs.Close!, ctx =>
+        _softporn.On(T(DoorWest)).Before(_softporn.Verbs.Close!, ctx =>
         {
             if (!ctx.Get(_doorWestOpen))
             {
@@ -333,7 +415,7 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.DoorWest)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(DoorWest)).Before(_softporn.Verbs.Open!, ctx =>
         {
             if (ctx.Get(_doorWestOpen))
             {
@@ -341,7 +423,7 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Say("A voice asks 'Passcard?' I search in my pockets and...");
-            if (ctx.Carrying(T(SoftpornIds.Passcard)))
+            if (ctx.Carrying(T(Passcard)))
             {
                 ctx.Say("I have it! The door opens!");
                 ctx.Set(_doorWestOpen, true);
@@ -351,11 +433,11 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Window)).Before(_break, ctx =>
+        _softporn.On(T(Window)).Before(_break, ctx =>
         {
             ctx.Say("Let me see if I have a hammer");
             Thread.Sleep(400);
-            if (!ctx.Carrying(T(SoftpornIds.Hammer)))
+            if (!ctx.Carrying(T(Hammer)))
             {
                 ctx.Say("I don't have it!!");
                 return VerbResult.Done;
@@ -365,27 +447,32 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Window)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(Window)).Before(_softporn.Verbs.Open!, ctx =>
         {
             ctx.Say("Won't budge");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Curtain)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(Curtain)).Before(_softporn.Verbs.Open!, ctx =>
         {
             ctx.Say("It seems to be remotely controlled");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Elevator)).Before(_b.Verbs.Open!, ctx =>
+        _softporn.On(T(Elevator)).Before(_softporn.Verbs.Open!, ctx =>
         {
             ctx.Say("Push the button to open elevator");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Toilet)).Before(_flush, ctx =>
+        _softporn.On(T(Toilet)).Before(_flush, ctx =>
         {
-            SayLong(ctx, 69);
+            SayLong(ctx,
+"""
+Ok, here goes .......
+Oh no!!!! It's overflowing!!!!!!!!!!!!!!!!!
+It's filling the room with gross sewage!!!!!
+""");
             ctx.Say("I'm dead from the germs!!");
             Purgatory(ctx);
             return VerbResult.Done;
@@ -394,18 +481,18 @@ internal sealed partial class SoftpornWorld
 
     private void DefineCommerce()
     {
-        _b.On(T(SoftpornIds.Rubber)).Before(_buy, BuyAtPharmacy);
-        _b.On(T(SoftpornIds.Magazine)).Before(_buy, BuyAtPharmacy);
+        _softporn.On(T(Rubber)).Before(_buy, BuyAtPharmacy);
+        _softporn.On(T(Magazine)).Before(_buy, BuyAtPharmacy);
     }
 
     private VerbResult BuyHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject == T(SoftpornIds.Wine))
-            return BuyWineFromWaitress(ctx);
-        if (ctx.DirectObject is { } item &&
-            (item == T(SoftpornIds.Beer) || item == T(SoftpornIds.Whiskey)))
-            return BuyFromBartender(ctx);
-        return VerbResult.Pass;
+        return ctx.DirectObject == T(Wine)
+            ? BuyWineFromWaitress(ctx)
+            : ctx.DirectObject is { } item &&
+            (item == T(Beer) || item == T(Whiskey))
+            ? BuyFromBartender(ctx)
+            : VerbResult.Pass;
     }
 
     private VerbResult BuyFromBartender(VerbContext ctx)
@@ -417,7 +504,7 @@ internal sealed partial class SoftpornWorld
         }
 
         if (ctx.DirectObject is not { } item ||
-            (item != T(SoftpornIds.Beer) && item != T(SoftpornIds.Whiskey)))
+            (item != T(Beer) && item != T(Whiskey)))
         {
             CantDoThat(ctx);
             return VerbResult.Done;
@@ -449,13 +536,13 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        if (!ctx.InRoom(R(SoftpornIds.Disco)))
+        if (!ctx.InRoom(Disco))
         {
             ctx.Say("Not yet but maybe later!");
             return VerbResult.Done;
         }
 
-        if (!IsOffstage(ctx, T(SoftpornIds.Wine)))
+        if (!IsOffstage(ctx, T(Wine)))
         {
             ctx.Say("All out!");
             return VerbResult.Done;
@@ -466,7 +553,7 @@ internal sealed partial class SoftpornWorld
         ctx.Say("Poor service!!!");
         Thread.Sleep(2000);
         Spend(ctx, 1);
-        ctx.PlaceHere(T(SoftpornIds.Wine));
+        ctx.PlaceHere(T(Wine));
         return VerbResult.Done;
     }
 
@@ -478,7 +565,7 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        if (!ctx.InRoom(R(SoftpornIds.Pharmacy)) || ctx.DirectObject is not { } item)
+        if (!ctx.InRoom(Pharmacy) || ctx.DirectObject is not { } item)
         {
             ctx.Say("Not yet but maybe later!");
             return VerbResult.Done;
@@ -490,7 +577,7 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        if (item == T(SoftpornIds.Rubber))
+        if (item == T(Rubber))
             BuyRubber(ctx);
         else
             ctx.Say("He takes $100 and gives me the magazine");
@@ -502,7 +589,7 @@ internal sealed partial class SoftpornWorld
 
     private void DefineTakeRules()
     {
-        T(SoftpornIds.Candy).OnTake = ctx =>
+        T(Candy).OnTake = ctx =>
         {
             if (ctx.InRoom(HookerBedroom) && !ctx.Get(_hookerFucked))
             {
@@ -513,9 +600,9 @@ internal sealed partial class SoftpornWorld
             return false;
         };
 
-        T(SoftpornIds.Rubber).OnTake = ctx =>
+        T(Rubber).OnTake = ctx =>
         {
-            if (ctx.InRoom(R(SoftpornIds.Pharmacy)))
+            if (ctx.InRoom(Pharmacy))
             {
                 ctx.Say("The man says 'Shoplifter!!' and shoots me");
                 Purgatory(ctx);
@@ -525,9 +612,9 @@ internal sealed partial class SoftpornWorld
             return false;
         };
 
-        T(SoftpornIds.Magazine).OnTake = ctx =>
+        T(Magazine).OnTake = ctx =>
         {
-            if (ctx.InRoom(R(SoftpornIds.Pharmacy)))
+            if (ctx.InRoom(Pharmacy))
             {
                 ctx.Say("The man says 'Shoplifter!!' and shoots me");
                 Purgatory(ctx);
@@ -537,9 +624,9 @@ internal sealed partial class SoftpornWorld
             return false;
         };
 
-        T(SoftpornIds.Water).OnTake = ctx =>
+        T(Water).OnTake = ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.Pitcher)))
+            if (!ctx.Carrying(T(Pitcher)))
             {
                 ctx.Say("Get me the pitcher so I don't spill it!");
                 return true;
@@ -549,7 +636,7 @@ internal sealed partial class SoftpornWorld
             return false;
         };
 
-        T(SoftpornIds.Rope).OnTake = ctx =>
+        T(Rope).OnTake = ctx =>
         {
             if (ctx.Get(_ropeInUse))
             {
@@ -560,119 +647,122 @@ internal sealed partial class SoftpornWorld
             return false;
         };
 
-        T(SoftpornIds.Pitcher).OnTake = ctx =>
+        T(Pitcher).OnTake = ctx =>
         {
-            if (ctx.Get(_pitcherFull) && ctx.LocatedIn(T(SoftpornIds.Water), ctx.CurrentRoom))
-                ctx.Take(T(SoftpornIds.Water));
+            if (ctx.Get(_pitcherFull) && ctx.LocatedIn(T(Water), ctx.CurrentRoom))
+                ctx.Take(T(Water));
             return false;
         };
     }
 
     private void DefineDropGifts()
     {
-        T(SoftpornIds.Candy).OnDrop = ctx =>
+        T(Candy).OnDrop = ctx =>
         {
-            if (!ctx.InRoom(R(SoftpornIds.Disco)) || !ctx.LocatedIn(T(SoftpornIds.Girl), ctx.CurrentRoom))
+            if (!ctx.InRoom(Disco) || !ctx.LocatedIn(T(Girl), ctx.CurrentRoom))
                 return false;
             ctx.Say("She smiles and eats a couple!!");
             ctx.Set(_candyGiven, true);
-            ctx.Remove(T(SoftpornIds.Candy));
+            ctx.Remove(T(Candy));
             CheckGirlCourtship(ctx);
             return true;
         };
 
-        T(SoftpornIds.Flowers).OnDrop = ctx =>
+        T(Flowers).OnDrop = ctx =>
         {
-            if (!ctx.InRoom(R(SoftpornIds.Disco)) || !ctx.LocatedIn(T(SoftpornIds.Girl), ctx.CurrentRoom))
+            if (!ctx.InRoom(Disco) || !ctx.LocatedIn(T(Girl), ctx.CurrentRoom))
                 return false;
             ctx.Say("She blushes profusely and puts them in her hair!");
             ctx.Set(_flowersGiven, true);
-            ctx.Remove(T(SoftpornIds.Flowers));
+            ctx.Remove(T(Flowers));
             CheckGirlCourtship(ctx);
             return true;
         };
 
-        T(SoftpornIds.Ring).OnDrop = ctx =>
+        T(Ring).OnDrop = ctx =>
         {
-            if (!ctx.InRoom(R(SoftpornIds.Disco)) || !ctx.LocatedIn(T(SoftpornIds.Girl), ctx.CurrentRoom))
+            if (!ctx.InRoom(Disco) || !ctx.LocatedIn(T(Girl), ctx.CurrentRoom))
                 return false;
             ctx.Say("She blushes and puts it in her purse.");
             ctx.Set(_ringGiven, true);
-            ctx.Remove(T(SoftpornIds.Ring));
+            ctx.Remove(T(Ring));
             CheckGirlCourtship(ctx);
             return true;
         };
 
-        T(SoftpornIds.Wine).OnDrop = ctx =>
-        {
-            if (ctx.LocatedIn(T(SoftpornIds.Bum), ctx.CurrentRoom))
-            {
-                if (IsOffstage(ctx, T(SoftpornIds.Knife)))
-                {
-                    BumTellsStory(ctx);
-                    ctx.PlaceHere(T(SoftpornIds.Knife));
-                }
-                else
-                    ctx.Say("The bum mutters 'That stuff made me puke!! Get out of here!!!'");
-                ctx.Remove(T(SoftpornIds.Wine));
-                return true;
-            }
+        T(Wine).OnDrop = ctx => TryGiveWineToBum(ctx);
 
-            return false;
-        };
-
-        T(SoftpornIds.Whiskey).OnDrop = ctx =>
+        _softporn.On(T(Wine)).Before(_softporn.Verbs.Give!, ctx =>
         {
-            if (ctx.LocatedIn(T(SoftpornIds.Businessman), ctx.CurrentRoom) &&
-                IsOffstage(ctx, T(SoftpornIds.ControlUnit)))
+            if (ctx.IndirectObject != T(Bum))
+                return VerbResult.Pass;
+            return TryGiveWineToBum(ctx) ? VerbResult.Done : VerbResult.Pass;
+        });
+
+        T(Whiskey).OnDrop = ctx =>
+        {
+            if (ctx.LocatedIn(T(Businessman), ctx.CurrentRoom) &&
+                IsOffstage(ctx, T(ControlUnit)))
             {
                 ctx.Say("The guy gives me a TV controller!!");
-                ctx.PlaceHere(T(SoftpornIds.ControlUnit));
+                ctx.PlaceHere(T(ControlUnit));
                 return false;
             }
 
             return false;
         };
 
-        T(SoftpornIds.Pills).OnDrop = ctx =>
+        T(Pills).OnDrop = ctx =>
         {
-            if (ctx.LocatedIn(T(SoftpornIds.Blonde), ctx.CurrentRoom))
+            if (ctx.LocatedIn(T(Blonde), ctx.CurrentRoom))
             {
-                SayLong(ctx, 57);
-                ctx.Remove(T(SoftpornIds.Blonde));
-                ctx.Remove(T(SoftpornIds.Pills));
+                SayLong(ctx,
+"""
+The blonde looks at the pills and says 'Thanks!!! I love this stuff!'
+She takes a pill .... her nipples start to stand up! Wow!!!!
+She's breathing heavily .... I hope she rapes me!!!!!
+She says 'So long!!! I'm going to see my boyfriend!'
+She disappears down the stairs.....
+""");
+                ctx.Remove(T(Blonde));
+                ctx.Remove(T(Pills));
                 return true;
             }
 
             return false;
         };
 
-        T(SoftpornIds.Apple).OnDrop = ctx =>
+        T(Apple).OnDrop = ctx =>
         {
-            if (ctx.InRoom(Jacuzzi) && ctx.LocatedIn(T(SoftpornIds.Girl), ctx.CurrentRoom))
+            if (ctx.InRoom(Jacuzzi) && ctx.LocatedIn(T(Girl), ctx.CurrentRoom))
             {
-                SayLong(ctx, 50);
+                SayLong(ctx,
+"""
+She takes the apple and raises it to her mouth. With an outrageously innocent
+look she takes a small bite out of it. A smile comes across her face! She's
+really starting to look quite sexy!!!! She winks and lays back in the jacuzzi
+""");
                 ctx.Set(_appleGiven, true);
-                ctx.Remove(T(SoftpornIds.Apple));
+                ctx.Remove(T(Apple));
                 return true;
             }
 
             return false;
         };
 
-        T(SoftpornIds.Rubber).OnDrop = ctx => { ctx.Set(_rubberWorn, false); return false; };
+        T(Rubber).OnDrop = ctx => { ctx.Set(_rubberWorn, false); return false; };
     }
 
     private void CheckGirlCourtship(GameContext ctx)
     {
         if (!ctx.Get(_candyGiven) || !ctx.Get(_flowersGiven) || !ctx.Get(_ringGiven)) return;
         ctx.Say("She says: 'See you at the Marriage Center!!'");
-        ctx.Move(T(SoftpornIds.Girl), Placement.InRoom(R(SoftpornIds.MarriageCenter)));
+        ctx.Move(T(Girl), Placement.InRoom(MarriageCenter));
     }
 
     private void DefineRomance()
     {
-        _b.On(T(SoftpornIds.Hooker)).Before(_fuck, ctx =>
+        _softporn.On(T(Hooker)).Before(_fuck, ctx =>
         {
             if (ctx.Get(_hookerFucked)) { ctx.Say("She can't take it any more!!!!"); return VerbResult.Done; }
             if (!ctx.Get(_rubberWorn))
@@ -683,13 +773,19 @@ internal sealed partial class SoftpornWorld
             }
             ctx.Set(_hookerFucked, true);
             ctx.State.Score++;
-            SayLong(ctx, 51);
+            SayLong(ctx,
+"""
+It's a good thing I was wearing that rubber!!!!!
+She was OK - but really ... can't you do better that this??
+The score is now '1' out of a possible of '3' ... so congratulations!!!!!
+Well ... go to it - you stud!!! Find me another girl!
+""");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Doll)).Before(_fuck, ctx =>
+        _softporn.On(T(Doll)).Before(_fuck, ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.Doll)))
+            if (!ctx.Carrying(T(Doll)))
             {
                 ctx.Say("I can't unless I'm holding it close");
                 return VerbResult.Done;
@@ -699,29 +795,53 @@ internal sealed partial class SoftpornWorld
                 ctx.Say("Inflate it first -- stupid!!!");
                 return VerbResult.Done;
             }
-            SayLong(ctx, 52);
-            ctx.Remove(T(SoftpornIds.Doll));
+            SayLong(ctx,
+"""
+Oh boy!!!! - it's got 3 spots to try!!! I thrust into the doll - kinky .. eh?
+I start to increase my tempo ... faster and faster I go!!!!
+Suddenly there's a flatulent noise and the doll becomes a popped balloon
+soaring around the room! It flies out of the room and disappears!
+""");
+            ctx.Remove(T(Doll));
             DecrementCarry(ctx);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Girl)).Before(_fuck, ctx =>
+        _softporn.On(T(Girl)).Before(_fuck, ctx =>
         {
             if (ctx.InRoom(HoneymoonSuite) && ctx.Get(_wineOrdered))
             {
-                SayLong(ctx, 54);
+                SayLong(ctx,
+"""
+She says 'Lay down honey - let me give you a special surprise!!!'
+I lay down and she says 'OK - now close your eyes'.
+I close my eyes and she starts to go to work on me.......
+I'm really enjoying myself when suddenly she ties me to the bed!!!!
+Then she says 'So long - Turkey!' and runs out of the room!!!
+Well - the score is now '2' out of a possible '3'.............
+.......but I'm also tied to the bed and can't move!!!!!!!
+""");
                 ctx.State.Score++;
                 ctx.Set(_girl2Fucked, true);
                 ctx.Set(_tiedToBed, true);
-                ctx.Move(T(SoftpornIds.Girl), Placement.InRoom(Jacuzzi));
-                ctx.PlaceHere(T(SoftpornIds.Rope));
+                ctx.Move(T(Girl), Placement.InRoom(Jacuzzi));
+                ctx.PlaceHere(T(Rope));
                 return VerbResult.Done;
             }
             if (ctx.InRoom(Jacuzzi) && ctx.Get(_appleGiven))
             {
                 ctx.State.Score++;
-                SayLong(ctx, 53);
-                ctx.Win(SoftpornMessages.Text(53));
+                string ending =
+"""
+She hops out of the tub - the steam rising from her skin ... her body is
+the best looking I've ever seen!!!
+Then she comes up to me and gives the best time of my life!!!
+Well ... I guess that's it! As your puppet in this game I thank you for
+the pleasure you have brought me ... so long ... I've got to get back to
+my new girl here! Keep it up!
+""";
+                SayLong(ctx, ending);
+                ctx.EndGame(true);
                 return VerbResult.Done;
             }
             if (ctx.InRoom(HoneymoonSuite))
@@ -732,26 +852,26 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Pass;
         });
 
-        _b.On(T(SoftpornIds.Rubber)).Before(_b.Verbs.TakeOff!, ctx =>
+        _softporn.On(T(Rubber)).Before(_softporn.Verbs.TakeOff!, ctx =>
         {
             ctx.Set(_rubberWorn, false);
             return VerbResult.Pass;
         });
 
-        _b.On(T(SoftpornIds.Rubber)).Before(_b.Verbs.Wear!, ctx =>
+        _softporn.On(T(Rubber)).Before(_softporn.Verbs.Wear!, ctx =>
         {
             ctx.Say("It tickles!!");
             ctx.Set(_rubberWorn, true);
-            ctx.Move(T(SoftpornIds.Rubber), Placement.Worn);
+            ctx.Move(T(Rubber), Placement.Worn);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Knife)).Before(_b.Verbs.Wear!, WearKnifeHandler);
-        _b.On(T(SoftpornIds.Knife)).Before(_cut, WearKnifeHandler);
+        _softporn.On(T(Knife)).Before(_softporn.Verbs.Wear!, WearKnifeHandler);
+        _softporn.On(T(Knife)).Before(_cut, WearKnifeHandler);
 
-        _b.On(T(SoftpornIds.Passcard)).Before(_b.Verbs.Wear!, ctx =>
+        _softporn.On(T(Passcard)).Before(_softporn.Verbs.Wear!, ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.Passcard)))
+            if (!ctx.Carrying(T(Passcard)))
             {
                 ctx.Say("I don't have it!!");
                 return VerbResult.Done;
@@ -766,9 +886,9 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Rope)).Before(_b.Verbs.Wear!, ctx =>
+        _softporn.On(T(Rope)).Before(_softporn.Verbs.Wear!, ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.Rope)))
+            if (!ctx.Carrying(T(Rope)))
             {
                 ctx.Say("I don't have it!!");
                 return VerbResult.Done;
@@ -779,7 +899,7 @@ internal sealed partial class SoftpornWorld
                 return VerbResult.Done;
             }
             ctx.Set(_ropeInUse, true);
-            ctx.PlaceHere(T(SoftpornIds.Rope));
+            ctx.PlaceHere(T(Rope));
             ctx.Say("You tie the safety rope to the balcony");
             return VerbResult.Done;
         });
@@ -789,7 +909,7 @@ internal sealed partial class SoftpornWorld
     {
         ctx.Say("Let me see if I still have the knife!");
         Thread.Sleep(600);
-        if (!ctx.Carrying(T(SoftpornIds.Knife)))
+        if (!ctx.Carrying(T(Knife)))
         {
             ctx.Say("I don't have it!!");
             return VerbResult.Done;
@@ -814,27 +934,27 @@ internal sealed partial class SoftpornWorld
 
     private void DefineGarden()
     {
-        _b.On(T(SoftpornIds.Sink)).Before(_b.Verbs.SwitchOn!, ctx =>
+        _softporn.On(T(Sink)).Before(_softporn.Verbs.SwitchOn!, ctx =>
         {
             ctx.Set(_waterOn, true);
             ctx.Say("Water is running in the sink");
-            ctx.PlaceHere(T(SoftpornIds.Water));
+            ctx.PlaceHere(T(Water));
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Sink)).Before(_b.Verbs.SwitchOff!, ctx =>
+        _softporn.On(T(Sink)).Before(_softporn.Verbs.SwitchOff!, ctx =>
         {
             ctx.Set(_waterOn, false);
             if (!ctx.Get(_pitcherFull))
             {
                 Ok(ctx);
-                if (ctx.LocatedIn(T(SoftpornIds.Water), ctx.CurrentRoom))
-                    ctx.Remove(T(SoftpornIds.Water));
+                if (ctx.LocatedIn(T(Water), ctx.CurrentRoom))
+                    ctx.Remove(T(Water));
             }
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Stool)).Before(_climb, ctx =>
+        _softporn.On(T(Stool)).Before(_climb, ctx =>
         {
             ctx.Set(_stoolClimbed, true);
             ctx.Say("OK");
@@ -845,87 +965,112 @@ internal sealed partial class SoftpornWorld
     private void GrowTree(GameContext ctx)
     {
         ctx.Say("A tree sprouts!!");
-        ctx.PlaceHere(T(SoftpornIds.Tree));
-        RevealHere(ctx, SoftpornIds.Apple);
-        if (ctx.Carrying(T(SoftpornIds.Seeds)) || ctx.LocatedIn(T(SoftpornIds.Seeds), ctx.CurrentRoom))
-            ctx.Remove(T(SoftpornIds.Seeds));
-        ctx.Remove(T(SoftpornIds.Water));
+        ctx.PlaceHere(T(Tree));
+        RevealHere(ctx, Apple);
+        if (ctx.Carrying(T(Seeds)) || ctx.LocatedIn(T(Seeds), ctx.CurrentRoom))
+            ctx.Remove(T(Seeds));
+        ctx.Remove(T(Water));
         ctx.Set(_pitcherFull, false);
     }
 
     private void DefineDeathTraps()
     {
-        foreach (string npc in new[] { SoftpornIds.Blonde, SoftpornIds.Waitress, SoftpornIds.Hooker, SoftpornIds.Girl })
+        foreach (Thing npc in new[] { Blonde, Waitress, Hooker, Girl })
         {
-            _b.On(T(npc)).Before(_b.Verbs.Eat!, ctx =>
+            _softporn.On(npc).Before(_softporn.Verbs.Eat!, ctx =>
             {
-                SayLong(ctx, 38);
+                SayLong(ctx,
+"""
+She says 'Me first!!!!'
+She takes my throbbing tool into her mouth!!!
+She starts going to work ... feels so good!!!!!!
+Then she smiles and bites it off! She says 'No oral sex in this game!!!!!!'
+Suffer!!!!!
+""");
                 Purgatory(ctx);
                 return VerbResult.Done;
             });
         }
 
-        _b.On(T(SoftpornIds.Pills)).Before(_b.Verbs.Eat!, ctx =>
+        _softporn.On(T(Pills)).Before(_softporn.Verbs.Eat!, ctx =>
         {
-            SayLong(ctx, 56);
+            SayLong(ctx,
+"""
+This stuff is good! I'm breathing heavily - I've never been this horny!!!!!
+I've just got to do something..............
+Ah ... there goes a female german shepard!! That gives me an idea!.......
+Kinky dog!!!! Chewed me to death!!!!
+""");
             Purgatory(ctx);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Mushroom)).Before(_b.Verbs.Eat!, ctx =>
+        _softporn.On(T(Mushroom)).Before(_softporn.Verbs.Eat!, ctx =>
         {
-            SayLong(ctx, 64);
-            bool carried = ctx.Carrying(T(SoftpornIds.Mushroom));
-            ctx.Remove(T(SoftpornIds.Mushroom));
+            SayLong(ctx,
+"""
+Holy Cow! Psychedelic!!!!
+Pretty colors appear and I'm elsewhere!
+""");
+            bool carried = ctx.Carrying(T(Mushroom));
+            ctx.Remove(T(Mushroom));
             if (carried) DecrementCarry(ctx);
             Thread.Sleep(600);
-            ctx.MovePlayerTo(R(SoftpornIds.Hallway));
-            ctx.Say(SoftpornMessages.Text(1));
+            ctx.MovePlayerTo(Hallway);
+            ctx.Say(
+"""
+I'm in a dimly lit hallway.
+The paint is peeling off the walls and the floor hasn't been cleaned in months.
+Cockroaches run across the floor - jumping as the loosely installed lightbulb
+crackles and flickers.
+An old desk sits pushed against the wall. A businessman sits on a broken chair
+next to the desk. Seems kind of drunk!
+""");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Garbage)).Before(_b.Verbs.Eat!, ctx =>
+        _softporn.On(T(Garbage)).Before(_softporn.Verbs.Eat!, ctx =>
         {
             ctx.Say("Too moldy!");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.AppleCore)).Before(_b.Verbs.Eat!, ctx =>
+        _softporn.On(T(AppleCore)).Before(_softporn.Verbs.Eat!, ctx =>
         {
             ctx.Say("Too moldy!");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Apple)).Before(_b.Verbs.Eat!, ctx =>
+        _softporn.On(T(Apple)).Before(_softporn.Verbs.Eat!, ctx =>
         {
             ctx.Say("Sorry ... not hungry!");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Whiskey)).Before(_b.Verbs.Drink!, ctx =>
+        _softporn.On(T(Whiskey)).Before(_softporn.Verbs.Drink!, ctx =>
         {
             ctx.Say("This stuff is rot-gut! Give it to someone ... I don't want it.");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Beer)).Before(_b.Verbs.Drink!, ctx =>
+        _softporn.On(T(Beer)).Before(_softporn.Verbs.Drink!, ctx =>
         {
             ctx.Say("Heh...heh...hey!!!! This stuff's OK!");
-            ctx.Remove(T(SoftpornIds.Beer));
+            ctx.Remove(T(Beer));
             DecrementCarry(ctx);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Wine)).Before(_b.Verbs.Drink!, ctx =>
+        _softporn.On(T(Wine)).Before(_softporn.Verbs.Drink!, ctx =>
         {
             ctx.Say("Sour grapes....");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Water)).Before(_b.Verbs.Drink!, ctx =>
+        _softporn.On(T(Water)).Before(_softporn.Verbs.Drink!, ctx =>
         {
             ctx.Say("Thanks!");
-            ctx.Remove(T(SoftpornIds.Water));
+            ctx.Remove(T(Water));
             ctx.Set(_pitcherFull, false);
             DecrementCarry(ctx);
             return VerbResult.Done;
@@ -934,9 +1079,9 @@ internal sealed partial class SoftpornWorld
 
     private void DefineNpcDrops()
     {
-        _b.On(T(SoftpornIds.Radio)).Before(_listen, ctx =>
+        _softporn.On(T(Radio)).Before(_listen, ctx =>
         {
-            if (!ctx.Carrying(T(SoftpornIds.Radio)))
+            if (!ctx.Carrying(T(Radio)))
             {
                 ctx.Say("Take it and put it next to my ear!");
                 return VerbResult.Done;
@@ -951,38 +1096,38 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Bartender)).Before(_fuck, ctx =>
+        _softporn.On(T(Bartender)).Before(_fuck, ctx =>
         {
             ctx.Say("He jumps over the bar and kills me!!");
             Purgatory(ctx);
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Waitress)).Before(_fuck, ctx =>
+        _softporn.On(T(Waitress)).Before(_fuck, ctx =>
         {
             ctx.Say("She kicks me in the groin and says 'Wise up - Buster!!'");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Blonde)).Before(_fuck, ctx =>
+        _softporn.On(T(Blonde)).Before(_fuck, ctx =>
         {
             ctx.Say("She says 'I'm working! Leave me alone!!'");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Pimp)).Before(_fuck, ctx =>
+        _softporn.On(T(Pimp)).Before(_fuck, ctx =>
         {
             ctx.Say("He says 'You'll never have enough money for me - fool!'.  I guess he's gay!");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Bum)).Before(_fuck, ctx =>
+        _softporn.On(T(Bum)).Before(_fuck, ctx =>
         {
             ctx.Say("To do that I need vaseline!!");
             return VerbResult.Done;
         });
 
-        _b.On(T(SoftpornIds.Businessman)).Before(_fuck, ctx =>
+        _softporn.On(T(Businessman)).Before(_fuck, ctx =>
         {
             ctx.Say("No way!!!  You're weird!!");
             return VerbResult.Done;
@@ -999,28 +1144,34 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult HailHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != T(SoftpornIds.Taxi))
+        if (ctx.DirectObject != T(Taxi))
         {
             ctx.Say("Who are you kidding? You're pulling at straws, fool!!");
             return VerbResult.Done;
         }
 
-        if (ctx.CurrentRoom != R(SoftpornIds.BarStreet) &&
-            ctx.CurrentRoom != R(SoftpornIds.CasinoStreet) &&
-            ctx.CurrentRoom != R(SoftpornIds.DiscoStreet))
+        if (ctx.CurrentRoom != BarStreet &&
+            ctx.CurrentRoom != CasinoStreet &&
+            ctx.CurrentRoom != DiscoStreet)
         {
             ctx.Say("I'm not in the street, fool!!");
             return VerbResult.Done;
         }
 
-        SayLong(ctx, 36);
+        SayLong(ctx,
+"""
+A taxi pulls up and screeches to a halt! I get in the back and sit down.
+A sign says 'We service 3 destinations. When asked, please specify -
+Disco ... Casino ... or Bar'.
+The driver turns and asks: 'Where to Mac???'
+""");
         string dest = ctx.PromptLine("").Trim().ToUpperInvariant();
         dest = (dest + "    ")[..4];
         Room? target = dest switch
         {
-            "DISC" => R(SoftpornIds.DiscoStreet),
-            "CASI" => R(SoftpornIds.CasinoStreet),
-            "BAR " => R(SoftpornIds.BarStreet),
+            "DISC" => DiscoStreet,
+            "CASI" => CasinoStreet,
+            "BAR " => BarStreet,
             _ => null
         };
 
@@ -1030,9 +1181,17 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        if (ctx.Carrying(T(SoftpornIds.Wine)))
+        if (ctx.Carrying(T(Wine)))
         {
-            SayLong(ctx, 58);
+            SayLong(ctx,
+"""
+The driver looks at me and says 'Hey!! What's that you got ... wine????'
+He grabs the bottle and guzzles the wine down!!!!!!!!!!!!!!
+Oh no!!!! He's swerving towards a huge truck!!!!!
+I grab the wheel...............................
+We struggle....................................
+The truck just misses us!!!!!!!
+""");
             ctx.Say("The idiot cab driver backs over me and kills me!!!!!!");
             Purgatory(ctx);
             return VerbResult.Done;
@@ -1045,12 +1204,12 @@ internal sealed partial class SoftpornWorld
 
     private void DefineSmellAndShow()
     {
-        _b.On(T(SoftpornIds.Passcard)).Before(_show, ShowPasscardHandler);
+        _softporn.On(T(Passcard)).Before(_show, ShowPasscardHandler);
     }
 
     private VerbResult ShowPasscardHandler(VerbContext ctx)
     {
-        if (!ctx.Carrying(T(SoftpornIds.Passcard)))
+        if (!ctx.Carrying(T(Passcard)))
         {
             ctx.Say("I don't have it!!");
             return VerbResult.Done;
@@ -1068,7 +1227,7 @@ internal sealed partial class SoftpornWorld
     private VerbResult ShowHandler(VerbContext ctx)
     {
         if (ctx.DirectObject is null) { CantDoThat(ctx); return VerbResult.Done; }
-        if (ctx.DirectObject == T(SoftpornIds.Passcard)) return VerbResult.Pass;
+        if (ctx.DirectObject == T(Passcard)) return VerbResult.Pass;
         CantDoThat(ctx);
         return VerbResult.Done;
     }
@@ -1082,16 +1241,15 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        string msg = ctx.DirectObject.Id switch
-        {
-            SoftpornIds.Blonde => "Hmmm.....nice!!!!",
-            SoftpornIds.Hooker => "OK, who's eating tuna fish?!?!?!",
-            SoftpornIds.Toilet => "Arghhh...I'm going to puke!!!!!!",
-            SoftpornIds.Plant => "Ahhh..chooo!!!!!!  I guess I'm allergic!",
-            SoftpornIds.Garbage => "Yechhhhh!!!!!",
-            SoftpornIds.Flowers => "Smells like perfume!!!",
-            _ => "Smells OK"
-        };
+        Thing obj = ctx.DirectObject;
+        string msg =
+            obj == Blonde ? "Hmmm.....nice!!!!" :
+            obj == Hooker ? "OK, who's eating tuna fish?!?!?!" :
+            obj == Toilet ? "Arghhh...I'm going to puke!!!!!!" :
+            obj == Plant ? "Ahhh..chooo!!!!!!  I guess I'm allergic!" :
+            obj == Garbage ? "Yechhhhh!!!!!" :
+            obj == Flowers ? "Smells like perfume!!!" :
+            "Smells OK";
         ctx.Say(msg);
         return VerbResult.Done;
     }
@@ -1104,17 +1262,17 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult MarryHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != T(SoftpornIds.Girl))
+        if (ctx.DirectObject != T(Girl))
         {
             ctx.Say("No way, weirdo!!");
             return VerbResult.Done;
         }
-        if (!ctx.LocatedIn(T(SoftpornIds.Girl), ctx.CurrentRoom))
+        if (!ctx.LocatedIn(T(Girl), ctx.CurrentRoom))
         {
             ctx.Say("No girl!!");
             return VerbResult.Done;
         }
-        if (!ctx.InRoom(R(SoftpornIds.MarriageCenter)))
+        if (!ctx.InRoom(MarriageCenter))
         {
             ctx.Say("Not yet but maybe later!");
             return VerbResult.Done;
@@ -1126,9 +1284,16 @@ internal sealed partial class SoftpornWorld
             ctx.Say("The preacher says 'I'll need $1000 too!!'");
             return VerbResult.Done;
         }
-        SayLong(ctx, 66);
+        SayLong(ctx,
+"""
+OK.
+Why am I doing this?
+The Preacher takes $1000 and winks!
+The girl grabs $2000 and says:
+'Meet me at the Honeymoon Suite!! I've got connections to get a room there!!'
+""");
         Spend(ctx, 30);
-        ctx.Move(T(SoftpornIds.Girl), Placement.InRoom(HoneymoonSuite));
+        ctx.Move(T(Girl), Placement.InRoom(HoneymoonSuite));
         ctx.Set(_marriedToGirl, true);
         return VerbResult.Done;
     }
@@ -1137,9 +1302,9 @@ internal sealed partial class SoftpornWorld
     {
         if (ctx.DirectObject is null) { FindMeOne(ctx); return VerbResult.Done; }
 
-        if (ctx.DirectObject == T(SoftpornIds.SlotMachines))
+        if (ctx.DirectObject == T(SlotMachines))
         {
-            if (ctx.InRoom(R(SoftpornIds.Casino)))
+            if (ctx.InRoom(Casino))
             {
                 if (HasMoney(ctx, 1) && CarryingWallet(ctx))
                     PlaySlots(ctx);
@@ -1151,9 +1316,9 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        if (ctx.DirectObject == T(SoftpornIds.Cards))
+        if (ctx.DirectObject == T(Cards))
         {
-            if (ctx.InRoom(R(SoftpornIds.TwentyOneRoom)))
+            if (ctx.InRoom(TwentyOneRoom))
             {
                 if (HasMoney(ctx, 1) && CarryingWallet(ctx))
                     PlayBlackjack(ctx);
@@ -1171,7 +1336,7 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult PressHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != T(SoftpornIds.Button)) return VerbResult.Pass;
+        if (ctx.DirectObject != T(Button)) return VerbResult.Pass;
         if (ctx.InRoom(Bar))
         {
             ctx.Blank();
@@ -1186,18 +1351,24 @@ internal sealed partial class SoftpornWorld
                 ctx.Say("Wrong!!");
             return VerbResult.Done;
         }
-        if (ctx.InRoom(R(SoftpornIds.HotelDesk)) || ctx.InRoom(R(SoftpornIds.PenthouseFoyer)))
+        if (ctx.InRoom(HotelDesk) || ctx.InRoom(PenthouseFoyer))
         {
-            if (ctx.LocatedIn(T(SoftpornIds.Blonde), ctx.CurrentRoom))
+            if (ctx.LocatedIn(T(Blonde), ctx.CurrentRoom))
             {
                 ctx.Say("The blonde says 'You can't go there!'");
                 return VerbResult.Done;
             }
-            SayLong(ctx, 37);
-            if (ctx.InRoom(R(SoftpornIds.HotelDesk)))
-                ctx.MovePlayerTo(R(SoftpornIds.PenthouseFoyer));
+            SayLong(ctx,
+"""
+The elevator door open ... I get in.
+As the doors close the music starts playing - it's the usual elevator stuff
+... boring! We start to move ... after a few seconds the elevator stops.
+The doors open and I get out.
+""");
+            if (ctx.InRoom(HotelDesk))
+                ctx.MovePlayerTo(PenthouseFoyer);
             else
-                ctx.MovePlayerTo(R(SoftpornIds.HotelDesk));
+                ctx.MovePlayerTo(HotelDesk);
             return VerbResult.Done;
         }
         ctx.Say("Not yet but maybe later!");
@@ -1208,10 +1379,10 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult InflateHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != T(SoftpornIds.Doll)) { CantDoThat(ctx); return VerbResult.Done; }
-        if (!ctx.Carrying(T(SoftpornIds.Doll)))
+        if (ctx.DirectObject != T(Doll)) { CantDoThat(ctx); return VerbResult.Done; }
+        if (!ctx.Carrying(T(Doll)))
         {
-            if (ctx.LocatedIn(T(SoftpornIds.Doll), ctx.CurrentRoom))
+            if (ctx.LocatedIn(T(Doll), ctx.CurrentRoom))
                 ctx.Say("I can't unless I'm holding it close");
             else
                 FindMeOne(ctx);
@@ -1236,9 +1407,9 @@ internal sealed partial class SoftpornWorld
         }
 
         string number = NormalizePhone(ExtractPhoneDigits(ctx.RawInput));
-        if (number.Length < 4 && ctx.LocatedIn(T(SoftpornIds.Telephone), ctx.CurrentRoom))
+        if (number.Length < 4 && ctx.LocatedIn(T(Telephone), ctx.CurrentRoom))
             number = NormalizePhone(ExtractPhoneDigits(ctx.PromptLine("Number? ")));
-        if (number.Length < 4 && ctx.DirectObject == T(SoftpornIds.Telephone))
+        if (number.Length < 4 && ctx.DirectObject == T(Telephone))
             number = NormalizePhone(ExtractPhoneDigits(ctx.PromptLine("Number? ")));
         if (number.Length < 4)
             number = NormalizePhone(ExtractPhoneDigits(ctx.PromptLine("Number? ")));
@@ -1258,16 +1429,23 @@ internal sealed partial class SoftpornWorld
         }
         if (number == "0439" && !ctx.Get(_called5550439))
         {
-            SayLong(ctx, 67);
+            SayLong(ctx,
+"""
+Hi there!!! This is Chuck (the author of this absurd game). If you're a
+voluptous blonde who's looking for a good time, then call me immedeatley!!
+""");
             ctx.Set(_called5550439, true);
             return VerbResult.Done;
         }
         if (number == "0987" && ctx.Get(_marriedToGirl) && !ctx.Get(_called5550987))
         {
-            SayLong(ctx, 68);
+            SayLong(ctx,
+"""
+A voice answers and says 'Wine for the nervous newlyweds! Coming right up!!'
+""");
             ctx.Set(_wineOrdered, true);
             ctx.Set(_called5550987, true);
-            ctx.Move(T(SoftpornIds.Wine), Placement.InRoom(HoneymoonSuite));
+            ctx.Move(T(Wine), Placement.InRoom(HoneymoonSuite));
             return VerbResult.Done;
         }
 
@@ -1277,7 +1455,7 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult AnswerHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != T(SoftpornIds.Telephone))
+        if (ctx.DirectObject != T(Telephone))
         {
             CantDoThat(ctx);
             return VerbResult.Done;
@@ -1300,7 +1478,7 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult ClimbHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject == T(SoftpornIds.Stool)) { ctx.Set(_stoolClimbed, true); ctx.Say("OK"); return VerbResult.Done; }
+        if (ctx.DirectObject == T(Stool)) { ctx.Set(_stoolClimbed, true); ctx.Say("OK"); return VerbResult.Done; }
         return VerbResult.Pass;
     }
 
@@ -1308,28 +1486,28 @@ internal sealed partial class SoftpornWorld
     {
         if (ctx.DirectObject is null) { CantDoThat(ctx); return VerbResult.Done; }
 
-        if (ctx.DirectObject == T(SoftpornIds.Bushes))
+        if (ctx.DirectObject == T(Bushes))
         {
             ctx.MovePlayerTo(Garden);
             return VerbResult.Done;
         }
-        if (ctx.DirectObject == T(SoftpornIds.Window))
+        if (ctx.DirectObject == T(Window))
         {
             if (ctx.Get(_windowBroken))
-                ctx.MovePlayerTo(R(SoftpornIds.BrokenRoom));
+                ctx.MovePlayerTo(BrokenRoom);
             else
                 ctx.Say("Not yet but maybe later!");
             return VerbResult.Done;
         }
-        if (ctx.DirectObject == T(SoftpornIds.DoorWest))
+        if (ctx.DirectObject == T(DoorWest))
         {
             if (ctx.Get(_doorWestOpen))
-                ctx.MovePlayerTo(R(SoftpornIds.Disco));
+                ctx.MovePlayerTo(Disco);
             else
                 ctx.Say("The door is closed");
             return VerbResult.Done;
         }
-        if (ctx.DirectObject == T(SoftpornIds.Elevator))
+        if (ctx.DirectObject == T(Elevator))
         {
             ctx.Say("Push the button to enter the elevator");
             return VerbResult.Done;
@@ -1342,7 +1520,7 @@ internal sealed partial class SoftpornWorld
     private VerbResult ListenHandler(VerbContext ctx)
     {
         if (ctx.DirectObject is null) { CantDoThat(ctx); return VerbResult.Done; }
-        if (ctx.DirectObject == T(SoftpornIds.Radio)) return VerbResult.Pass;
+        if (ctx.DirectObject == T(Radio)) return VerbResult.Pass;
         if (!ctx.LocatedIn(ctx.DirectObject, ctx.CurrentRoom) && !ctx.Carrying(ctx.DirectObject))
         {
             FindMeOne(ctx);
@@ -1354,7 +1532,7 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult JumpHandler(VerbContext ctx)
     {
-        if (ctx.CurrentRoom == HookerBalcony || ctx.CurrentRoom == R(SoftpornIds.WindowLedge))
+        if (ctx.CurrentRoom == HookerBalcony || ctx.CurrentRoom == WindowLedge)
             FallingDown(ctx, jumped: true);
         else ctx.Say("Whoooopeeeee!!!");
         return VerbResult.Done;
@@ -1376,7 +1554,7 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult SmokeHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject == T(SoftpornIds.Plant))
+        if (ctx.DirectObject == T(Plant))
         {
             ctx.Say("A cop beats me over the head!!!!");
             Purgatory(ctx);
@@ -1395,38 +1573,28 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        switch (ctx.DirectObject.Id)
+        Thing obj = ctx.DirectObject;
+        if (obj == Pimp)
+            ctx.Say(ctx.Get(_hookerFucked)
+                ? "He says 'I don't want your money - stud!'"
+                : "Try going up -- he'll take the money then");
+        else if (obj == Hooker)
+            ctx.Say("You already paid the Pimp, stupid!!");
+        else if (obj == Blonde || obj == Waitress || obj == Girl)
         {
-            case SoftpornIds.Pimp:
-                ctx.Say(ctx.Get(_hookerFucked)
-                    ? "He says 'I don't want your money - stud!'"
-                    : "Try going up -- he'll take the money then");
-                break;
-            case SoftpornIds.Hooker:
-                ctx.Say("You already paid the Pimp, stupid!!");
-                break;
-            case SoftpornIds.Blonde:
-            case SoftpornIds.Waitress:
-            case SoftpornIds.Girl:
-                ctx.Say("She yells 'I'm not a whore!!!' and kills me!");
-                Purgatory(ctx);
-                break;
-            case SoftpornIds.Preacher:
-                ctx.Say("Bring a girl here to marry -- he'll take the money then!");
-                break;
-            case SoftpornIds.Businessman:
-                ctx.Say("He's too drunk to do business right now!");
-                break;
-            case SoftpornIds.Bartender:
-                ctx.Say("Buy something -- he'll take the money then");
-                break;
-            case SoftpornIds.Dealer:
-                ctx.Say("Why not play 21 instead?  You'll lose anyway, fool!");
-                break;
-            default:
-                CantDoThat(ctx);
-                break;
+            ctx.Say("She yells 'I'm not a whore!!!' and kills me!");
+            Purgatory(ctx);
         }
+        else if (obj == Preacher)
+            ctx.Say("Bring a girl here to marry -- he'll take the money then!");
+        else if (obj == Businessman)
+            ctx.Say("He's too drunk to do business right now!");
+        else if (obj == Bartender)
+            ctx.Say("Buy something -- he'll take the money then");
+        else if (obj == Dealer)
+            ctx.Say("Why not play 21 instead?  You'll lose anyway, fool!");
+        else
+            CantDoThat(ctx);
         return VerbResult.Done;
     }
 
@@ -1440,22 +1608,22 @@ internal sealed partial class SoftpornWorld
         if (upper.Contains(" OFF", StringComparison.Ordinal) || upper.EndsWith(" OFF", StringComparison.Ordinal))
             return WaterSink(ctx, on: false);
 
-        if (!ctx.Carrying(T(SoftpornIds.Water)) && !ctx.Get(_pitcherFull))
+        if (!ctx.Carrying(T(Water)) && !ctx.Get(_pitcherFull))
         {
             ctx.Say("I have no water!");
             return VerbResult.Done;
         }
 
-        if (ctx.DirectObject == T(SoftpornIds.Seeds) ||
-            (ctx.DirectObject == T(SoftpornIds.Water) && ctx.IndirectObject == T(SoftpornIds.Seeds)) ||
-            (ctx.InRoom(Garden) && ctx.Carrying(T(SoftpornIds.Seeds)) && ctx.DirectObject is null))
+        if (ctx.DirectObject == T(Seeds) ||
+            (ctx.DirectObject == T(Water) && ctx.IndirectObject == T(Seeds)) ||
+            (ctx.InRoom(Garden) && ctx.Carrying(T(Seeds)) && ctx.DirectObject is null))
         {
             if (ctx.InRoom(Garden))
                 GrowTree(ctx);
             else
             {
                 ctx.Say("The seeds need better soil to grow.");
-                ctx.Remove(T(SoftpornIds.Water));
+                ctx.Remove(T(Water));
                 ctx.Set(_pitcherFull, false);
             }
             return VerbResult.Done;
@@ -1473,7 +1641,7 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult WaterSink(VerbContext ctx, bool on)
     {
-        if (!ctx.LocatedIn(T(SoftpornIds.Sink), ctx.CurrentRoom))
+        if (!ctx.LocatedIn(T(Sink), ctx.CurrentRoom))
         {
             ctx.Say("Find a working sink!");
             return VerbResult.Done;
@@ -1482,30 +1650,30 @@ internal sealed partial class SoftpornWorld
         if (on)
         {
             ctx.Say("Water is running in the sink");
-            ctx.PlaceHere(T(SoftpornIds.Water));
+            ctx.PlaceHere(T(Water));
         }
         else if (!ctx.Get(_pitcherFull))
         {
             Ok(ctx);
-            if (ctx.LocatedIn(T(SoftpornIds.Water), ctx.CurrentRoom))
-                ctx.Remove(T(SoftpornIds.Water));
+            if (ctx.LocatedIn(T(Water), ctx.CurrentRoom))
+                ctx.Remove(T(Water));
         }
         return VerbResult.Done;
     }
 
     private VerbResult FillHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != T(SoftpornIds.Pitcher))
+        if (ctx.DirectObject != T(Pitcher))
         {
             CantDoThat(ctx);
             return VerbResult.Done;
         }
-        if (!ctx.Carrying(T(SoftpornIds.Pitcher)))
+        if (!ctx.Carrying(T(Pitcher)))
         {
             ctx.Say("I don't have it!");
             return VerbResult.Done;
         }
-        if (!ctx.LocatedIn(T(SoftpornIds.Sink), ctx.CurrentRoom))
+        if (!ctx.LocatedIn(T(Sink), ctx.CurrentRoom))
         {
             ctx.Say("Find a working sink!!");
             return VerbResult.Done;
@@ -1527,15 +1695,15 @@ internal sealed partial class SoftpornWorld
 
     private VerbResult PourHandler(VerbContext ctx)
     {
-        Thing? seeds = ctx.DirectObject == T(SoftpornIds.Seeds) ? T(SoftpornIds.Seeds)
-            : ctx.IndirectObject == T(SoftpornIds.Seeds) ? T(SoftpornIds.Seeds) : null;
-        bool pouringWater = ctx.DirectObject == T(SoftpornIds.Water) || ctx.IndirectObject == T(SoftpornIds.Water);
+        Thing? seeds = ctx.DirectObject == T(Seeds) ? T(Seeds)
+            : ctx.IndirectObject == T(Seeds) ? T(Seeds) : null;
+        bool pouringWater = ctx.DirectObject == T(Water) || ctx.IndirectObject == T(Water);
         if (!pouringWater && seeds is null)
         {
             CantDoThat(ctx);
             return VerbResult.Done;
         }
-        if (!ctx.Carrying(T(SoftpornIds.Pitcher)))
+        if (!ctx.Carrying(T(Pitcher)))
         {
             ctx.Say("You have nothing to pour it with!");
             return VerbResult.Done;
@@ -1552,8 +1720,8 @@ internal sealed partial class SoftpornWorld
             return VerbResult.Done;
         }
 
-        if (seeds is null && ctx.Carrying(T(SoftpornIds.Seeds)))
-            seeds = T(SoftpornIds.Seeds);
+        if (seeds is null && ctx.Carrying(T(Seeds)))
+            seeds = T(Seeds);
 
         if (seeds is null || (!ctx.Carrying(seeds) && !ctx.LocatedIn(seeds, ctx.CurrentRoom)))
         {

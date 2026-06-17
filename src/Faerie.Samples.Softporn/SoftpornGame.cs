@@ -6,7 +6,8 @@ namespace Faerie.Samples.Softporn;
 
 /// <summary>
 /// Chuck Benton's 1981 <em>Softporn Adventure</em> on the Faerie fluent engine.
-/// Room text is verbatim from <c>Data/softporn.txt</c>; puzzles use <see cref="GameBuilder"/> verbs and hooks.
+/// Every room, item and message is authored directly in C# (no external data file); puzzles use
+/// <see cref="GameBuilder"/> verbs and hooks.
 /// </summary>
 public static class SoftpornGame
 {
@@ -30,7 +31,7 @@ public static class SoftpornGame
         {
             ctx.Blank();
             char yn = ctx.PromptKey("Do you need instructions? (y/n) ", "YN");
-            if (yn == 'Y')
+            if (yn is 'Y' or 'y')
                 world.ShowHelp(ctx);
             else
             {

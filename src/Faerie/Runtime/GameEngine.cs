@@ -94,6 +94,13 @@ public sealed class GameEngine
     /// <summary>Mid-turn prompts during verb execution (<see cref="GameContext.PromptLine"/>).</summary>
     public IPlayerInput? PlayerInput { get; set; }
 
+    /// <summary>
+    /// Optional host hook that waits while pumping the UI message loop so mid-turn output
+    /// (e.g. <see cref="OutputWriter.OverwriteLine"/>) can paint. Falls back to
+    /// <see cref="Thread.Sleep(int)"/> when unset.
+    /// </summary>
+    public Action<int>? PresentationDelay { get; set; }
+
     internal IPlayerInput RequirePlayerInput() =>
         PlayerInput ?? throw new InvalidOperationException(
             "Mid-turn input requires IPlayerInput. Wire PlayerInput on the host or use an in-memory provider in tests.");
@@ -528,6 +535,13 @@ public sealed class GameEngine
     public void RequestQuit()
     {
         Out.PrintLine("Until next time...");
+        RequestClose();
+    }
+
+    /// <summary>Stops the host without farewell text (e.g. the player closed the window).</summary>
+    public void RequestClose()
+    {
+        if (QuitRequested) return;
         QuitRequested = true;
         OnQuit?.Invoke();
     }

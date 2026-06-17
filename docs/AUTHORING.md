@@ -121,6 +121,74 @@ Available directions: `North South East West Up Down In` (plus the diagonals if 
 ledge.Down(pit, reciprocal: false);   // you can fall down, but not climb back up
 ```
 
+### Conditional exits
+
+Pass `when` and optional `blocked` on any direction helper or `Connect` for simple boolean
+conditions. The exit is only traversable when the condition is true; otherwise the player sees
+`blocked` (or silence if omitted).
+
+```csharp
+StateKey<bool> curtainOpen = b.State("curtain-open", false);
+
+bar.East(backroom, when: curtainOpen, blocked: "I can't go that way!");
+// or with a lambda:
+bar.East(backroom, when: ctx => ctx.Get(curtainOpen), blocked: "I can't go that way!");
+
+// After the fact, on the Exit returned from Connect:
+cabin.Connect(Direction.North, forest).When(doorOpen, "The door is locked.");
+```
+
+For **per-context block messages**, use `gate` instead of `when`/`blocked`. Return `null` to allow
+passage or a string to block with that message:
+
+```csharp
+backroom.Up(hookerBedroom,
+    gate: ctx =>
+    {
+        if (!ctx.Get(pimpDistracted)) return "The Pimp blocks my way upstairs!";
+        if (!ctx.Get(canAfford)) return "The Pimp says I can't until I get $2000";
+        return null;
+    },
+    onPass: ctx =>
+    {
+        ctx.Say("The Pimp takes $2000 and says OK");
+        ctx.Set(money, ctx.Get(money) - 20);
+    });
+```
+
+`onPass` runs after the gate allows passage and before the player moves — use it for payments,
+messages, and other one-shot side effects. Return `false` to skip the move (e.g. a fatal fall handled
+entirely in `onPass`). `Exit.When(Func<GameContext, string?>)` and `Exit.OnPass(...)` work on an
+exit returned from `Connect` too.
+
+Unless `reciprocal: false`, the return trip gets the same `when`/`blocked`, `gate`, and `onPass`.
+Use `ctx.CurrentRoom` in a shared gate when the two directions need different rules (e.g. a curtain
+you can always exit through from the back, but must be open to enter from the bar):
+
+```csharp
+backroom.West(bar,
+    gate: ctx => ctx.CurrentRoom == backroom ? null
+        : (ctx.Get(curtainOpen) ? null : "I can't go that way!"),
+    onPass: ctx => { ctx.Set(curtainOpen, false); return true; });
+```
+
+### Forward references (`RoomRef`)
+
+You can wire an exit from room A before room B exists. Declare a ref by id, connect from A, then
+register B with that same id:
+
+```csharp
+RoomRef backroomRef = b.RoomRef("backroom");
+
+var bar = b.Register(new Room("bar", "Bar")
+    .East(backroomRef, when: curtainOpen, blocked: "I can't go that way!"));
+
+var backroom = b.Register(new Room("backroom", "Backroom").Describe("...");
+```
+
+`b.Room("name")` also registers the room and resolves refs. `b.Register(room)` is for manually
+constructed rooms. `Build()` throws if any `RoomRef` was never bound to a room.
+
 ### Where the player starts
 
 ```csharp
@@ -731,12 +799,12 @@ The Sierra preset:
 1. **Long prose once** — full room description on first visit and on `LOOK` (or “It is pitch dark…”
    when the room is unlit and you have no light).
 2. **Compact banner every turn** — short title, comma-separated items, comma-separated exit
-   destinations, then a row of `=` characters.
+   directions, then a row of `=` characters.
 3. **Prompt** — copied to the game for the Avalonia host.
 
 Set a banner title per room with `.ShortTitle(...)` (see [Short titles](#short-titles-sierra-style-banners)).
-Exit lines use each destination's short title. Blocked exits (closed doors, failed conditions) are
-omitted from **Other areas**.
+Exit lines use direction names (`NORTH`, `EAST`, …). Blocked exits (closed doors, failed conditions) are
+omitted from **Other exits**.
 
 When the room is lit, the banner lists visible non-scenery things physically in the room (via
 `ThingsLocatedIn` / scope — not your inventory). In the dark, only the short title and separator

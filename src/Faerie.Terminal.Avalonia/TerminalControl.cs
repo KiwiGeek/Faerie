@@ -72,6 +72,8 @@ public sealed class TerminalControl : Control
 
     private bool _blinkOn = true;
     private bool _inputActive;
+    private bool _isShuttingDown;
+    private DispatcherFrame? _activePumpFrame;
     private string _input = "";
     private TaskCompletionSource<string?>? _slotPickTcs;
     private IReadOnlyList<SaveSlotPicker.SlotOption>? _slotPickOptions;
@@ -80,6 +82,7 @@ public sealed class TerminalControl : Control
     private TaskCompletionSource<string>? _linePromptTcs;
     private TaskCompletionSource<char>? _keyPromptTcs;
     private ReadOnlyMemory<char> _keyPromptValid;
+    private bool _suppressTextInput;
     private readonly List<string> _commandHistory = [];
     private int _historyIndex = -1;   // index into _commandHistory, or -1 for the live draft line
     private string _historyDraft = "";
@@ -144,6 +147,32 @@ public sealed class TerminalControl : Control
 
     /// <summary>Raised when the grid dimensions change after the first layout (resize / font change).</summary>
     public event Action? Resized;
+
+    /// <summary>Raised when the control is shutting down (e.g. the host window is closing).</summary>
+    public event Action? ShuttingDown;
+
+    /// <summary>True after <see cref="Shutdown"/> has been called.</summary>
+    public bool IsShuttingDown => _isShuttingDown;
+
+    /// <summary>
+    /// Unblocks mid-turn prompts and animation pumps so the UI thread can exit. Idempotent.
+    /// </summary>
+    public void Shutdown()
+    {
+        if (_isShuttingDown) return;
+        _isShuttingDown = true;
+
+        _blinkTimer.Stop();
+        _activePumpFrame?.Continue = false;
+        _activePumpFrame = null;
+
+        _linePromptTcs?.TrySetResult("");
+        _keyPromptTcs?.TrySetResult('\0');
+        _slotPickTcs?.TrySetResult(null);
+
+        EndInput();
+        ShuttingDown?.Invoke();
+    }
 
     // ---- layout / sizing ------------------------------------------------------------------
 
@@ -211,6 +240,8 @@ public sealed class TerminalControl : Control
     /// <summary>Blocking in-terminal slot picker; must run on the UI thread.</summary>
     internal string? RunSlotPicker(IReadOnlyList<SaveSlotPicker.SlotOption> options, bool forSave)
     {
+        if (_isShuttingDown) return null;
+
         _slotPickTcs = new TaskCompletionSource<string?>(TaskCreationOptions.RunContinuationsAsynchronously);
         _slotPickOptions = options;
         _slotPickIndex = 0;
@@ -234,6 +265,8 @@ public sealed class TerminalControl : Control
     /// <summary>Blocking mid-turn line read; must run on the UI thread.</summary>
     internal string RunLinePrompt()
     {
+        if (_isShuttingDown) return "";
+
         _linePromptTcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
         _input = "";
         _inputActive = true;
@@ -256,6 +289,8 @@ public sealed class TerminalControl : Control
     /// <summary>Blocking mid-turn single-key read; must run on the UI thread.</summary>
     internal char RunKeyPrompt(ReadOnlySpan<char> validKeys)
     {
+        if (_isShuttingDown) return validKeys.Length > 0 ? validKeys[0] : '\0';
+
         _keyPromptTcs = new TaskCompletionSource<char>(TaskCreationOptions.RunContinuationsAsynchronously);
         _keyPromptValid = validKeys.ToArray();
         _inputActive = false;
@@ -271,6 +306,53 @@ public sealed class TerminalControl : Control
         }
 
         return prompt.GetAwaiter().GetResult();
+    }
+
+    /// <summary>
+    /// Blocks for <paramref name="milliseconds"/> while pumping the UI thread so mid-turn output
+    /// (e.g. slot-reel overwrites) can paint between frames.
+    /// </summary>
+    internal void PumpUi(int milliseconds)
+    {
+        if (_isShuttingDown) return;
+
+        void Pump()
+        {
+            if (_isShuttingDown) return;
+
+            InvalidateVisual();
+            var frame = new DispatcherFrame();
+            _activePumpFrame = frame;
+            try
+            {
+                if (milliseconds <= 0)
+                {
+                    Dispatcher.UIThread.Post(() => frame.Continue = false, DispatcherPriority.Render);
+                }
+                else
+                {
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(milliseconds) };
+                    timer.Tick += (_, _) =>
+                    {
+                        timer.Stop();
+                        frame.Continue = false;
+                    };
+                    timer.Start();
+                }
+
+                Dispatcher.UIThread.PushFrame(frame);
+            }
+            finally
+            {
+                if (_activePumpFrame == frame)
+                    _activePumpFrame = null;
+            }
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+            Pump();
+        else
+            Dispatcher.UIThread.Invoke(Pump);
     }
 
     private void CompleteLinePrompt(string line)
@@ -298,6 +380,8 @@ public sealed class TerminalControl : Control
 
         _keyPromptTcs?.TrySetResult(key);
         _keyPromptTcs = null;
+        _suppressTextInput = true;
+        Dispatcher.UIThread.Post(() => _suppressTextInput = false, DispatcherPriority.Background);
         InvalidateVisual();
     }
 
@@ -336,6 +420,7 @@ public sealed class TerminalControl : Control
             return;
         }
 
+        if (e.Key == Key.Space && KeyIsValid(' ')) { CompleteKeyPrompt(' '); e.Handled = true; return; }
         if (e.Key == Key.Y && KeyIsValid('y')) { CompleteKeyPrompt('y'); e.Handled = true; return; }
         if (e.Key == Key.N && KeyIsValid('n')) { CompleteKeyPrompt('n'); e.Handled = true; return; }
     }
@@ -489,13 +574,21 @@ public sealed class TerminalControl : Control
         _blinkTimer.Stop();
     }
 
-    private void OnBufferInvalidated() => Dispatcher.UIThread.Post(() =>
+    private void OnBufferInvalidated()
     {
-        _scrollOffset = 0;     // new output snaps the view back to the bottom
-        _hasSelection = false; // ...and invalidates any selection (wrapped rows have shifted)
-        _blockSelect = false;
-        InvalidateVisual();
-    });
+        void Apply()
+        {
+            _scrollOffset = 0;     // new output snaps the view back to the bottom
+            _hasSelection = false; // ...and invalidates any selection (wrapped rows have shifted)
+            _blockSelect = false;
+            InvalidateVisual();
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+            Apply();
+        else
+            Dispatcher.UIThread.Post(Apply);
+    }
 
     // ---- mouse cell highlight -------------------------------------------------------------
 
@@ -717,7 +810,30 @@ public sealed class TerminalControl : Control
     protected override void OnTextInput(TextInputEventArgs e)
     {
         base.OnTextInput(e);
-        if (!_inputActive || e.Text is null) return;
+        if (e.Text is null) return;
+
+        if (_keyPromptTcs is not null)
+        {
+            foreach (char c in e.Text)
+            {
+                if (!KeyIsValid(c)) continue;
+                CompleteKeyPrompt(c);
+                e.Handled = true;
+                return;
+            }
+
+            e.Handled = true;
+            return;
+        }
+
+        if (_suppressTextInput)
+        {
+            _suppressTextInput = false;
+            e.Handled = true;
+            return;
+        }
+
+        if (!_inputActive) return;
 
         _scrollOffset = 0;
         foreach (char c in e.Text)

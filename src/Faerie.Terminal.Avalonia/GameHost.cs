@@ -19,9 +19,11 @@ public sealed class GameHost
         _control = control;
         _promptMarkup = promptMarkup;
         _control.CommandEntered += OnCommandEntered;
+        _control.ShuttingDown += OnShuttingDown;
 
         _engine.PickSaveSlot = request => SaveSlotPicker.Pick(_control, _engine.Out, request);
         _engine.PlayerInput = new TerminalPlayerInput(_control);
+        _engine.PresentationDelay = _control.PumpUi;
 
         // The game starts once the control has laid out and sized its buffer to the window.
         _control.Ready += Start;
@@ -41,10 +43,20 @@ public sealed class GameHost
 
     private void OnCommandEntered(string line)
     {
+        if (_engine.QuitRequested) return;
+
         // The control already echoed the line and moved to a fresh row; keep the wrapper in sync.
         _engine.Out.SyncColumn(0);
         _engine.SubmitLine(line);
         Prompt();
+    }
+
+    private void OnShuttingDown()
+    {
+        _control.CommandEntered -= OnCommandEntered;
+        _control.ShuttingDown -= OnShuttingDown;
+        _control.EndInput();
+        _engine.RequestClose();
     }
 
     private void Prompt()

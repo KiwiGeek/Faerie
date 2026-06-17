@@ -45,6 +45,8 @@ public sealed class GameBuilder
     private int _sierraSeparatorWidth = 40;
     private string? _inputPrompt;
 
+    private readonly RoomLinkRegistry _roomLinks = new();
+
     private GameBuilder(string title) => Title = title;
 
     public static GameBuilder Create(string title) => new(title);
@@ -64,7 +66,17 @@ public sealed class GameBuilder
     public Room Room(string name)
     {
         Room room = new(NextId("room", name), name);
+        return Register(room);
+    }
+
+    /// <summary>Forward reference to a room identified by <paramref name="id"/> (must match <see cref="Element.Id"/>).</summary>
+    public RoomRef RoomRef(string id) => _roomLinks.Ref(id);
+
+    /// <summary>Registers a manually constructed room and resolves any pending links to its id.</summary>
+    public Room Register(Room room)
+    {
         World.Register(room);
+        _roomLinks.Bind(room);
         return room;
     }
 
@@ -294,6 +306,7 @@ public sealed class GameBuilder
     {
         Verb verb = new(id, words, forms, handler);
         Library.Add(verb);
+        SyncStandardVerbHandle(verb);
         return verb;
     }
 
@@ -301,7 +314,43 @@ public sealed class GameBuilder
     public Verb AddVerb(Verb verb)
     {
         Library.Add(verb);
+        SyncStandardVerbHandle(verb);
         return verb;
+    }
+
+    private void SyncStandardVerbHandle(Verb verb)
+    {
+        switch (verb.Id)
+        {
+            case StandardVerbIds.Go: Verbs.Go = verb; break;
+            case StandardVerbIds.Look: Verbs.Look = verb; break;
+            case StandardVerbIds.Examine: Verbs.Examine = verb; break;
+            case StandardVerbIds.Search: Verbs.Search = verb; break;
+            case StandardVerbIds.Inventory: Verbs.Inventory = verb; break;
+            case StandardVerbIds.Take: Verbs.Take = verb; break;
+            case StandardVerbIds.Drop: Verbs.Drop = verb; break;
+            case StandardVerbIds.Open: Verbs.Open = verb; break;
+            case StandardVerbIds.Close: Verbs.Close = verb; break;
+            case StandardVerbIds.Lock: Verbs.Lock = verb; break;
+            case StandardVerbIds.Unlock: Verbs.Unlock = verb; break;
+            case StandardVerbIds.Put: Verbs.Put = verb; break;
+            case StandardVerbIds.Push: Verbs.Push = verb; break;
+            case StandardVerbIds.Read: Verbs.Read = verb; break;
+            case StandardVerbIds.Wear: Verbs.Wear = verb; break;
+            case StandardVerbIds.Remove: Verbs.TakeOff = verb; break;
+            case StandardVerbIds.Eat: Verbs.Eat = verb; break;
+            case StandardVerbIds.Drink: Verbs.Drink = verb; break;
+            case StandardVerbIds.PushButton: Verbs.SwitchOn = verb; break;
+            case StandardVerbIds.SwitchOff: Verbs.SwitchOff = verb; break;
+            case StandardVerbIds.Give: Verbs.Give = verb; break;
+            case StandardVerbIds.Use: Verbs.Use = verb; break;
+            case StandardVerbIds.Wait: Verbs.Wait = verb; break;
+            case StandardVerbIds.Help: Verbs.Help = verb; break;
+            case StandardVerbIds.Quit: Verbs.Quit = verb; break;
+            case StandardVerbIds.Save: Verbs.Save = verb; break;
+            case StandardVerbIds.Restore: Verbs.Restore = verb; break;
+            case StandardVerbIds.Score: Verbs.Score = verb; break;
+        }
     }
 
     // ---- build ----------------------------------------------------------------------------
@@ -315,6 +364,8 @@ public sealed class GameBuilder
         foreach (Thing thing in World.Things)
             if (thing.InitialPlacement.Anchor != Anchor.Offstage)
                 World.PlaceInitially(thing, thing.InitialPlacement);
+
+        _roomLinks.EnsureResolved();
 
         return new Game
         {

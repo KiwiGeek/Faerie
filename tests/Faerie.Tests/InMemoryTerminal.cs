@@ -13,6 +13,14 @@ public sealed class InMemoryTerminal : ITerminal
     public TextStyle DefaultStyle => new(TerminalColor.LightGray, TerminalColor.Black);
 
     public void Write(string text, TextStyle style) => _sb.Append(text);
+
+    public void OverwriteLine(string text, TextStyle style)
+    {
+        int lastNewline = _sb.ToString().LastIndexOf('\n');
+        _sb.Length = lastNewline >= 0 ? lastNewline + 1 : 0;
+        _sb.Append(text);
+    }
+
     public void NewLine() => _sb.Append('\n');
     public void Clear() => _sb.Clear();
 

@@ -28,8 +28,4 @@
     <AvaloniaResource Include="Assets\Fonts\PxPlus_IBM_VGA8.ttf" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Data\softporn.txt" />
-  </ItemGroup>
-
 </Project>

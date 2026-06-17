@@ -69,6 +69,13 @@ public sealed class TerminalBuffer : ITerminal
         TrimAndInvalidate();
     }
 
+    public void OverwriteLine(string text, TextStyle style)
+    {
+        if (_lines.Count == 0) _lines.Add([]);
+        _lines[^1] = text.Length > 0 ? [new Run(text, style)] : [];
+        TrimAndInvalidate();
+    }
+
     public void Clear()
     {
         _lines.Clear();

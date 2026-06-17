@@ -41,6 +41,35 @@ public sealed class OutputWriter(ITerminal terminal)
     /// <summary>Writes a blank line.</summary>
     public void Blank() => NewLine();
 
+    /// <summary>
+    /// Replaces the current output line in place (no newline). Markup is flattened to plain styled text.
+    /// </summary>
+    public void OverwriteLine(string markup)
+    {
+        if (Transform is { } transform && !_filtering)
+        {
+            _filtering = true;
+            string? filtered;
+            try { filtered = transform(markup); }
+            finally { _filtering = false; }
+            if (filtered is null) return;
+            markup = filtered;
+        }
+
+        List<StyledSpan> spans = Markup.Parse(markup, BaseStyle).ToList();
+        if (spans.Count == 0)
+        {
+            Terminal.OverwriteLine("", BaseStyle);
+            return;
+        }
+
+        var text = new System.Text.StringBuilder();
+        foreach (StyledSpan span in spans)
+            text.Append(span.Text);
+
+        Terminal.OverwriteLine(text.ToString(), spans[0].Style);
+    }
+
     private void Emit(string markup, bool newLine)
     {
         if (Transform is { } transform && !_filtering)
