@@ -730,8 +730,6 @@ print until a lit light source is present.
 
 Re-entry to an already-visited room skips the long prose; the banner still redraws every turn.
 
-Try the **`Faerie.Samples.SierraDemo`** project for a walkable bar that exercises this preset.
-
 ### Native OS window title and icon
 
 ```csharp

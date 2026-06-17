@@ -25,7 +25,6 @@ Usborne type-in classic) and a full *Zork I* port.
 | `src/Faerie.Terminal.Avalonia` | Avalonia fake-terminal front end. |
 | `src/Faerie.Terminal.Headless` | Script replay + transcript logging (no UI). |
 | `src/Faerie.Samples.HauntedHouse` | A small, fully-worked sample game + Avalonia app host. |
-| `src/Faerie.Samples.SierraDemo` | Sierra `RoomPresentation` preset demo + Avalonia host. |
 | `src/Faerie.Samples.Zork` | A complete Zork I port (see its `AGENTS.md` for the engine-gap list it tracks). |
 | `tests/Faerie.Tests` | xUnit tests for the engine (parser, verbs, world, save/load). |
 
@@ -41,7 +40,6 @@ Requires the **.NET 10 SDK**.
 ```
 dotnet build Faerie.sln
 dotnet run --project src/Faerie.Samples.HauntedHouse
-dotnet run --project src/Faerie.Samples.SierraDemo
 dotnet run --project src/Faerie.Samples.Zork
 dotnet test
 ```
