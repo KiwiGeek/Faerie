@@ -19,7 +19,7 @@ internal static class RoomBanner
         {
             List<string> items = scope.VisibleThings()
                 .Distinct()
-                .Where(t => state.RoomOf(t) == room && !t.Has(Attr.Scenery))
+                .Where(t => state.IsLocatedIn(t, room) && !t.Has(Attr.Scenery))
                 .Select(t => t.Name)
                 .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
                 .ToList();

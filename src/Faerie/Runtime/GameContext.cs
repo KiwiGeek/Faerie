@@ -55,6 +55,12 @@ public class GameContext
     public bool Here(Thing thing) => State.IsPresent(thing);
     public bool InRoom(Room room) => State.CurrentRoom == room;
 
+    /// <summary>
+    /// True when the thing is physically in <paramref name="room"/>, not in the player's inventory.
+    /// See <see cref="GameState.IsLocatedIn"/>.
+    /// </summary>
+    public bool LocatedIn(Thing thing, Room room) => State.IsLocatedIn(thing, room);
+
     /// <summary>The room a thing currently sits in, or null if it is carried, worn, or offstage.</summary>
     public Room? RoomOf(Thing thing) => State.RoomOf(thing);
 
@@ -62,12 +68,23 @@ public class GameContext
     /// Things in <paramref name="room"/>. By default only loose floor items are returned.
     /// When <paramref name="includePresent"/> is true, also includes things inside in-room
     /// containers and things carried or worn by the player while in that room (including items
-    /// nested inside carried containers).
+    /// nested inside carried containers). For room contents excluding inventory, use
+    /// <see cref="ThingsLocatedIn"/>.
     /// </summary>
     public IEnumerable<Thing> ThingsIn(Room room, bool includePresent = false) =>
         includePresent
             ? World.Things.Where(t => RoomOf(t) == room)
             : State.ContentsOf(room);
+
+    /// <summary>
+    /// Everything physically in the room (floor, containers, creatures), excluding the player's
+    /// inventory and worn items.
+    /// </summary>
+    public IEnumerable<Thing> ThingsLocatedIn(Room room) =>
+        World.Things.Where(t => State.IsLocatedIn(t, room));
+
+    /// <summary>Things physically in the player's current room. See <see cref="ThingsLocatedIn"/>.</summary>
+    public IEnumerable<Thing> ThingsLocatedHere() => ThingsLocatedIn(CurrentRoom);
 
     /// <summary>Things in the player's current room. See <see cref="ThingsIn(Room, bool)"/>.</summary>
     public IEnumerable<Thing> ThingsHere(bool includePresent = false) => ThingsIn(CurrentRoom, includePresent);

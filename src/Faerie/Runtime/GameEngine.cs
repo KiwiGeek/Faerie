@@ -393,8 +393,13 @@ public sealed class GameEngine
 
         if (_game.RoomBannerStyle == RoomBannerStyle.Sierra)
         {
-            if (verbose && scope.IsLit(room))
-                Out.PrintLine(room.ResolveDescription(_context));
+            if (verbose)
+            {
+                if (scope.IsLit(room))
+                    Out.PrintLine(room.ResolveDescription(_context));
+                else
+                    Out.PrintLine("It is pitch dark, and you can see nothing.");
+            }
             return;
         }
 

@@ -143,6 +143,31 @@ var gratingRoom = b.Room("Grating Room").Describe("...").Dark()
     .LitWhen(ctx => ctx.Get(gratingOpen));
 ```
 
+### Re-entry descriptions
+
+By default, the full `.Describe(...)` text is shown the first time the player enters a room and
+whenever they `LOOK`. On later visits, the engine shows the optional `.Brief(...)` text instead (or
+falls back to the full description if you never set a brief).
+
+```csharp
+var hall = b.Room("Entrance Hall")
+    .Describe("A grand, ruined hall. Dust hangs in the air.")
+    .Brief("You are back in the entrance hall.");
+```
+
+### Short titles (Sierra-style banners)
+
+Hi-Res / Sierra adventures use a one-line place name in the per-turn room banner, separate from the
+long prose. Set it with `.ShortTitle(...)`; when omitted, the room's display name is used.
+
+```csharp
+var bar = b.Room("The Bar")
+    .ShortTitle("BAR")
+    .Describe("You are in a dim, smoky bar...");
+```
+
+See [Sierra-style room banners](#sierra-style-room-banners) below.
+
 ---
 
 ## 4. Things: items, scenery, and containers
@@ -368,15 +393,23 @@ queries that work for *any* room or thing, not just the player's current locatio
 
 #### Enumerating things in a room
 
-- `ctx.ThingsHere()` / `ctx.ThingsIn(room)` — things in a room. By default these return only
-  **loose** floor items (the same set as `ctx.State.ContentsOf(room)`): not things inside
-  containers, and not things you are carrying.
+There are three useful “what’s in this room?” queries:
 
-Pass `includePresent: true` for the broader "everything whose ultimate room is here" set:
+| API | What it returns |
+| --- | --- |
+| `ctx.ThingsIn(room)` | Loose floor items only (same as `ctx.State.ContentsOf(room)`) |
+| `ctx.ThingsLocatedIn(room)` | Everything physically in the room — floor, containers, creatures — **excluding** the player's inventory and worn items |
+| `ctx.ThingsIn(room, includePresent: true)` | Everything whose `RoomOf` is this room, **including** what the player is carrying while standing here |
+
+The single-thing predicate `ctx.LocatedIn(thing, room)` matches the middle row: true when the thing is
+in the room but not in your pockets. Use it when listing visible room contents (Sierra banners, custom
+`EveryTurn` hooks). Do **not** use `RoomOf(thing) == room` alone — `RoomOf` maps carried items to the
+current room for parser scope, so inventory would be counted by mistake.
 
 ```csharp
 ctx.ThingsHere();                             // loose floor items only
-ctx.ThingsHere(includePresent: true);         // loose + in-room containers + your inventory
+ctx.ThingsLocatedHere();                      // in-room contents, not your inventory
+ctx.ThingsHere(includePresent: true);         // loose + containers + your inventory
 ctx.ThingsIn(kitchen, includePresent: true);  // same for any room
 ```
 
@@ -627,6 +660,38 @@ b.WithStatusBar(ctx => new BarContent
 
 You can fully style your own title bar with `WithTitleBar(...)` the same way. Leave the status bar
 unset and there simply won't be one.
+
+### Sierra-style room banners
+
+Infocom-style games print a heading, prose, and inline “You can see … / Exits: …” when you enter or
+look. **Sierra / Hi-Res Adventure** games (e.g. *Softporn Adventure*) use a different layout:
+
+1. **Long prose once** — full room description on first visit and on `LOOK` (or “It is pitch dark…”
+   when the room is unlit and you have no light).
+2. **Compact banner every turn** — short title, comma-separated items, comma-separated exit
+   destinations, then a row of `=` characters.
+3. **Prompt** — e.g. `What shall I do?` at the bottom (the Avalonia host reads this from the game).
+
+Opt in on the builder:
+
+```csharp
+var b = GameBuilder.Create("My Hi-Res Game")
+    .AddStandardVerbs()
+    .WithSierraRoomBanner()                    // default prompt: "What shall I do? "
+    .WithRoomBannerSeparatorWidth(40);         // optional; default 40
+```
+
+Set a banner title per room with `.ShortTitle(...)` (see [Short titles](#short-titles-sierra-style-banners)).
+Exit lines use each destination's short title. Blocked exits (closed doors, failed conditions) are
+omitted from **Other areas**.
+
+When the room is lit, the banner lists visible non-scenery things physically in the room (via
+`ThingsLocatedIn` / scope — not your inventory). In the dark, only the short title and separator
+print until a lit light source is present.
+
+Re-entry to an already-visited room skips the long prose; the banner still redraws every turn.
+
+To print the banner yourself (e.g. from a custom hook), call `ctx.PrintRoomBanner()`.
 
 ### Native OS window title and icon
 

@@ -108,6 +108,76 @@ public class RoomBannerTests
     }
 
     [Fact]
+    public void TakenItem_OmittedFromItemsInSight()
+    {
+        var (engine, term, _, _, beer, _) = BuildSierraWorld();
+
+        engine.Submit("take beer");
+
+        Assert.True(engine.State.IsCarried(beer));
+        Assert.Contains("Items in sight: bartender", term.Output);
+        Assert.DoesNotContain("beer", term.Output);
+    }
+
+    [Fact]
+    public void FirstVisitToDarkRoom_PrintsDarknessMessageNotLongDescription()
+    {
+        GameBuilder b = GameBuilder.Create("Dark")
+            .AddStandardVerbs()
+            .WithSierraRoomBanner()
+            .WithRoomBannerSeparatorWidth(20);
+
+        Room bar = b.Room("Bar").ShortTitle("BAR").Describe("A lit bar.");
+        Room restroom = b.Room("Men's Room")
+            .ShortTitle("MEN'S ROOM")
+            .Describe("Fluorescent tubes buzz over cracked tiles.")
+            .Dark();
+        bar.West(restroom);
+        b.StartIn(bar);
+
+        InMemoryTerminal term = new();
+        GameEngine engine = new(b.Build(), term, randomSeed: 1);
+        engine.Start();
+        term.Reset();
+
+        engine.Submit("west");
+
+        Assert.Contains("pitch dark", term.Output, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Fluorescent tubes", term.Output);
+        Assert.Contains("MEN'S ROOM", term.Output);
+    }
+
+    [Fact]
+    public void LookInDarkRoom_WithLight_ShowsLongDescription()
+    {
+        GameBuilder b = GameBuilder.Create("Dark")
+            .AddStandardVerbs()
+            .WithSierraRoomBanner();
+
+        Room bar = b.Room("Bar").ShortTitle("BAR").Describe("A lit bar.");
+        Room restroom = b.Room("Men's Room")
+            .ShortTitle("MEN'S ROOM")
+            .Describe("Fluorescent tubes buzz over cracked tiles.")
+            .Dark();
+        b.Item("lantern").Describe("A lantern.").LightSource(lit: true).StartsIn(bar);
+        bar.West(restroom);
+        b.StartIn(bar);
+
+        InMemoryTerminal term = new();
+        GameEngine engine = new(b.Build(), term, randomSeed: 1);
+        engine.Start();
+        term.Reset();
+
+        engine.Submit("take lantern");
+        term.Reset();
+        engine.Submit("west");
+        term.Reset();
+        engine.Submit("look");
+
+        Assert.Contains("Fluorescent tubes buzz over cracked tiles.", term.Output);
+    }
+
+    [Fact]
     public void GameContext_PrintRoomBanner_MatchesEngine()
     {
         GameContext? ctx = null;
