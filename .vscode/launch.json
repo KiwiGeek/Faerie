@@ -3,24 +3,65 @@
   "configurations": [
     {
       "name": "Zork I (Avalonia)",
-      "type": "node-terminal",
+      "type": "coreclr",
       "request": "launch",
-      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj",
-      "cwd": "${workspaceFolder}"
+      "preLaunchTask": "build-zork",
+      "program": "${workspaceFolder}/src/Faerie.Samples.Zork/bin/Debug/net10.0/Zork.dll",
+      "cwd": "${workspaceFolder}/src/Faerie.Samples.Zork/bin/Debug/net10.0",
+      "console": "internalConsole",
+      "stopAtEntry": false
     },
     {
       "name": "Haunted House (Avalonia)",
-      "type": "node-terminal",
+      "type": "coreclr",
       "request": "launch",
-      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.HauntedHouse/Faerie.Samples.HauntedHouse.csproj",
-      "cwd": "${workspaceFolder}"
+      "preLaunchTask": "build-haunted-house",
+      "program": "${workspaceFolder}/src/Faerie.Samples.HauntedHouse/bin/Debug/net10.0/HauntedHouse.dll",
+      "cwd": "${workspaceFolder}/src/Faerie.Samples.HauntedHouse/bin/Debug/net10.0",
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Softporn Adventure (Avalonia)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-softporn",
+      "program": "${workspaceFolder}/src/Faerie.Samples.Softporn/bin/Debug/net10.0/Softporn.dll",
+      "cwd": "${workspaceFolder}/src/Faerie.Samples.Softporn/bin/Debug/net10.0",
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Softporn Adventure (Headless)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-softporn",
+      "program": "${workspaceFolder}/src/Faerie.Samples.Softporn/bin/Debug/net10.0/Softporn.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "args": [
+        "--script",
+        "${workspaceFolder}/scripts/softporn-smoketest.txt",
+        "-o",
+        "-"
+      ],
+      "stopAtEntry": false
     },
     {
       "name": "Zork I (Headless)",
-      "type": "node-terminal",
+      "type": "coreclr",
       "request": "launch",
-      "command": "dotnet run --project ${workspaceFolder}/src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script ${workspaceFolder}/scripts/zork1-smoketest.txt -o -",
-      "cwd": "${workspaceFolder}"
+      "preLaunchTask": "build-zork",
+      "program": "${workspaceFolder}/src/Faerie.Samples.Zork/bin/Debug/net10.0/Zork.dll",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "args": [
+        "--script",
+        "${workspaceFolder}/scripts/zork1-smoketest.txt",
+        "-o",
+        "-"
+      ],
+      "stopAtEntry": false
     }
   ]
 }

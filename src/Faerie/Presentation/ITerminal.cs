@@ -21,6 +21,13 @@ public interface ITerminal
     /// <summary>Moves the cursor to the start of the next line.</summary>
     void NewLine();
 
+    /// <summary>
+    /// Replaces the current logical line (the one the cursor is on) without advancing to the next.
+    /// Used for single-line animations such as slot reels. The next <see cref="NewLine"/> commits
+    /// the final text to scrollback.
+    /// </summary>
+    void OverwriteLine(string text, TextStyle style);
+
     /// <summary>Clears the screen and resets the cursor to the top-left.</summary>
     void Clear();
 

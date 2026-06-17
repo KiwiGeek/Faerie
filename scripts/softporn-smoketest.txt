@@ -1,0 +1,14 @@
+# Basic smoke: intro, movement, smell, hail taxi, quit
+n
+look
+go west
+smell flowers
+go north
+smell toilet
+go south
+go east
+go north
+hail taxi
+BAR 
+look
+quit

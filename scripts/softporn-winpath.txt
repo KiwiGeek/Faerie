@@ -1,0 +1,233 @@
+﻿# Full win path --seed 42
+
+n
+go north
+hail taxi
+CASI
+go east
+play slots
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+y
+n
+go west
+hail taxi
+DISC
+go east
+buy rubber
+red
+cherry
+n
+n
+go west
+hail taxi
+BAR
+go south
+go west
+take flowers
+go north
+examine washbasin
+take ring
+go south
+go east
+go north
+go east
+go up
+go south
+wear rubber
+fuck hooker
+take off rubber
+take candy
+go north
+go down
+take garbage
+examine garbage
+examine apple core
+take seeds
+drop garbage
+go west
+hail taxi
+CASI
+go east
+go east
+go up
+go west
+examine ashtray
+take passcard
+go east
+go down
+examine plant
+enter bushes
+take stool
+eat mushroom
+go east
+go north
+hail taxi
+CASI
+go east
+go east
+go up
+press button
+go east
+climb stool
+open cabinet
+drop stool
+take pitcher
+turn on sink
+fill pitcher
+go west
+press button
+go down
+examine plant
+enter bushes
+drop seeds
+water seeds
+take apple
+go south
+go west
+go west
+hail taxi
+DISC
+go north
+show passcard
+go west
+drop candy
+drop flowers
+drop ring
+go east
+go south
+hail taxi
+CASI
+go north
+marry girl
+go south
+go east
+go east
+go up
+go west
+go south
+go east
+take radio
+listen radio
+go west
+go north
+go east
+go down
+go west
+go west
+hail taxi
+DISC
+go north
+show passcard
+go west
+buy wine
+take wine
+go east
+go south
+drop wine
+take knife
+go north
+show passcard
+go west
+go south
+call
+0987
+go north
+go east
+go south
+hail taxi
+CASI
+go east
+go east
+go up
+go west
+go south
+fuck girl
+wear knife
+go north
+go east
+press button
+go up
+go north
+go down
+drop apple
+fuck girl
+score
+quit

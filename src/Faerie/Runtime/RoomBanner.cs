@@ -28,17 +28,17 @@ public static class RoomBanner
                 ? $"Items in sight: {string.Join(", ", items)}"
                 : "Items in sight: none");
 
-            List<string> areas = [];
+            List<string> exits = [];
             foreach (Direction direction in Enum.GetValues<Direction>())
             {
                 if (!room.Exits.TryGetValue(direction, out Exit? exit)) continue;
                 if (!exit.CanPass(context, out _)) continue;
-                areas.Add(exit.Destination.ResolveShortTitle(context));
+                exits.Add(direction.ToString().ToUpperInvariant());
             }
 
-            output.PrintLine(areas.Count > 0
-                ? $"Other areas: {string.Join(", ", areas)}"
-                : "Other areas: none");
+            output.PrintLine(exits.Count > 0
+                ? $"Other exits: {string.Join(", ", exits)}"
+                : "Other exits: none");
         }
 
         int width = Math.Max(1, separatorWidth);

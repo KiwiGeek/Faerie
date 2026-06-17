@@ -14,7 +14,14 @@ public sealed class VerbLibrary
 
     public IReadOnlyList<Verb> All => _verbs;
 
-    public void Add(Verb verb) => _verbs.Add(verb);
+    public void Add(Verb verb)
+    {
+        int i = _verbs.FindIndex(v => v.Id == verb.Id);
+        if (i >= 0)
+            _verbs[i] = verb;
+        else
+            _verbs.Add(verb);
+    }
 
     public bool Contains(string word) =>
         _verbs.Any(v => v.Words.Contains(word.ToLowerInvariant()));

@@ -66,6 +66,31 @@ public sealed class MidTurnPromptTests
     }
 
     [Fact]
+    public void PromptKey_NormalizesToValidKeyCasing()
+    {
+        GameBuilder b = GameBuilder.Create("Test").AddStandardVerbs();
+        Room hall = b.Room("Hall").Describe("A hall.");
+        b.StartIn(hall);
+
+        b.DefineVerb("ask", ["ask"], VerbForms.Intransitive, ctx =>
+        {
+            char answer = ctx.PromptKey("Continue? (y/n) ", "YN");
+            ctx.Say(answer == 'Y' ? "Yes." : "No.");
+            return VerbResult.Done;
+        });
+
+        InMemoryTerminal term = new();
+        GameEngine engine = new(b.Build(), term, randomSeed: 1);
+        engine.PlayerInput = new QueuedPlayerInput("y");
+        engine.Start();
+        term.Reset();
+
+        engine.Submit("ask");
+
+        Assert.Contains("Yes.", term.Output);
+    }
+
+    [Fact]
     public void HeadlessScript_IncludesPromptAnswersInOrder()
     {
         string dir = Path.Combine(Path.GetTempPath(), "faerie-prompt-" + Guid.NewGuid().ToString("N"));

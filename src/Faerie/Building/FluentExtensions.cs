@@ -3,9 +3,83 @@ using Faerie.Runtime;
 
 namespace Faerie.Building;
 
+/// <summary>Fluent helpers for <see cref="Exit"/> conditions and room connections.</summary>
+public static class ExitFluent
+{
+    /// <summary>Sets a gate returning null to pass or a message to block.</summary>
+    public static Exit When(this Exit exit, Func<GameContext, string?> gate)
+    {
+        exit.Gate = ctx => gate(ctx);
+        return exit;
+    }
+
+    /// <summary>Sets <see cref="Exit.Condition"/> and optional <see cref="Exit.BlockedMessage"/>.</summary>
+    public static Exit When(this Exit exit, Func<GameContext, bool> condition, string? blocked = null)
+    {
+        exit.Condition = condition;
+        exit.BlockedMessage = blocked;
+        return exit;
+    }
+
+    /// <summary>Opens the exit when <paramref name="key"/> is true.</summary>
+    public static Exit When(this Exit exit, StateKey<bool> key, string? blocked = null) =>
+        exit.When(ctx => ctx.Get(key), blocked);
+
+    public static Exit OnPass(this Exit exit, Action<GameContext> onPass)
+    {
+        exit.OnPass = ctx => { onPass(ctx); return true; };
+        return exit;
+    }
+
+    public static Exit OnPass(this Exit exit, Func<GameContext, bool> onPass)
+    {
+        exit.OnPass = onPass;
+        return exit;
+    }
+
+    internal static void ApplyGate(
+        Exit exit,
+        Func<GameContext, bool>? when,
+        string? blocked,
+        Func<GameContext, string?>? gate = null,
+        Func<GameContext, bool>? onPass = null)
+    {
+        if (gate is not null)
+            exit.Gate = ctx => gate(ctx);
+        else if (when is not null)
+        {
+            exit.Condition = when;
+            exit.BlockedMessage = blocked;
+        }
+
+        if (onPass is not null)
+            exit.OnPass = onPass;
+    }
+
+    internal static void ApplyReciprocalExit(
+        Room from,
+        Direction direction,
+        Room to,
+        bool reciprocal,
+        Func<GameContext, bool>? when,
+        string? blocked,
+        Func<GameContext, string?>? gate,
+        Func<GameContext, bool>? onPass)
+    {
+        if (!reciprocal) return;
+
+        Direction opposite = direction.Opposite();
+        if (to.ExitTo(opposite) is not null) return;
+
+        Exit reciprocalExit = to.SetExit(opposite, from);
+        ApplyGate(reciprocalExit, when, blocked, gate, onPass);
+    }
+}
+
 /// <summary>
 /// Fluent configuration helpers for rooms. Everything is wired by reference: you pass the actual
-/// <see cref="Room"/> and <see cref="Thing"/> objects, never strings.
+/// <see cref="Room"/> and <see cref="Thing"/> objects, never strings — except <see cref="RoomRef"/>
+/// for forward-declared destinations.
 /// </summary>
 public static class RoomFluent
 {
@@ -41,25 +115,81 @@ public static class RoomFluent
     /// Connects this room to another in a direction. By default the reciprocal exit is created on
     /// the destination too. Returns the created <see cref="Exit"/> so doors/conditions can be added.
     /// </summary>
-    public static Exit Connect(this Room room, Direction direction, Room destination, bool reciprocal = true)
+    public static Exit Connect(
+        this Room room,
+        Direction direction,
+        Room destination,
+        bool reciprocal = true,
+        Func<GameContext, bool>? when = null,
+        string? blocked = null,
+        Func<GameContext, string?>? gate = null,
+        Func<GameContext, bool>? onPass = null)
     {
         Exit exit = room.SetExit(direction, destination);
-        if (reciprocal && destination.ExitTo(direction.Opposite()) is null)
-            destination.SetExit(direction.Opposite(), room);
+        ApplyGate(exit, when, blocked, gate, onPass);
+        ExitFluent.ApplyReciprocalExit(room, direction, destination, reciprocal, when, blocked, gate, onPass);
         return exit;
     }
 
-    public static Room North(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.North, dest, reciprocal); return room; }
-    public static Room South(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.South, dest, reciprocal); return room; }
-    public static Room East(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.East, dest, reciprocal); return room; }
-    public static Room West(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.West, dest, reciprocal); return room; }
-    public static Room Up(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.Up, dest, reciprocal); return room; }
-    public static Room Down(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.Down, dest, reciprocal); return room; }
-    public static Room In(this Room room, Room dest, bool reciprocal = true) { room.Connect(Direction.In, dest, reciprocal); return room; }
+    /// <summary>
+    /// Connects to a <see cref="RoomRef"/> destination that may not exist yet. The link is created
+    /// when the destination room is registered with a matching <see cref="Element.Id"/>.
+    /// </summary>
+    public static Room Connect(
+        this Room room,
+        Direction direction,
+        RoomRef destination,
+        bool reciprocal = true,
+        Func<GameContext, bool>? when = null,
+        string? blocked = null,
+        Func<GameContext, string?>? gate = null,
+        Func<GameContext, bool>? onPass = null)
+    {
+        destination.QueueFrom(room, direction, reciprocal, when, blocked, gate, onPass);
+        return room;
+    }
 
-    // Note: the OnEnter / OnFirstEnter / OnTurn hooks are settable properties on Room
-    // (e.g. room.OnEnter = ctx => ...). They are intentionally not offered as extension methods
-    // because a method of the same name would shadow the property.
+    public static Room North(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.North, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room South(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.South, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room East(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.East, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room West(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.West, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room Up(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.Up, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room Down(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.Down, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room In(this Room room, Room dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.In, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room North(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.North, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room South(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.South, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room East(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.East, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room West(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.West, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room Up(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.Up, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room Down(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.Down, dest, reciprocal, when, blocked, gate, onPass); return room; }
+
+    public static Room In(this Room room, RoomRef dest, bool reciprocal = true, Func<GameContext, bool>? when = null, string? blocked = null, Func<GameContext, string?>? gate = null, Func<GameContext, bool>? onPass = null)
+    { room.Connect(Direction.In, dest, reciprocal, when, blocked, gate, onPass); return room; }
 
     /// <summary>Places things in this room as their starting location.</summary>
     public static Room Contains(this Room room, params Thing[] things)
@@ -67,6 +197,9 @@ public static class RoomFluent
         foreach (Thing thing in things) thing.InitialPlacement = Placement.InRoom(room);
         return room;
     }
+
+    private static void ApplyGate(Exit exit, Func<GameContext, bool>? when, string? blocked, Func<GameContext, string?>? gate, Func<GameContext, bool>? onPass) =>
+        ExitFluent.ApplyGate(exit, when, blocked, gate, onPass);
 }
 
 /// <summary>Fluent configuration helpers for things (items, scenery, doors, creatures).</summary>
@@ -147,6 +280,17 @@ public static class ThingFluent
     public static Thing Edible(this Thing thing) { thing.Set(Attr.Edible); thing.Set(Attr.Takeable); return thing; }
     public static Thing Drinkable(this Thing thing) { thing.Set(Attr.Drinkable); return thing; }
 
+    /// <summary>
+    /// Names this stock item for purchase when <paramref name="vendor"/> is in the current room,
+    /// even before the item has been spawned into the world.
+    /// </summary>
+    public static Thing OrderableFrom(this Thing thing, Thing vendor)
+    {
+        thing.Set(Attr.Orderable);
+        thing.Vendor = vendor;
+        return thing;
+    }
+
     public static Thing Readable(this Thing thing, string text)
     {
         thing.Set(Attr.Readable);
@@ -158,11 +302,6 @@ public static class ThingFluent
 
     /// <summary>A custom one-line listing for when the thing sits in its original spot in a room.</summary>
     public static Thing InitialText(this Thing thing, string line) { thing.InitialDescription = line; return thing; }
-
-    // Note: OnExamine / OnFirstExamine / OnTake / OnDrop are settable properties on Thing
-    // (e.g. thing.OnExamine = ctx => ...), not extension methods, to avoid shadowing the property.
-
-    // ---- initial placement ----------------------------------------------------------------
 
     public static Thing StartsIn(this Thing thing, Room room) { thing.InitialPlacement = Placement.InRoom(room); return thing; }
     public static Thing StartsCarried(this Thing thing) { thing.InitialPlacement = Placement.Carried; return thing; }

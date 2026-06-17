@@ -53,7 +53,7 @@ public class RoomBannerTests
         Assert.Contains("A smoky bar with a long counter.", term.Output);
         Assert.Contains("BAR", term.Output);
         Assert.Contains("Items in sight: bartender, beer", term.Output);
-        Assert.Contains("Other areas: BACK ROOM", term.Output);
+        Assert.Contains("Other exits: EAST", term.Output);
         Assert.Contains(new string('=', 20), term.Output);
         Assert.DoesNotContain("You can see", term.Output);
         Assert.DoesNotContain("Exits:", term.Output);
@@ -104,7 +104,7 @@ public class RoomBannerTests
 
         engine.Submit("wait");
 
-        Assert.Contains("Other areas: none", term.Output);
+        Assert.Contains("Other exits: none", term.Output);
     }
 
     [Fact]

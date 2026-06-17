@@ -30,11 +30,30 @@ public class GameContext
 
     public void Say(string markup) => Out.PrintLine(markup);
     public void SayInline(string markup) => Out.Print(markup);
+    public void OverwriteLine(string markup) => Out.OverwriteLine(markup);
     public void Blank() => Out.Blank();
+
+    /// <summary>
+    /// Pauses briefly while allowing the host to repaint (interactive terminals). Headless hosts
+    /// and tests fall back to <see cref="Thread.Sleep(int)"/>. A delay of 0 pumps one frame when a
+    /// presentation host is wired; otherwise it is a no-op.
+    /// </summary>
+    public void Delay(int milliseconds)
+    {
+        if (Engine.QuitRequested) return;
+        if (Engine.PresentationDelay is { } delay)
+            delay(milliseconds);
+        else if (milliseconds > 0)
+            Thread.Sleep(milliseconds);
+    }
+
+    /// <summary>True when the host repaints mid-turn (e.g. Avalonia); false in headless/script runs.</summary>
+    public bool LivePresentation => Engine.PresentationDelay is not null;
 
     /// <summary>Prints a prompt and blocks until the player enters a line (mid-turn).</summary>
     public string PromptLine(string prompt)
     {
+        if (Engine.QuitRequested) return "";
         Out.Print(prompt);
         return Engine.RequirePlayerInput().ReadLine();
     }
@@ -42,9 +61,16 @@ public class GameContext
     /// <summary>Prints a prompt and blocks until the player presses an accepted key (mid-turn).</summary>
     public char PromptKey(string prompt, ReadOnlySpan<char> validKeys)
     {
+        if (Engine.QuitRequested) return validKeys.Length > 0 ? validKeys[0] : '\0';
         Out.Print(prompt);
         char key = Engine.RequirePlayerInput().ReadKey(validKeys);
         Out.NewLine();
+        foreach (char valid in validKeys)
+        {
+            if (char.ToLowerInvariant(valid) == char.ToLowerInvariant(key))
+                return valid;
+        }
+
         return key;
     }
 
@@ -119,6 +145,17 @@ public class GameContext
 
     /// <summary>Legacy alias for <see cref="RefreshRoomDisplay"/>.</summary>
     public void PrintRoomBanner() => RefreshRoomDisplay();
+
+    /// <summary>
+    /// Recomputes title/status bars mid-turn (e.g. after spending money during slots). Interactive
+    /// hosts pump one frame so the bar paints before the verb continues.
+    /// </summary>
+    public void RefreshStatusBars()
+    {
+        Engine.RefreshStatusBars();
+        if (Engine.PresentationDelay is { } delay)
+            delay(0);
+    }
 
     /// <summary>Ends the game. <paramref name="won"/> selects the win or lose framing.</summary>
     public void EndGame(bool won, string? message = null)

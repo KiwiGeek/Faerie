@@ -111,13 +111,14 @@ public static class StandardVerbs
             return VerbResult.Done;
         }
 
-        if (!exit.CanPass(ctx, out string? reason))
+        if (!exit.TryTraverse(ctx, out string? reason, out bool shouldMove))
         {
             ctx.Say(reason ?? "You can't go that way.");
             return VerbResult.Done;
         }
 
-        ctx.MovePlayerTo(exit.Destination);
+        if (shouldMove)
+            ctx.MovePlayerTo(exit.Destination);
         return VerbResult.Done;
     }
 

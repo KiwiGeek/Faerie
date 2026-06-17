@@ -32,6 +32,12 @@ public class TerminalWindow : Window
         Terminal.Focus();
     }
 
+    protected override void OnClosing(WindowClosingEventArgs e)
+    {
+        Terminal.Shutdown();
+        base.OnClosing(e);
+    }
+
     protected override void OnKeyDown(KeyEventArgs e)
     {
         bool altEnter = e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Alt);

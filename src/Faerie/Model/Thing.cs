@@ -23,6 +23,9 @@ public class Thing : Element
     /// <summary>The thing that unlocks this one when it is <see cref="Attr.Lockable"/>.</summary>
     public Thing? Key { get; set; }
 
+    /// <summary>NPC or shopkeeper who sells this when it is <see cref="Attr.Orderable"/>.</summary>
+    public Thing? Vendor { get; set; }
+
     /// <summary>Where this thing begins the game. Set by the fluent placement helpers; resolved at build.</summary>
     internal Placement InitialPlacement { get; set; } = Placement.Offstage;
 
