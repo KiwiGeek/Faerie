@@ -508,22 +508,6 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Hades — bell+book+candles in inventory; no ordered ritual sequence.
-    private void DefineHades()
-    {
-        _b.On(BrassBell).Before(_ring, ctx =>
-        {
-            if (ctx.InRoom(EntranceToHades) && ctx.Carrying(BlackBook) && ctx.Carrying(PairOfCandles))
-            {
-                ctx.Set(_hadesOpen, true);
-                ctx.Say("The bell tolls. The gate shimmers and opens.");
-                return VerbResult.Done;
-            }
-            ctx.Say("The bell makes a hollow sound.");
-            return VerbResult.Done;
-        });
-    }
-
     // ENGINE-LIMIT: ZorkSimplifications.Bat — instant death without garlic; no bat steal/repel loop.
     private void DefineBatAndGarlic()
     {

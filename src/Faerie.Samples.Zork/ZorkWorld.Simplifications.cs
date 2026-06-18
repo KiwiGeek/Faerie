@@ -36,7 +36,8 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §8 — Mirror rooms connected; no break/swap behavior.</summary>
     internal const string Mirrors = nameof(Mirrors);
 
-    /// <summary>AGENTS.md §9 — Hades opens with bell+book+candles in inventory; no ritual sequence.</summary>
+    /// <summary>AGENTS.md §9 — IMPLEMENTED: bell drops hot, candles drop and go out, relight, read prayer.
+    /// See ZorkWorld.Hades.cs. Pour-water-on-bell recovery included.</summary>
     internal const string Hades = nameof(Hades);
 
     /// <summary>AGENTS.md §10 — Grating is a gated exit; no push-through from clearing.</summary>
