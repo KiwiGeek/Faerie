@@ -499,20 +499,14 @@ internal sealed partial class ZorkWorld
         // Troll
         ConfigureTrollExits();
 
-        // Cyclops up
-        R(ZorkIds.CyclopsRoom).ExitTo(Direction.Up)!.Condition = ctx =>
-            ctx.Get(_cyclopsAsleep) || ctx.Get(_cyclopsDead);
-        R(ZorkIds.CyclopsRoom).ExitTo(Direction.Up)!.BlockedMessage =
-            "The cyclops doesn't look like he'll let you past.";
+        // Cyclops room exits configured in ZorkWorld.Cyclops.cs
 
         // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — magic flag from gallery visit, not gnome encounter.
         Exit toStrange = LivingRoom.Connect(Direction.West, StrangePassage, reciprocal: false);
         toStrange.Condition = ctx => ctx.Get(_magicFlag);
         toStrange.BlockedMessage = "The door is nailed shut.";
 
-        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — _strangePassageOpen never set; cyclops wall break omitted.
-        R(ZorkIds.CyclopsRoom).ExitTo(Direction.East)!.Condition = ctx => ctx.Get(_strangePassageOpen);
-        R(ZorkIds.CyclopsRoom).ExitTo(Direction.East)!.BlockedMessage = "The east wall is solid rock.";
+        // Cyclops east exit configured in ZorkWorld.Cyclops.cs
 
         // ENGINE-LIMIT: ZorkSimplifications.MagicPassage, Encumbrance — chimney flag on studio enter; no load check.
         Exit toStudio = Kitchen.Connect(Direction.Down, R(ZorkIds.Studio), reciprocal: false);

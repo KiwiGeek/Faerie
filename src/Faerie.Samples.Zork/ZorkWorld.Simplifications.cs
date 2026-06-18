@@ -54,7 +54,8 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §15 — IMPLEMENTED: proximity glow daemon (none/faint/bright). See ZorkWorld.DefineSwordGlow.</summary>
     internal const string Sword = nameof(Sword);
 
-    /// <summary>AGENTS.md §16 — Cyclops sleep simplified; no mood counter or water quantity.</summary>
+    /// <summary>AGENTS.md §16 — IMPLEMENTED: lunch/water wrath stages, I-CYCLOPS daemon, ODYSSEUS verb.
+    /// See ZorkWorld.Cyclops.cs.</summary>
     internal const string Cyclops = nameof(Cyclops);
 
     /// <summary>AGENTS.md §17 — Bat room instant death without garlic; no steal loop.</summary>
