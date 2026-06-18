@@ -100,6 +100,30 @@ public sealed class HeadlessRunnerTests
     }
 
     [Fact]
+    public void TryParse_Tee_SetsMirrorTranscriptToConsole()
+    {
+        string script = Path.Combine(Path.GetTempPath(), "faerie-headless-tee-" + Guid.NewGuid().ToString("N") + ".txt");
+        File.WriteAllText(script, "look\n");
+        try
+        {
+            bool parsed = HeadlessArgs.TryParse(
+                ["--script", script, "-o", "out.txt", "--tee"],
+                out HeadlessOptions? options,
+                out string? error);
+
+            Assert.True(parsed);
+            Assert.Null(error);
+            Assert.NotNull(options);
+            Assert.True(options!.MirrorTranscriptToConsole);
+            Assert.Equal("out.txt", options.TranscriptPath);
+        }
+        finally
+        {
+            File.Delete(script);
+        }
+    }
+
+    [Fact]
     public void TryParse_WithoutScript_ReturnsFalse()
     {
         bool parsed = HeadlessArgs.TryParse(["--help"], out HeadlessOptions? options, out string? error);

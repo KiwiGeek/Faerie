@@ -22,7 +22,8 @@ public static class HeadlessRunner
         try
         {
             bool useStdin = scriptOverride is null && options.ScriptFromStdin;
-            bool useStdout = transcriptOverride is null && options.TranscriptToStdout;
+            bool useStdout = transcriptOverride is null &&
+                (options.TranscriptToStdout || options.MirrorTranscriptToConsole);
             ParentConsole.AttachIfNeeded(useStdin, useStdout);
 
             StreamWriter? ownedWriter = null;
@@ -73,8 +74,12 @@ public static class HeadlessRunner
             return ownedWriter;
         }
 
-        ownedWriter = new StreamWriter(options.TranscriptPath, append: false);
-        return ownedWriter;
+        ownedWriter = new StreamWriter(options.TranscriptPath, append: false) { AutoFlush = true };
+        if (!options.MirrorTranscriptToConsole)
+            return ownedWriter;
+
+        StreamWriter console = new(Console.OpenStandardOutput(), leaveOpen: true) { AutoFlush = true };
+        return new TeeTextWriter(ownedWriter, console);
     }
 
     private static IEnumerable<string> ReadCommands(HeadlessOptions options, TextReader? scriptOverride)

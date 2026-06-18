@@ -1,0 +1,65 @@
+# https://johnesco.github.io/zork1-v2/walkthrough.html
+north
+up
+take egg
+down
+south
+east
+open window
+west
+take sack
+take bottle
+west
+take sword
+take lamp
+open case
+put egg in case
+east
+turn on lamp
+up
+take rope
+down
+open sack
+take garlic
+west
+move rug
+open trap door
+down
+south
+drop sack
+drop bottle
+drop rope
+east
+take painting
+west
+north
+north
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+drop sword
+east
+east
+east
+echo
+take platinum bar
+west
+north
+northeast
+east
+north
+take matchbook
+north
+push yellow button
+take wrench
+take screwdriver
