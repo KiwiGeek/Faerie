@@ -106,3 +106,34 @@ south
 take book
 take candles
 down
+down
+ring bell
+take candles
+light candles with matchbook
+read book
+drop book
+drop candles
+south
+take skull
+north
+up
+north
+north
+north
+west
+west
+west
+south
+east
+up
+southwest
+east
+south
+southeast
+east
+east
+turn off lamp
+put torch in case
+put skull in case
+turn on lamp
+open trap door
