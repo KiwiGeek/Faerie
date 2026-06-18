@@ -75,7 +75,7 @@
     {
       "label": "run: Zork I (winpath)",
       "type": "shell",
-      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-winpath.txt -o scripts/zork1-winpath.transcript.txt --seed 1",
+      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-winpath.txt -o scripts/zork1-winpath.transcript.txt --seed 1 --tee",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "none",
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
@@ -97,9 +97,17 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
     },
     {
-      "label": "run: Softporn Adventure (Headless)",
+      "label": "run: Softporn Adventure (winpath)",
       "type": "shell",
-      "command": "dotnet run --project src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj -- --script scripts/softporn-smoketest.txt -o -",
+      "command": "dotnet run --project src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj -- --script scripts/softporn-winpath.txt -o scripts/softporn-winpath.transcript.txt --tee",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "run: Softporn Adventure (smoketest)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.Softporn/Faerie.Samples.Softporn.csproj -- --script scripts/softporn-smoketest.txt -o scripts/softporn-smoketest.transcript.txt",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "none",
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }

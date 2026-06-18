@@ -19,6 +19,7 @@ public static class HeadlessArgs
         string? save = null;
         string? saveDir = null;
         bool helpRequested = false;
+        bool mirrorTranscript = false;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -31,6 +32,9 @@ public static class HeadlessArgs
                 case "--transcript":
                 case "-o":
                     if (!TryReadValue(args, ref i, out transcript)) { error = "Missing value for --transcript."; return true; }
+                    break;
+                case "--tee":
+                    mirrorTranscript = true;
                     break;
                 case "--seed":
                     if (!TryReadValue(args, ref i, out string? seedText)) { error = "Missing value for --seed."; return true; }
@@ -77,7 +81,8 @@ public static class HeadlessArgs
             TranscriptPath = transcript,
             RandomSeed = seed,
             SavePath = savePath,
-            SaveDirectory = saveDir
+            SaveDirectory = saveDir,
+            MirrorTranscriptToConsole = mirrorTranscript
         };
         return true;
     }
@@ -90,6 +95,7 @@ public static class HeadlessArgs
           --script <path>       Input script, or - for stdin (one command per line; # and ; comments)
           --transcript <path>   Output transcript, or - for stdout (default: <script>.transcript.txt, or - when script is -)
           -o <path>             Alias for --transcript
+          --tee                 Also mirror transcript output to the console (with a file transcript)
           --seed <n>            Fixed random seed for reproducible rolls
           --save <path>         Legacy single save file (default: <script>.save.json)
           --save-dir <path>     Directory for named save slots (SAVE / RESTORE ABC)

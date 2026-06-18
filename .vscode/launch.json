@@ -32,7 +32,7 @@
       "stopAtEntry": false
     },
     {
-      "name": "Softporn Adventure (Headless)",
+      "name": "Softporn Adventure (Headless winpath)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build-softporn",
@@ -41,9 +41,10 @@
       "console": "integratedTerminal",
       "args": [
         "--script",
-        "${workspaceFolder}/scripts/softporn-smoketest.txt",
+        "${workspaceFolder}/scripts/softporn-winpath.txt",
         "-o",
-        "-"
+        "${workspaceFolder}/scripts/softporn-winpath.transcript.txt",
+        "--tee"
       ],
       "stopAtEntry": false
     },
@@ -61,7 +62,8 @@
         "-o",
         "${workspaceFolder}/scripts/zork1-winpath.transcript.txt",
         "--seed",
-        "1"
+        "1",
+        "--tee"
       ],
       "stopAtEntry": false
     }

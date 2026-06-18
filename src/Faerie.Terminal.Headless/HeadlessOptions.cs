@@ -27,4 +27,10 @@ public sealed class HeadlessOptions
 
     /// <summary>True when <see cref="TranscriptPath"/> is <c>-</c> (write to stdout).</summary>
     public bool TranscriptToStdout => TranscriptPath == "-";
+
+    /// <summary>
+    /// When writing to a transcript file, also mirror output to the console (for debug terminals).
+    /// Ignored when <see cref="TranscriptToStdout"/> is true.
+    /// </summary>
+    public bool MirrorTranscriptToConsole { get; init; }
 }
