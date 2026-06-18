@@ -8,9 +8,6 @@ namespace Faerie.Samples.Zork;
 /// </summary>
 internal static class ZorkSimplifications
 {
-    /// <summary>AGENTS.md §1 — No carry weight; coffin/empty-hands rules partial only.</summary>
-    internal const string Encumbrance = nameof(Encumbrance);
-
     /// <summary>AGENTS.md §2 — Inflate/deflate only; no river boarding or water-room travel.</summary>
     internal const string BoatAndRiver = nameof(BoatAndRiver);
 

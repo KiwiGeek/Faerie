@@ -253,6 +253,8 @@ internal sealed partial class ZorkWorld
 
         Thief = Reg("thief", _b.Creature("thief").Called("robber", "figure").Adjectives("sneaky", "shadowy")
             .Describe("There is a suspicious-looking individual, holding a large bag, leaning against one wall."));
+
+        ApplyThingSizes();
     }
 
     private void PlaceThings()
