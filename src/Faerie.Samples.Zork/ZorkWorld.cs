@@ -71,6 +71,8 @@ internal sealed partial class ZorkWorld
     private StateKey<int> _cyclopsWrath = null!;
     private StateKey<bool> _cyclopsDaemon = null!;
     private StateKey<bool> _thiefDead = null!;
+    private StateKey<bool> _thiefHere = null!;
+    private StateKey<bool> _thiefEngrossed = null!;
     private StateKey<bool> _lowTide = null!;
     private StateKey<bool> _rainbowSolid = null!;
     private StateKey<bool> _boatInflated = null!;
@@ -125,6 +127,8 @@ internal sealed partial class ZorkWorld
         _cyclopsWrath = _b.State("cyclops-wrath", 0);
         _cyclopsDaemon = _b.State("cyclops-daemon", false);
         _thiefDead = _b.State("thief-dead", false);
+        _thiefHere = _b.State("thief-here", false);
+        _thiefEngrossed = _b.State("thief-engrossed", false);
         _lowTide = _b.State("low-tide", false);
         _rainbowSolid = _b.State("rainbow-solid", false);
         _boatInflated = _b.State("boat-inflated", false);

@@ -396,43 +396,7 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Thief — random steal + teleport; no bag, roaming, or sacred rooms.
-    private void DefineThief()
-    {
-        _b.EveryTurn(ctx =>
-        {
-            if (ctx.Get(_thiefDead) || ctx.Get(_thiefKO) > 0 || ctx.State.TurnCount < 20) return;
-            if (ctx.Random.Next(6) != 0) return;
-
-            if (!ctx.Here(Thief) && !ctx.Get(_thiefDead))
-            {
-                ctx.PlaceHere(Thief);
-                ctx.Say("You catch a glimpse of a suspicious-looking figure slipping into the room.");
-            }
-
-            Thing? stolen = ctx.State.Inventory
-                .Where(t => IsTreasure(t) && t != Sword && t != Lantern)
-                .OrderBy(_ => ctx.Random.Next()).FirstOrDefault();
-            if (stolen is null) return;
-            ctx.Remove(stolen);
-            ctx.State.Move(stolen, Placement.InRoom(TreasureRoom));
-            ctx.Say("You hear a rustling in the darkness. Something has been taken from your pack!");
-        }, when: ctx => !ctx.Get(_thiefDead));
-
-        Thief.OnExamine = ctx =>
-        {
-            if (ctx.Get(_thiefDead)) return;
-            ctx.Say("The thief is eyeing your possessions greedily.");
-        };
-    }
-
-    private void DropThiefLoot(GameContext ctx)
-    {
-        foreach (Thing t in ctx.State.ContentsOf(TreasureRoom).Where(IsTreasure).ToList())
-            if (!ctx.State.ContentsOf(TrophyCase).Contains(t))
-                ctx.PlaceHere(t);
-    }
-
+    // ENGINE-LIMIT: ZorkSimplifications.Thief — see ZorkWorld.Thief.cs (I-THIEF daemon).
     // ENGINE-LIMIT: ZorkSimplifications.BoatAndRiver — inflate/deflate only; river rooms not gated on boat state.
     private void DefineBoat()
     {
