@@ -19,6 +19,7 @@ internal sealed partial class ZorkWorld
     internal Thing Bottle = null!;
     internal Thing Garlic = null!;
     internal Thing Rope = null!;
+    internal Thing DomeRailing = null!;
     internal Thing Leaves = null!;
     internal Thing Grating = null!;
     internal Thing SkeletonKey = null!;
@@ -123,6 +124,9 @@ internal sealed partial class ZorkWorld
             .Describe("A clove of garlic."));
 
         Rope = Reg("rope", _b.Item("rope").Adjectives("large", "coiled").Describe("A large coil of rope."));
+
+        DomeRailing = Reg("dome_railing", _b.Scenery("railing").Called("railing", "ceiling").Adjectives("dome")
+            .Describe("A railing around the edge of the dome overlooks a stomach-churning drop."));
 
         PileOfPlastic = Reg("plastic", _b.Item("pile of plastic").Called("plastic", "pile").Adjectives("deflated")
             .Describe("A small pile of plastic. It looks like it could be inflated into something useful."));
@@ -271,6 +275,7 @@ internal sealed partial class ZorkWorld
         Bottle.StartsIn(Kitchen).InitialText("A bottle is sitting on the table.");
 
         Rope.StartsIn(Attic);
+        DomeRailing.StartsIn(DomeRoom);
         NastyKnife.StartsIn(Attic).InitialText("On a table is a nasty-looking knife.");
         PileOfPlastic.StartsIn(R(ZorkIds.DamBase)).InitialText(
             "There is a folded pile of plastic here which has a small valve attached.");

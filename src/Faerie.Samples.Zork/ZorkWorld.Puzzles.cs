@@ -570,13 +570,12 @@ internal sealed partial class ZorkWorld
     {
         _b.On(Rope).Before(_tie, ctx =>
         {
-            if (ctx.InRoom(DomeRoom) || ctx.IndirectObject?.Name.Contains("railing", StringComparison.OrdinalIgnoreCase) == true)
-            {
-                ctx.Set(_domeRopeTied, true);
-                ctx.Say("The rope is tied to the railing.");
-                return VerbResult.Done;
-            }
-            return VerbResult.Pass;
+            if (!ctx.InRoom(DomeRoom)) return VerbResult.Pass;
+            if (ctx.IndirectObject is not null && ctx.IndirectObject != DomeRailing) return VerbResult.Pass;
+
+            ctx.Set(_domeRopeTied, true);
+            ctx.Say("The rope is tied to the railing.");
+            return VerbResult.Done;
         });
     }
 
