@@ -1,0 +1,136 @@
+[
+  {
+    "enum": "IbmBios8x8",
+    "file": "PxPlus_IBM_BIOS.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "PC BIOS 8×8 (shared by CGA graphics and early text modes)."
+  },
+  {
+    "enum": "IbmCga8x8",
+    "file": "PxPlus_IBM_CGA.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "IBM CGA 8×8."
+  },
+  {
+    "enum": "IbmMda9x14",
+    "file": "PxPlus_IBM_MDA.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "IBM MDA 9×14 (80-column monochrome with 9th-dot box drawing)."
+  },
+  {
+    "enum": "IbmEga8x14",
+    "file": "PxPlus_IBM_EGA_8x14.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "IBM EGA 8×14."
+  },
+  {
+    "enum": "IbmVga8x14",
+    "file": "PxPlus_IBM_VGA_8x14.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "IBM VGA 8×14."
+  },
+  {
+    "enum": "IbmVga8x16",
+    "file": "PxPlus_IBM_VGA_8x16.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "IBM VGA 8×16 (classic DOS 80×25)."
+  },
+  {
+    "enum": "IbmVga9x16",
+    "file": "PxPlus_IBM_VGA_9x16.ttf",
+    "group": "IBM PC (int10h.org, CC BY-SA 4.0)",
+    "summary": "IBM VGA 9×16 (9-dot-wide text mode)."
+  },
+  {
+    "enum": "Tandy10008x16",
+    "file": "PxPlus_Tandy1K-II_200L.ttf",
+    "group": "IBM PC compatibles (int10h.org, CC BY-SA 4.0)",
+    "summary": "Tandy 1000 / PCjr 200-line 8×16."
+  },
+  {
+    "enum": "AmstradPc",
+    "file": "PxPlus_Amstrad_PC.ttf",
+    "group": "IBM PC compatibles (int10h.org, CC BY-SA 4.0)",
+    "summary": "Amstrad PC1512 system font."
+  },
+  {
+    "enum": "DecRainbow80Col",
+    "file": "PxPlus_Rainbow100_re_80.ttf",
+    "group": "IBM PC compatibles (int10h.org, CC BY-SA 4.0)",
+    "summary": "DEC Rainbow 100 80-column text."
+  },
+  {
+    "enum": "AppleIIe",
+    "file": "PrintChar21.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "Apple II 40-column text (Print Char 21).",
+    "kreativeZip": "bitmap/apple2/pr.zip",
+    "kreativeMember": "Print Char 21.ttf"
+  },
+  {
+    "enum": "AppleII80Column",
+    "file": "PRNumber3.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "Apple II 80-column text (PR Number 3).",
+    "kreativeZip": "bitmap/apple2/pr.zip",
+    "kreativeMember": "PR Number 3.ttf"
+  },
+  {
+    "enum": "Commodore64",
+    "file": "PetMe64.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "Commodore 64 PETSCII (Pet Me 64).",
+    "kreativeZip": "retro/petme.zip",
+    "kreativeMember": "PetMe64.ttf"
+  },
+  {
+    "enum": "ZxSpectrum",
+    "file": "Speccy.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "ZX Spectrum.",
+    "kreativeZip": "retro/speccy.zip",
+    "kreativeMember": "Speccy.ttf"
+  },
+  {
+    "enum": "Atari8Bit",
+    "file": "CandyAntics.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "Atari 8-bit (Candy Antics).",
+    "kreativeZip": "retro/candy.zip",
+    "kreativeMember": "CandyAntics.ttf"
+  },
+  {
+    "enum": "AtariSt",
+    "file": "ProjectJasonSmall.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "Atari ST low resolution (Project Jason Small).",
+    "kreativeZip": "retro/projason.zip",
+    "kreativeMember": "ProjectJasonSmall.ttf"
+  },
+  {
+    "enum": "Trs80CoCo",
+    "file": "HotCoCo.ttf",
+    "group": "8-bit classics (Kreative Software, Free Use 1.2f)",
+    "summary": "TRS-80 Color Computer.",
+    "kreativeZip": "retro/hotcoco.zip",
+    "kreativeMember": "HotCoCo.ttf"
+  },
+  {
+    "enum": "BbcMaster512",
+    "file": "Px437_Master_512.ttf",
+    "group": "BBC Micro (int10h.org, CC BY-SA 4.0)",
+    "summary": "BBC Master 512 MOS 8×8 (Modes 0–6)."
+  },
+  {
+    "enum": "BbcTeletext",
+    "file": "Teletext50.otf",
+    "group": "BBC Micro teletext (public domain)",
+    "summary": "BBC Mode 7 / teletext (SAA5050-style, Teletext50)."
+  },
+  {
+    "enum": "Kaypro2k",
+    "file": "Px437_Kaypro2K_G.ttf",
+    "group": "IBM PC compatibles (int10h.org, CC BY-SA 4.0)",
+    "summary": "Kaypro 2000 portable."
+  }
+]

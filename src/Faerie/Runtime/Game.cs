@@ -26,11 +26,10 @@ public sealed class Game
     public string? WindowIconUri { get; init; }
 
     /// <summary>
-    /// The terminal font, as a spec the host resolves. May be a system family name ("Consolas"),
+    /// The terminal font, as a spec the host resolves. May be a built-in retro font (see
+    /// <c>Faerie.Terminal.Avalonia.BuiltInTerminalFont</c>), a system family name ("Consolas"),
     /// an Avalonia resource font with an explicit family ("avares://MyGame/Assets/Fonts#Apple ][")
     /// , or a URI/folder pointing at an embedded font file. Null means the host's default monospace.
-    /// The font file itself lives in the game's assembly, not the engine — so the engine ships
-    /// with no font dependencies.
     /// </summary>
     public string? FontSpec { get; init; }
 
