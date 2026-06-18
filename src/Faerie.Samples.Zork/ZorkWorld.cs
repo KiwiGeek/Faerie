@@ -66,8 +66,10 @@ internal sealed partial class ZorkWorld
     private StateKey<bool> _trapDoorOpen = null!;
     private StateKey<bool> _windowOpen = null!;
     private StateKey<bool> _trollDefeated = null!;
-    private StateKey<bool> _cyclopsAsleep = null!;
-    private StateKey<bool> _cyclopsDead = null!;
+    private StateKey<bool> _cyclopsFlag = null!;
+    private StateKey<bool> _cyclopsGone = null!;
+    private StateKey<int> _cyclopsWrath = null!;
+    private StateKey<bool> _cyclopsDaemon = null!;
     private StateKey<bool> _thiefDead = null!;
     private StateKey<bool> _lowTide = null!;
     private StateKey<bool> _rainbowSolid = null!;
@@ -118,8 +120,10 @@ internal sealed partial class ZorkWorld
         _trapDoorOpen = _b.State("trap-open", false);
         _windowOpen = _b.State("window-open", false);
         _trollDefeated = _b.State("troll-defeated", false);
-        _cyclopsAsleep = _b.State("cyclops-asleep", false);
-        _cyclopsDead = _b.State("cyclops-dead", false);
+        _cyclopsFlag = _b.State("cyclops-flag", false);
+        _cyclopsGone = _b.State("cyclops-gone", false);
+        _cyclopsWrath = _b.State("cyclops-wrath", 0);
+        _cyclopsDaemon = _b.State("cyclops-daemon", false);
         _thiefDead = _b.State("thief-dead", false);
         _lowTide = _b.State("low-tide", false);
         _rainbowSolid = _b.State("rainbow-solid", false);

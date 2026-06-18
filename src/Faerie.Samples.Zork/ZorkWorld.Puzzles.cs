@@ -63,6 +63,7 @@ internal sealed partial class ZorkWorld
         DefineCombat();
         DefineSwordGlow();
         DefineTrollAndCyclops();
+        DefineCyclops();
         DefineThief();
         DefineDamAndReservoir();
         DefineBoat();
@@ -194,21 +195,6 @@ internal sealed partial class ZorkWorld
     {
         _b.On(Troll).Before(_attack, ctx => PlayerStrikes(ctx, Troll, _trollHp, _trollKO, _trollDefeated, "troll", KillTroll));
         _b.On(Thief).Before(_attack, ctx => PlayerStrikes(ctx, Thief, _thiefHp, _thiefKO, _thiefDead, "thief", KillThief));
-
-        // The cyclops isn't a melee fight in the original — you scare or feed him (see below).
-        _b.On(Cyclops).Before(_attack, ctx =>
-        {
-            if (ctx.Get(_cyclopsDead)) { ctx.Say("The cyclops is already dead."); return VerbResult.Done; }
-            if (HasSword(ctx))
-            {
-                ctx.Set(_cyclopsDead, true);
-                ctx.Remove(Cyclops);
-                ctx.Say("The cyclops shrinks into a little pile of salt.");
-                return VerbResult.Done;
-            }
-            ctx.Say("The cyclops catches your arm and nearly breaks it.");
-            return VerbResult.Done;
-        });
 
         _b.EveryTurn(CombatRound);
     }
@@ -393,7 +379,6 @@ internal sealed partial class ZorkWorld
         return Math.Max(Level(Troll, ctx.Get(_trollDefeated)), Level(Thief, ctx.Get(_thiefDead)));
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Cyclops — lunch/bottle/yell sleep cyclops; no mood daemon or water quantity.
     private void DefineTrollAndCyclops()
     {
         _b.On(Troll).Before(_b.Verbs.Give!, ctx =>
@@ -407,39 +392,6 @@ internal sealed partial class ZorkWorld
                 return VerbResult.Done;
             }
             ctx.Say("The troll is not interested.");
-            return VerbResult.Done;
-        });
-
-        _b.On(Cyclops).Before(_b.Verbs.Give!, ctx =>
-        {
-            if (ctx.DirectObject == Lunch)
-            {
-                ctx.Remove(Lunch);
-                ctx.Say("The cyclops takes the lunch and devours it. He seems less hostile.");
-                return VerbResult.Done;
-            }
-            if (ctx.DirectObject == Bottle && ctx.Carrying(Bottle))
-            {
-                ctx.Set(_cyclopsAsleep, true);
-                ctx.Say("The cyclops drinks the water and falls fast asleep.");
-                return VerbResult.Done;
-            }
-            ctx.Say("The cyclops is not interested.");
-            return VerbResult.Done;
-        });
-
-        _b.On(Cyclops).Before(_yell, ctx =>
-        {
-            if (ctx.Get(_cyclopsDead)) return VerbResult.Pass;
-            if (ctx.DirectObjectText?.Contains("odysseus", StringComparison.OrdinalIgnoreCase) == true ||
-                ctx.DirectObjectText?.Contains("ulysseus", StringComparison.OrdinalIgnoreCase) == true)
-            {
-                ctx.Set(_cyclopsAsleep, true);
-                ctx.Say("The cyclops, hearing the name of his father's nemesis, falls into a deep sleep.");
-                return VerbResult.Done;
-            }
-            ctx.Set(_cyclopsAsleep, true);
-            ctx.Say("The cyclops covers his ears and falls asleep.");
             return VerbResult.Done;
         });
     }
@@ -679,11 +631,6 @@ internal sealed partial class ZorkWorld
     {
         Gallery.OnFirstEnter = ctx => ctx.Set(_magicFlag, true);
         R(ZorkIds.Studio).OnFirstEnter = ctx => ctx.Set(_chimneyFlag, true);
-        CyclopsRoom.OnEnter = ctx =>
-        {
-            if (ctx.Get(_cyclopsDead) || ctx.Get(_cyclopsAsleep)) return;
-            ctx.Say("The cyclops blocks the staircase.");
-        };
     }
 
     private void DefineStoneBarrowWin()
@@ -776,7 +723,8 @@ internal sealed partial class ZorkWorld
     private VerbResult AttackHandler(VerbContext ctx)
     {
         if (ctx.DirectObject is null) { ctx.Say("Attack what?"); return VerbResult.Done; }
-        if (ctx.DirectObject == Troll || ctx.DirectObject == Cyclops || ctx.DirectObject == Thief) return VerbResult.Pass;
+        if (ctx.DirectObject == Troll || ctx.DirectObject == Cyclops || ctx.DirectObject == Thief)
+            return VerbResult.Pass;
         ctx.Say("Violence isn't the answer to every problem.");
         return VerbResult.Done;
     }
@@ -833,7 +781,6 @@ internal sealed partial class ZorkWorld
 
     private VerbResult YellHandler(VerbContext ctx)
     {
-        if (ctx.InRoom(CyclopsRoom) && !ctx.Get(_cyclopsDead)) return VerbResult.Pass;
         ctx.Say("You yell loudly.");
         return VerbResult.Done;
     }
