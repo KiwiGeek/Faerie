@@ -761,6 +761,7 @@ internal sealed partial class ZorkWorld
 
     private VerbResult PrayHandler(VerbContext ctx)
     {
+        if (TryAltarPray(ctx)) return VerbResult.Done;
         ctx.Say("You achieve a brief moment of serenity.");
         return VerbResult.Done;
     }

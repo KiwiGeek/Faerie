@@ -137,3 +137,37 @@ put torch in case
 put skull in case
 turn on lamp
 open trap door
+down
+north
+east
+east
+southeast
+east
+down
+south
+down
+take coffin
+open coffin
+take sceptre
+up
+south
+pray
+turn off lamp
+drop lamp
+drop screwdriver
+east
+south
+east
+in
+west
+put coffin in case
+east
+out
+east
+east
+down
+down
+north
+wave sceptre
+take pot of gold
+put sceptre in case
