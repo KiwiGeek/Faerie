@@ -618,16 +618,6 @@ internal sealed partial class ZorkWorld
             if (turns >= 3) ctx.Lose("It is pitch black. You are likely to be eaten by a grue.");
         });
 
-        // ENGINE-LIMIT: ZorkSimplifications.Encumbrance — altar-only block; no global carry weight.
-        _b.On(GoldCoffin).Before(_b.Verbs.Take!, ctx =>
-        {
-            if (ctx.InRoom(Altar) || ctx.State.RoomOf(GoldCoffin) == Altar)
-            {
-                ctx.Say("The coffin is too heavy to lift from the altar.");
-                return VerbResult.Done;
-            }
-            return VerbResult.Pass;
-        });
     }
 
     // ---- verb handlers --------------------------------------------------------------------

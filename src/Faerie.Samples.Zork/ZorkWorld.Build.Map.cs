@@ -508,19 +508,20 @@ internal sealed partial class ZorkWorld
 
         // Cyclops east exit configured in ZorkWorld.Cyclops.cs
 
-        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage, Encumbrance — chimney flag on studio enter; no load check.
+        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — chimney flag on studio enter.
         Exit toStudio = Kitchen.Connect(Direction.Down, R(ZorkIds.Studio), reciprocal: false);
         toStudio.Condition = ctx => ctx.Get(_chimneyFlag);
         toStudio.BlockedMessage = "Only Santa Claus climbs down chimneys.";
 
-        // Studio up to kitchen
-        R(ZorkIds.Studio).Connect(Direction.Up, Kitchen, reciprocal: false).Condition = ctx => ctx.Get(_chimneyFlag);
+        // Studio up to kitchen — load rules in ConfigureEncumbranceExits.
 
         // Reservoir crossing
         ConfigureReservoirExits();
 
         // Rainbow
         ConfigureRainbowExits();
+
+        ConfigureEncumbranceExits();
 
         // Hades
         R(ZorkIds.EntranceToHades).ExitTo(Direction.In)!.Condition = ctx => ctx.Get(_hadesOpen);

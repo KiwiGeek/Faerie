@@ -20,6 +20,7 @@ public static class ZorkGame
     {
         GameBuilder b = GameBuilder.Create("Zork I: The Great Underground Empire")
             .By("A sample for the Text Adventure engine")
+            .WithCarryLimit(100)
             .WithMaxScore(350)
             .WithWindowTitle("Zork I — The Great Underground Empire")
             .WithFont(BuiltInTerminalFont.IbmVga8x16)

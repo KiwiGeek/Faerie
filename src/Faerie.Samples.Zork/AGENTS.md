@@ -33,7 +33,7 @@ Simplified Infocom behaviors are tracked as [open **ZORK1:** issues](https://git
 
 | § | Topic | ZORK1 issue | ENGINE issue(s) |
 | --- | --- | --- | --- |
-| 1 | Encumbrance | [#22](https://github.com/KiwiGeek/Faerie/issues/22) | [#4](https://github.com/KiwiGeek/Faerie/issues/4) |
+| 1 | Encumbrance | **done** ([#22](https://github.com/KiwiGeek/Faerie/issues/22), [#4](https://github.com/KiwiGeek/Faerie/issues/4)) | — |
 | 2 | Boat / river | [#23](https://github.com/KiwiGeek/Faerie/issues/23) | [#5](https://github.com/KiwiGeek/Faerie/issues/5) |
 | 3 | Combat fidelity | [#24](https://github.com/KiwiGeek/Faerie/issues/24) | [#18](https://github.com/KiwiGeek/Faerie/issues/18) (optional module) |
 | 5 | Thief | [#25](https://github.com/KiwiGeek/Faerie/issues/25) | [#12](https://github.com/KiwiGeek/Faerie/issues/12), [#13](https://github.com/KiwiGeek/Faerie/issues/13) |
