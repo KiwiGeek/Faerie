@@ -1,5 +1,6 @@
 using Faerie.Building;
 using Faerie.Model;
+using Faerie.Presentation;
 using Faerie.Runtime;
 using Faerie.Verbs;
 
@@ -40,7 +41,7 @@ internal sealed partial class ZorkWorld
         _inflate = _b.DefineVerb("inflate", ["inflate", "blow up", "pump up"],
             VerbForms.Transitive | VerbForms.Ditransitive, InflateHandler);
         _deflate = _b.DefineVerb("deflate", ["deflate"], VerbForms.Transitive, DeflateHandler);
-        _echo = _b.DefineVerb("echo", ["echo"], VerbForms.Transitive, EchoHandler);
+        _echo = _b.DefineVerb("echo", ["echo"], VerbForms.Intransitive | VerbForms.Transitive, EchoHandler);
         _yell = _b.DefineVerb("yell", ["yell", "scream", "shout"], VerbForms.Transitive | VerbForms.Intransitive, YellHandler);
         _blast = _b.DefineVerb("blast", ["blast"], VerbForms.Transitive, BlastHandler);
         _turn = _b.DefineVerb("turn", ["turn", "twist"], VerbForms.Transitive, TurnHandler);
@@ -547,8 +548,12 @@ internal sealed partial class ZorkWorld
     /// <summary>The last run of letters in a (possibly marked-up) line, or null if there is none.</summary>
     private static string? LastWord(string text)
     {
+        string plain = Markup.Strip(text).Trim();
+        if (plain.Length == 0 || plain.All(static c => c is '>' or ' '))
+            return null;
+
         System.Text.RegularExpressions.MatchCollection words =
-            System.Text.RegularExpressions.Regex.Matches(text, "[A-Za-z]+");
+            System.Text.RegularExpressions.Regex.Matches(plain, "[A-Za-z]+");
         return words.Count == 0 ? null : words[^1].Value;
     }
 
@@ -833,15 +838,9 @@ internal sealed partial class ZorkWorld
 
         // Mastering the acoustics silences the room (stops the output-filter echo) before we speak.
         ctx.Set(_loudQuieted, true);
-
-        string word = ctx.DirectObjectText ?? ctx.DirectObject?.Name ?? "hello";
-        if (word.Contains("bar", StringComparison.OrdinalIgnoreCase))
-        {
-            PlatinumBar.Set(Attr.Concealed, false);
-            ctx.PlaceHere(PlatinumBar);
-            ctx.Say("The acoustics settle. A platinum bar lies on the floor.");
-        }
-        else ctx.Say("The room's echo fades; you can hear yourself think again.");
+        PlatinumBar.Set(Attr.Concealed, false);
+        ctx.PlaceHere(PlatinumBar);
+        ctx.Say("The acoustics of the room change subtly.");
         return VerbResult.Done;
     }
 

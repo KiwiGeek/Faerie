@@ -48,7 +48,7 @@
       "stopAtEntry": false
     },
     {
-      "name": "Zork I (Headless)",
+      "name": "Zork I (Headless winpath)",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build-zork",
@@ -57,9 +57,11 @@
       "console": "integratedTerminal",
       "args": [
         "--script",
-        "${workspaceFolder}/scripts/zork1-smoketest.txt",
+        "${workspaceFolder}/scripts/zork1-winpath.txt",
         "-o",
-        "-"
+        "${workspaceFolder}/scripts/zork1-winpath.transcript.txt",
+        "--seed",
+        "1"
       ],
       "stopAtEntry": false
     }

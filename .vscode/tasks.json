@@ -73,9 +73,17 @@
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
     },
     {
-      "label": "run: Zork I (Headless)",
+      "label": "run: Zork I (winpath)",
       "type": "shell",
-      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-smoketest.txt -o -",
+      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-winpath.txt -o scripts/zork1-winpath.transcript.txt --seed 1",
+      "options": { "cwd": "${workspaceFolder}" },
+      "group": "none",
+      "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
+    },
+    {
+      "label": "run: Zork I (smoketest)",
+      "type": "shell",
+      "command": "dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --script scripts/zork1-smoketest.txt -o scripts/zork1-smoketest.transcript.txt",
       "options": { "cwd": "${workspaceFolder}" },
       "group": "none",
       "presentation": { "reveal": "always", "panel": "dedicated", "focus": true }
