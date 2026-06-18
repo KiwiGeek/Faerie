@@ -29,6 +29,15 @@ public class Thing : Element
     /// <summary>Where this thing begins the game. Set by the fluent placement helpers; resolved at build.</summary>
     internal Placement InitialPlacement { get; set; } = Placement.Offstage;
 
+    /// <summary>
+    /// Encumbrance weight for carry-limit checks. Zero (the default) does not add to
+    /// <see cref="GameState.TotalLoad"/>.
+    /// </summary>
+    public int Size { get; set; }
+
+    /// <summary>Optional override when a take is blocked by carry limit.</summary>
+    public string? OnTakeBlockedMessage { get; set; }
+
     /// <summary>Optional hook invoked the first time the player examines this thing.</summary>
     public Action<GameContext>? OnFirstExamine { get; set; }
 

@@ -25,6 +25,14 @@ public static class ExitFluent
     public static Exit When(this Exit exit, StateKey<bool> key, string? blocked = null) =>
         exit.When(ctx => ctx.Get(key), blocked);
 
+    /// <summary>Blocks passage while the player is holding anything (worn items are allowed).</summary>
+    public static Exit RequiresEmptyHands(this Exit exit, string? blocked = null) =>
+        exit.When(ctx => Encumbrance.HandsEmpty(ctx), blocked ?? Encumbrance.DefaultEmptyHandsMessage);
+
+    /// <summary>Blocks passage while <see cref="GameState.TotalLoad"/> is greater than zero.</summary>
+    public static Exit RequiresNoLoad(this Exit exit, string? blocked = null) =>
+        exit.When(ctx => Encumbrance.NoLoad(ctx), blocked ?? Encumbrance.DefaultNoLoadMessage);
+
     public static Exit OnPass(this Exit exit, Action<GameContext> onPass)
     {
         exit.OnPass = ctx => { onPass(ctx); return true; };
@@ -228,6 +236,14 @@ public static class ThingFluent
     public static Thing Proper(this Thing thing) { thing.Article = ""; return thing; }
 
     public static Thing Takeable(this Thing thing, bool value = true) { thing.Set(Attr.Takeable, value); if (value) thing.Set(Attr.Fixed, false); return thing; }
+
+    /// <summary>Sets encumbrance weight for carry-limit checks.</summary>
+    public static Thing Size(this Thing thing, int size)
+    {
+        thing.Size = size;
+        return thing;
+    }
+
     public static Thing Fixed(this Thing thing) { thing.Set(Attr.Fixed); thing.Set(Attr.Takeable, false); return thing; }
     public static Thing Plural(this Thing thing) { thing.Set(Attr.Plural); return thing; }
     public static Thing Concealed(this Thing thing, bool value = true) { thing.Set(Attr.Concealed, value); return thing; }

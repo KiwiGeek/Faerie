@@ -254,6 +254,12 @@ public static class StandardVerbs
             return VerbResult.Done;
         }
 
+        if (!Encumbrance.CanTake(ctx, thing))
+        {
+            ctx.Say(Encumbrance.TakeBlockedMessage(ctx, thing));
+            return VerbResult.Done;
+        }
+
         ctx.Take(thing);
         ctx.State.LastReferencedThing = thing;
         ctx.Say("Taken.");
@@ -415,6 +421,12 @@ public static class StandardVerbs
         if (ctx.DirectObject is not { } thing) { ctx.Say("Wear what?"); return VerbResult.Done; }
         if (!thing.Has(Attr.Wearable)) { ctx.Say("You can't wear that."); return VerbResult.Done; }
         if (ctx.Wearing(thing)) { ctx.Say($"You're already wearing {It(thing)}."); return VerbResult.Done; }
+
+        if (!ctx.Carrying(thing) && !Encumbrance.CanTake(ctx, thing))
+        {
+            ctx.Say(Encumbrance.TakeBlockedMessage(ctx, thing));
+            return VerbResult.Done;
+        }
 
         ctx.Move(thing, Placement.Worn);
         thing.Set(Attr.Worn);

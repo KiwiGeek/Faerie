@@ -59,6 +59,12 @@ public sealed class Game
     /// <summary>Maximum achievable score (0 if the game does not use scoring).</summary>
     public int MaxScore { get; init; }
 
+    /// <summary>
+    /// Maximum total <see cref="Thing.Size"/> the player may carry (inventory, worn, and nested
+    /// contents). Null disables carry-limit checks.
+    /// </summary>
+    public int? CarryLimit { get; init; }
+
     /// <summary>Runs once after the intro and the first room description.</summary>
     public Action<GameContext>? OnStart { get; init; }
 
