@@ -481,22 +481,6 @@ internal sealed partial class ZorkWorld
                 ctx.PlaceHere(t);
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Dam — bolt turn instantly drains reservoir; no bubble/buttons or flood timer.
-    private void DefineDamAndReservoir()
-    {
-        _b.On(Bolt).Before(_turn, ctx =>
-        {
-            if (!ctx.Carrying(Wrench)) { ctx.Say("You can't turn the bolt with your bare hands."); return VerbResult.Done; }
-            if (ctx.Get(_damOpened)) { ctx.Say("The bolt is already turned."); return VerbResult.Done; }
-            ctx.Set(_damOpened, true);
-            ctx.Set(_lowTide, true);
-            TrunkOfJewels.Set(Attr.Concealed, false);
-            ctx.Say("The bolt turns with a squeak. Water pours through the dam. The reservoir drains.");
-            ctx.State.Score += 4;
-            return VerbResult.Done;
-        });
-    }
-
     // ENGINE-LIMIT: ZorkSimplifications.BoatAndRiver — inflate/deflate only; river rooms not gated on boat state.
     private void DefineBoat()
     {
@@ -540,7 +524,7 @@ internal sealed partial class ZorkWorld
     private void DefineLoudRoom()
     {
         _b.FilterOutput((ctx, text) =>
-            ctx.InRoom(LoudRoom) && !ctx.Get(_loudQuieted) && LastWord(text) is { } word
+            ctx.InRoom(LoudRoom) && !LoudRoomQuiet(ctx) && LastWord(text) is { } word
                 ? $"{text}\n{{fg:darkgray}}{word}... {word}...{{/}}"
                 : text);
     }
@@ -800,7 +784,10 @@ internal sealed partial class ZorkWorld
     private VerbResult MoveHandler(VerbContext ctx)
     {
         if (ctx.DirectObject is null) { ctx.Say("Move what?"); return VerbResult.Done; }
-        if (ctx.DirectObject == Rug || ctx.DirectObject == Leaves) return VerbResult.Pass;
+        if (ctx.DirectObject == Rug || ctx.DirectObject == Leaves ||
+            ctx.DirectObject == BlueButton || ctx.DirectObject == YellowButton ||
+            ctx.DirectObject == BrownButton || ctx.DirectObject == RedButton)
+            return VerbResult.Pass;
         ctx.Say("You can't move that.");
         return VerbResult.Done;
     }
@@ -851,14 +838,8 @@ internal sealed partial class ZorkWorld
         return VerbResult.Done;
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Dam — maintenance blast = instant death only; no button puzzle.
     private VerbResult BlastHandler(VerbContext ctx)
     {
-        if (ctx.InRoom(MaintenanceRoom) || ctx.DirectObject?.Name.Contains("panel", StringComparison.OrdinalIgnoreCase) == true)
-        {
-            ctx.Lose("The dam explodes. You are blown to bits.");
-            return VerbResult.Done;
-        }
         ctx.Say("Blast what?");
         return VerbResult.Done;
     }

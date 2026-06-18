@@ -565,7 +565,6 @@ internal sealed partial class ZorkWorld
         }
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.BoatAndRiver — _lowTide flag only; no timed reservoir drain or boat crossing.
     private void ConfigureReservoirExits()
     {
         foreach (Room room in new[] { R(ZorkIds.ReservoirSouth), R(ZorkIds.ReservoirNorth) })
