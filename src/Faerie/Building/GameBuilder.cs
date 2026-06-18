@@ -34,6 +34,7 @@ public sealed class GameBuilder
     private string? _intro;
     private string? _author;
     private int _maxScore;
+    private int? _carryLimit;
     private string? _windowTitle;
     private string? _windowIconUri;
     private string? _fontSpec;
@@ -131,6 +132,12 @@ public sealed class GameBuilder
     public GameBuilder By(string author) { _author = author; return this; }
     public GameBuilder WithIntro(string markup) { _intro = markup; return this; }
     public GameBuilder WithMaxScore(int max) { _maxScore = max; return this; }
+
+    /// <summary>
+    /// Sets the maximum total <see cref="Thing.Size"/> the player may carry. Null (the default)
+    /// disables carry-limit checks in standard take/wear verbs.
+    /// </summary>
+    public GameBuilder WithCarryLimit(int? limit) { _carryLimit = limit; return this; }
     public GameBuilder OnStart(Action<GameContext> action) { _onStart = action; return this; }
 
     /// <summary>Sets the native OS window title bar text (defaults to the game title if not set).</summary>
@@ -384,6 +391,7 @@ public sealed class GameBuilder
             Timers = _timers,
             OutputFilters = _outputFilters,
             MaxScore = _maxScore,
+            CarryLimit = _carryLimit,
             OnStart = _onStart,
             TitleBar = _titleBar,
             StatusBar = _statusBar,

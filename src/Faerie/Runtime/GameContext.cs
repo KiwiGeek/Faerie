@@ -87,6 +87,18 @@ public class GameContext
     /// </summary>
     public bool LocatedIn(Thing thing, Room room) => State.IsLocatedIn(thing, room);
 
+    /// <summary>Carry limit for this game, or null if encumbrance is disabled.</summary>
+    public int? CarryLimit => Engine.Game.CarryLimit;
+
+    /// <summary>Current total carry load. See <see cref="GameState.TotalLoad"/>.</summary>
+    public int TotalLoad => State.TotalLoad;
+
+    /// <summary>True when <see cref="Encumbrance.CanTake"/> allows picking up <paramref name="thing"/>.</summary>
+    public bool CanCarry(Thing thing) => Encumbrance.CanTake(this, thing);
+
+    /// <summary>True when the player is not holding anything in inventory.</summary>
+    public bool HandsEmpty => Encumbrance.HandsEmpty(this);
+
     /// <summary>The room a thing currently sits in, or null if it is carried, worn, or offstage.</summary>
     public Room? RoomOf(Thing thing) => State.RoomOf(thing);
 

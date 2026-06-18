@@ -120,6 +120,38 @@ public sealed class GameState
 
     public bool IsWorn(Thing thing) => PlacementOf(thing).Anchor == Anchor.Worn;
 
+    /// <summary>
+    /// Sum of <see cref="Thing.Size"/> for everything in the player's inventory tree (carried,
+    /// worn, and nested contents). Zero-sized things do not contribute.
+    /// </summary>
+    public int TotalLoad => CarriedTree().Sum(t => t.Size);
+
+    /// <summary>
+    /// Total size of <paramref name="thing"/> and everything inside or on it. Used when picking
+    /// something up from the world.
+    /// </summary>
+    public int LoadOf(Thing thing) => ThingAndDescendants(thing).Sum(t => t.Size);
+
+    private IEnumerable<Thing> CarriedTree()
+    {
+        foreach (Thing root in Inventory.Concat(Worn))
+        {
+            foreach (Thing t in ThingAndDescendants(root))
+                yield return t;
+        }
+    }
+
+    private IEnumerable<Thing> ThingAndDescendants(Thing thing)
+    {
+        yield return thing;
+        foreach (Thing inside in ContentsOf(thing))
+            foreach (Thing nested in ThingAndDescendants(inside))
+                yield return nested;
+        foreach (Thing onTop in ContentsOf(thing, onTop: true))
+            foreach (Thing nested in ThingAndDescendants(onTop))
+                yield return nested;
+    }
+
     /// <summary>Walks up the containment chain to find the room a thing is ultimately in (if any).</summary>
     public Room? RoomOf(Thing thing)
     {
