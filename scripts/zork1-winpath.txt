@@ -81,3 +81,10 @@ east
 south
 southeast
 odysseus
+east
+east
+turn off lamp
+put painting in case
+put platinum bar in case
+turn on lamp
+open trap door

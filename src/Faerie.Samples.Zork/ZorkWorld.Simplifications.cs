@@ -22,7 +22,8 @@ internal static class ZorkSimplifications
     /// seam (GameBuilder.FilterOutput); ECHO silences it. See ZorkWorld.DefineLoudRoom.</summary>
     internal const string LoudRoom = nameof(LoudRoom);
 
-    /// <summary>AGENTS.md §5 — Random steal daemon; no thief bag, roaming, or sacred rooms.</summary>
+    /// <summary>AGENTS.md §5 — IMPLEMENTED: I-THIEF roam, bag booty, sacred rooms, treasure-room defense.
+    /// See ZorkWorld.Thief.cs. Full melee/rob tables still simplified.</summary>
     internal const string Thief = nameof(Thief);
 
     /// <summary>AGENTS.md §6 — IMPLEMENTED: yellow/brown gate flag, bolt toggle, 8-turn drain/fill,
