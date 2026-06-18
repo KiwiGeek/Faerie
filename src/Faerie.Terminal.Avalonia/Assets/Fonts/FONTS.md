@@ -7,10 +7,8 @@
 ```
 
 Each enum value maps to a file in this folder. License texts are alongside the font files
-(`LICENSE-*.txt`).
-
-To change the bundled set, edit `scripts/builtin-fonts.manifest.json` and run
-`python scripts/fetch-builtin-fonts.py` (downloads fonts, regenerates the enum, and updates this file).
+(`LICENSE-*.txt`). To add or swap a font, place the file here, update `BuiltInTerminalFont` and
+`BuiltInTerminalFonts`, and extend `BuiltInTerminalFontTests`.
 
 ---
 

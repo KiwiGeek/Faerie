@@ -1,7 +1,7 @@
 namespace Faerie.Terminal.Avalonia;
 
 /// <summary>Retro terminal fonts bundled with <c>Faerie.Terminal.Avalonia</c>.</summary>
-/// <remarks>Curated set — edit <c>scripts/builtin-fonts.manifest.json</c> and re-run <c>fetch-builtin-fonts.py</c>.</remarks>
+/// <remarks>Curated set bundled as Avalonia resources in <c>Assets/Fonts</c>.</remarks>
 public enum BuiltInTerminalFont
 {
     // IBM PC (int10h.org, CC BY-SA 4.0)

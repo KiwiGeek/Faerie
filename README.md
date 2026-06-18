@@ -101,9 +101,7 @@ mouse pointer is drawn as an inverted character cell rather than the OS cursor. 
 | `AtariSt` | Atari ST | Kreative Software | Free Use 1.2f |
 | `Trs80CoCo` | TRS-80 Color Computer | Kreative Software | Free Use 1.2f |
 
-To swap fonts, edit `scripts/builtin-fonts.manifest.json` and run
-`python scripts/fetch-builtin-fonts.py` (downloads, prunes extras, regenerates the enum).
-See also [`src/Faerie.Terminal.Avalonia/Assets/Fonts/FONTS.md`](src/Faerie.Terminal.Avalonia/Assets/Fonts/FONTS.md)
+See [`src/Faerie.Terminal.Avalonia/Assets/Fonts/FONTS.md`](src/Faerie.Terminal.Avalonia/Assets/Fonts/FONTS.md)
 for a per-font reference.
 
 ### Guides
