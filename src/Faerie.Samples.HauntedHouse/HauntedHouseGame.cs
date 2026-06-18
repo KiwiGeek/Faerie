@@ -2,6 +2,7 @@ using Faerie.Building;
 using Faerie.Model;
 using Faerie.Presentation;
 using Faerie.Runtime;
+using Faerie.Terminal.Avalonia;
 using Faerie.Verbs;
 
 namespace Faerie.Samples.HauntedHouse;
@@ -21,7 +22,7 @@ public static class HauntedHouseGame
             .WithMaxScore(100)
             .WithWindowTitle("The Haunted House — a Text Adventure")
             // .WithWindowIcon("avares://HauntedHouse/Assets/icon.ico")
-            .WithFont("avares://HauntedHouse/Assets/Fonts#PxPlus IBM VGA 8x16")   // family name from the TTF's name table, not the filename
+            .WithFont(BuiltInTerminalFont.IbmVga8x16)
             .WithCursor(TerminalCursor.Block)
             .AddStandardVerbs();
 

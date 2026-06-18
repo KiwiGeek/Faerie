@@ -9,12 +9,19 @@
     <!-- NuGet packaging -->
     <IsPackable>true</IsPackable>
     <PackageId>Faerie.Terminal.Avalonia</PackageId>
-    <Description>Avalonia "fake terminal" front end for the Faerie text-adventure engine: renders Faerie.Terminal's character-cell framebuffer as a true-colour text screen with blink/underline/bold/inverse, scrollback, zoom, title/status bars, and a game-supplied font and cursor. Ships no fonts of its own.</Description>
+    <Description>Avalonia "fake terminal" front end for the Faerie text-adventure engine: renders Faerie.Terminal's character-cell framebuffer as a true-colour text screen with blink/underline/bold/inverse, scrollback, zoom, title/status bars, and a game-supplied or built-in retro font. Bundles 20 curated open-licensed fonts (IBM PC, BBC, and 8-bit classics).</Description>
     <PackageTags>text-adventure;interactive-fiction;avalonia;terminal;tui;game-engine</PackageTags>
   </PropertyGroup>
 
-  <!-- This library deliberately bundles NO fonts. A game supplies its own font (embedded in the
-       game's own assembly as an AvaloniaResource, or a system family) via the game definition. -->
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\Fonts\*.ttf" />
+    <AvaloniaResource Include="Assets\Fonts\*.otf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Assets\Fonts\LICENSE*.txt" Pack="true" PackagePath="Assets/Fonts/" />
+    <None Include="Assets\Fonts\FONTS.md" Pack="true" PackagePath="Assets/Fonts/" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.14" />

@@ -74,13 +74,37 @@ mouse pointer is drawn as an inverted character cell rather than the OS cursor. 
 
 ### Fonts
 
-Faerie ships with **no fonts** (so the package stays light and licence-clean). A game supplies its own
-via `GameBuilder.WithFont(spec)`, where `spec` is a system family name (`"Consolas"`), an Avalonia
-resource font with an explicit family (`"avares://MyGame/Assets/Fonts#PxPlus IBM VGA8"`), or a path to
-an embedded font file/folder (the family name is read from the font automatically). Embed the font in
-your *own* game project as an `<AvaloniaResource>`. If no font is given, a system monospace is used.
-The Haunted House sample embeds the freely-licensed *PxPlus IBM VGA8* font (int10h.org, CC BY-SA 4.0)
-and selects it with `.WithFont("avares://HauntedHouse/Assets/Fonts")`.
+`Faerie.Terminal.Avalonia` bundles **20** curated retro terminal fonts selectable via
+`BuiltInTerminalFont` and `.WithFont(BuiltInTerminalFont.IbmVga8x16)`. License files live in
+`Assets/Fonts/`. Games can still pass a custom `WithFont(spec)` string.
+
+| Built-in | Machine / use | Source | License |
+|----------|---------------|--------|---------|
+| `IbmBios8x8` | PC BIOS 8×8 | [int10h.org](https://int10h.org/oldschool-pc-fonts/) | CC BY-SA 4.0 |
+| `IbmCga8x8` | IBM CGA | int10h.org | CC BY-SA 4.0 |
+| `IbmMda9x14` | IBM MDA 80-col | int10h.org | CC BY-SA 4.0 |
+| `IbmEga8x14` | IBM EGA | int10h.org | CC BY-SA 4.0 |
+| `IbmVga8x14` | IBM VGA 8×14 | int10h.org | CC BY-SA 4.0 |
+| `IbmVga8x16` | IBM VGA 80×25 | int10h.org | CC BY-SA 4.0 |
+| `IbmVga9x16` | IBM VGA 9-dot | int10h.org | CC BY-SA 4.0 |
+| `Tandy10008x16` | Tandy 1000 | int10h.org | CC BY-SA 4.0 |
+| `AmstradPc` | Amstrad PC1512 | int10h.org | CC BY-SA 4.0 |
+| `DecRainbow80Col` | DEC Rainbow 80-col | int10h.org | CC BY-SA 4.0 |
+| `Kaypro2k` | Kaypro 2000 | int10h.org | CC BY-SA 4.0 |
+| `BbcMaster512` | BBC Master MOS 8×8 | int10h.org | CC BY-SA 4.0 |
+| `BbcTeletext` | BBC Mode 7 teletext | [Teletext50](https://galax.xyz/Teletext50/) | Public domain |
+| `AppleIIe` | Apple II 40-col | [Kreative Software](https://www.kreativekorp.com/software/fonts/apple2/) | Free Use 1.2f |
+| `AppleII80Column` | Apple II 80-col | Kreative Software | Free Use 1.2f |
+| `Commodore64` | C64 PETSCII | Kreative Software | Free Use 1.2f |
+| `ZxSpectrum` | ZX Spectrum | Kreative Software | Free Use 1.2f |
+| `Atari8Bit` | Atari 8-bit | Kreative Software | Free Use 1.2f |
+| `AtariSt` | Atari ST | Kreative Software | Free Use 1.2f |
+| `Trs80CoCo` | TRS-80 Color Computer | Kreative Software | Free Use 1.2f |
+
+To swap fonts, edit `scripts/builtin-fonts.manifest.json` and run
+`python scripts/fetch-builtin-fonts.py` (downloads, prunes extras, regenerates the enum).
+See also [`src/Faerie.Terminal.Avalonia/Assets/Fonts/FONTS.md`](src/Faerie.Terminal.Avalonia/Assets/Fonts/FONTS.md)
+for a per-font reference.
 
 ### Guides
 
@@ -96,7 +120,7 @@ and selects it with `.WithFont("avares://HauntedHouse/Assets/Fonts")`.
 var b = GameBuilder.Create("Cave of Wonders")
     .AddStandardVerbs()          // movement + core + meta verbs, all at once
     .WithDefaultTitleBar()
-    .WithFont("avares://MyGame/Assets/Fonts")   // your game embeds its own font
+    .WithFont(BuiltInTerminalFont.IbmVga8x16)   // bundled IBM VGA, or pass a custom spec string
     .WithCursor(TerminalCursor.Block);
 
 Room cave = b.Room("Cave Mouth").Describe("Daylight spills into a low cave. A tunnel leads east.");

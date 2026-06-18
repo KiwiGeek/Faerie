@@ -1,6 +1,7 @@
 using Faerie.Building;
 using Faerie.Presentation;
 using Faerie.Runtime;
+using Faerie.Terminal.Avalonia;
 
 namespace Faerie.Samples.Softporn;
 
@@ -16,7 +17,7 @@ public static class SoftpornGame
         GameBuilder b = GameBuilder.Create("Softporn Adventure")
             .WithMaxScore(3)
             .WithWindowTitle("Softporn Adventure")
-            .WithFont("avares://Softporn/Assets/Fonts#PxPlus IBM VGA 8x16")
+            .WithFont(BuiltInTerminalFont.IbmVga8x16)
             .AddMovement()
             .AddCoreVerbs()
             .AddMetaVerbs()

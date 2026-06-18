@@ -24,8 +24,4 @@
     <ProjectReference Include="..\Faerie.Terminal.Headless\Faerie.Terminal.Headless.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\Fonts\PxPlus_IBM_VGA8.ttf" />
-  </ItemGroup>
-
 </Project>

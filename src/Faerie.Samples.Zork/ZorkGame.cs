@@ -2,6 +2,7 @@ using Faerie.Building;
 using Faerie.Model;
 using Faerie.Presentation;
 using Faerie.Runtime;
+using Faerie.Terminal.Avalonia;
 
 namespace Faerie.Samples.Zork;
 
@@ -21,7 +22,7 @@ public static class ZorkGame
             .By("A sample for the Text Adventure engine")
             .WithMaxScore(350)
             .WithWindowTitle("Zork I — The Great Underground Empire")
-            .WithFont("avares://Zork/Assets/Fonts#PxPlus IBM VGA 8x16")   // family name from the TTF's name table, not the filename
+            .WithFont(BuiltInTerminalFont.IbmVga8x16)
             .AddCoreVerbs()
             .AddMetaVerbs();
 

@@ -144,8 +144,9 @@ public sealed class GameBuilder
     public GameBuilder WithWindowIcon(string uriOrPath) { _windowIconUri = uriOrPath; return this; }
 
     /// <summary>
-    /// Chooses the terminal font. The font lives in <em>your</em> game assembly, not the engine, so
-    /// the engine ships with no font dependencies. Accepts:
+    /// Chooses the terminal font. Use <c>Faerie.Terminal.Avalonia.GameBuilderFontExtensions.WithFont</c>
+    /// for fonts bundled in <c>Faerie.Terminal.Avalonia</c>, or pass a custom spec here. Custom fonts live in
+    /// <em>your</em> game assembly when not using a built-in. Accepts:
     /// a system family name ("Consolas"); an Avalonia resource font with explicit family
     /// ("avares://MyGame/Assets/Fonts#Apple ][" ); or a URI/folder pointing at an embedded font file
     /// or folder ("avares://MyGame/Assets/Fonts" or ".../MyFont.ttf"), in which case the family name

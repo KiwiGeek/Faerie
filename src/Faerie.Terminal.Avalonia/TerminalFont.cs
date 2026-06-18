@@ -6,9 +6,9 @@ namespace Faerie.Terminal.Avalonia;
 
 /// <summary>
 /// Resolves a game's font spec (a plain string from the game definition) into a usable
-/// <see cref="Typeface"/> pair. The engine and this control ship with <b>no</b> bundled fonts; a
-/// game supplies its own font (embedded in the game's assembly as an <c>AvaloniaResource</c>, or a
-/// system font family). This keeps font files — and their licences — out of the library/NuGet.
+/// <see cref="Typeface"/> pair. Games may use a <see cref="BuiltInTerminalFont"/> (see
+/// <see cref="GameBuilderFontExtensions"/>), embed their own font as an <c>AvaloniaResource</c>, or
+/// name a system font family.
 ///
 /// Accepted spec formats:
 /// <list type="bullet">

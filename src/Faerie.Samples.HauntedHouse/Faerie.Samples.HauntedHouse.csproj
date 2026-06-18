@@ -24,10 +24,4 @@
     <ProjectReference Include="..\Faerie.Terminal.Headless\Faerie.Terminal.Headless.csproj" />
   </ItemGroup>
 
-  <!-- The game embeds its own font; the engine ships none. The game definition points the
-       terminal at it via .WithFont("avares://HauntedHouse/Assets/Fonts#PxPlus IBM VGA 8x16"). -->
-  <ItemGroup>
-    <AvaloniaResource Include="Assets\Fonts\PxPlus_IBM_VGA8.ttf" />
-  </ItemGroup>
-
 </Project>
