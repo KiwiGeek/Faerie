@@ -25,7 +25,8 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §5 — Random steal daemon; no thief bag, roaming, or sacred rooms.</summary>
     internal const string Thief = nameof(Thief);
 
-    /// <summary>AGENTS.md §6 — Bolt instantly drains reservoir; no bubble/buttons or flood timer.</summary>
+    /// <summary>AGENTS.md §6 — IMPLEMENTED: yellow/brown gate flag, bolt toggle, 8-turn drain/fill,
+    /// blue-button flood, red lights. See ZorkWorld.Dam.cs. Loud Room input garbling deferred (#86).</summary>
     internal const string Dam = nameof(Dam);
 
     /// <summary>AGENTS.md §7 — Gas-room explosion with open flame not implemented.</summary>

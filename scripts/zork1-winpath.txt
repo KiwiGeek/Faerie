@@ -63,3 +63,21 @@ north
 push yellow button
 take wrench
 take screwdriver
+south
+south
+turn bolt
+drop wrench
+south
+southwest
+south
+west
+west
+west
+south
+east
+up
+southwest
+east
+south
+southeast
+odysseus

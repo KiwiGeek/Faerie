@@ -69,7 +69,6 @@ internal sealed partial class ZorkWorld
     private StateKey<bool> _cyclopsAsleep = null!;
     private StateKey<bool> _cyclopsDead = null!;
     private StateKey<bool> _thiefDead = null!;
-    private StateKey<bool> _damOpened = null!;
     private StateKey<bool> _lowTide = null!;
     private StateKey<bool> _rainbowSolid = null!;
     private StateKey<bool> _boatInflated = null!;
@@ -122,7 +121,6 @@ internal sealed partial class ZorkWorld
         _cyclopsAsleep = _b.State("cyclops-asleep", false);
         _cyclopsDead = _b.State("cyclops-dead", false);
         _thiefDead = _b.State("thief-dead", false);
-        _damOpened = _b.State("dam-opened", false);
         _lowTide = _b.State("low-tide", false);
         _rainbowSolid = _b.State("rainbow-solid", false);
         _boatInflated = _b.State("boat-inflated", false);
