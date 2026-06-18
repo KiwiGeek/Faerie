@@ -31,6 +31,7 @@ internal sealed partial class ZorkWorld
     internal Thing Stiletto = null!;
 
     private List<Room> _thiefRoamRooms = null!;
+    private HashSet<Room> _sacredRooms = null!;
     private int _thiefRoamIndex;
 
     private void DefineThiefThings()
@@ -59,15 +60,19 @@ internal sealed partial class ZorkWorld
 
     private void BuildThiefRoamRooms()
     {
-        _thiefRoamRooms = _rooms.Values
-            .Where(r => !SacredRoomIds.Contains(r.Id))
-            .Where(r => !WaterRoomIds.Contains(r.Id))
-            .OrderBy(r => r.Id, StringComparer.Ordinal)
+        _sacredRooms = SacredRoomIds.Select(R).ToHashSet();
+
+        _thiefRoamRooms = _rooms
+            .Where(kv => !SacredRoomIds.Contains(kv.Key) && !WaterRoomIds.Contains(kv.Key))
+            .Select(kv => kv.Value)
+            .OrderBy(r => _rooms.First(kv => kv.Value == r).Key, StringComparer.Ordinal)
             .ToList();
 
-        int start = _thiefRoamRooms.FindIndex(r => r.Id == ZorkIds.RoundRoom);
+        int start = _thiefRoamRooms.FindIndex(r => r == RoundRoom);
         _thiefRoamIndex = start >= 0 ? start : 0;
     }
+
+    private bool IsSacredRoom(Room room) => _sacredRooms.Contains(room);
 
     private string ThiefDescription(GameContext ctx)
     {
@@ -169,10 +174,13 @@ internal sealed partial class ZorkWorld
             return;
         }
 
+        if (IsSacredRoom(ctx.CurrentRoom))
+            return;
+
         if (sameRoom && lit && !ctx.Here(Troll) && ThiefVsAdventurer(ctx, visible))
             return;
 
-        if (thiefRoom.Has(Attr.Visited) && !SacredRoomIds.Contains(thiefRoom.Id))
+        if (thiefRoom.Has(Attr.Visited) && !IsSacredRoom(thiefRoom))
         {
             RobRoomTreasures(ctx, thiefRoom, 75);
             if (IsMazeRoom(thiefRoom.Id))
@@ -257,7 +265,7 @@ internal sealed partial class ZorkWorld
 
     private bool RobPlayerTreasures(GameContext ctx, int percent)
     {
-        if (SacredRoomIds.Contains(ctx.CurrentRoom.Id))
+        if (IsSacredRoom(ctx.CurrentRoom))
             return false;
 
         bool robbed = false;
@@ -330,7 +338,7 @@ internal sealed partial class ZorkWorld
         {
             _thiefRoamIndex = (_thiefRoamIndex + 1) % _thiefRoamRooms.Count;
             Room next = _thiefRoamRooms[_thiefRoamIndex];
-            if (SacredRoomIds.Contains(next.Id)) continue;
+            if (IsSacredRoom(next)) continue;
             ctx.State.Move(Thief, Placement.InRoom(next));
             HideThief(ctx);
             ctx.Set(_thiefHere, false);

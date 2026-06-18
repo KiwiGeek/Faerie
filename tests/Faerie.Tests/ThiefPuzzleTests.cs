@@ -112,4 +112,23 @@ public sealed class ThiefPuzzleTests
         Assert.Null(engine.State.RoomOf(thief));
         Assert.Contains(painting, engine.State.ContentsOf(roundRoom));
     }
+
+    [Fact]
+    public void Zork_Thief_NeverRoamIntoSacredLivingRoom()
+    {
+        Game game = ZorkGame.Build();
+        InMemoryTerminal term = new();
+        GameEngine engine = new(game, term, randomSeed: 1);
+        engine.Start();
+
+        Thing thief = game.World.Things.First(t => t.Name == "thief");
+        Room livingRoom = game.World.Rooms.First(r => r.Name == "Living Room");
+        engine.State.CurrentRoom = livingRoom;
+        engine.State.TurnCount = 25;
+
+        for (int i = 0; i < 200; i++)
+            engine.Submit("wait");
+
+        Assert.NotEqual(livingRoom, engine.State.RoomOf(thief));
+    }
 }

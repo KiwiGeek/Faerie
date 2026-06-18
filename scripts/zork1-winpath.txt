@@ -88,3 +88,21 @@ put painting in case
 put platinum bar in case
 turn on lamp
 open trap door
+down
+south
+take rope
+north
+north
+east
+east
+southeast
+east
+tie rope to ceiling
+down
+take torch
+south
+take bell
+south
+take book
+take candles
+down
