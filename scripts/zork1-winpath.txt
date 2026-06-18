@@ -155,19 +155,79 @@ pray
 turn off lamp
 drop lamp
 drop screwdriver
-east
 south
-east
-in
-west
-put coffin in case
-east
-out
-east
+north
 east
 down
 down
 north
 wave sceptre
 take pot of gold
+southwest
+up
+up
+northwest
+south
+west
+take lamp
+east
+south
+east
+west
+west
+put coffin in case
 put sceptre in case
+put pot of gold in case
+turn on lamp
+open trap door
+down
+north
+east
+east
+north
+northeast
+northwest
+north
+north
+take pump
+north
+take trident
+south
+south
+take trunk
+south
+southeast
+southwest
+south
+west
+west
+west
+south
+east
+up
+southwest
+east
+south
+southeast
+east
+east
+turn off lamp
+put trunk in case
+put trident in case
+east
+out
+northwest
+north
+west
+take screwdriver
+east
+south
+south
+east
+west
+west
+take torch from case
+turn on lamp
+open trap door
+down
+north
