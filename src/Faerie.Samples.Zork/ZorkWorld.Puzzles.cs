@@ -435,14 +435,44 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // The Loud Room throws every line of output back at you until you master its acoustics (say ECHO).
-    // Implemented with the engine's output-filter seam (GameBuilder.FilterOutput).
+    // Loud Room: output echoes every line; input is restricted until ECHO or the dam quiets the room.
     private void DefineLoudRoom()
     {
         _b.FilterOutput((ctx, text) =>
             ctx.InRoom(LoudRoom) && !LoudRoomQuiet(ctx) && LastWord(text) is { } word
                 ? $"{text}\n{{fg:darkgray}}{word}... {word}...{{/}}"
                 : text);
+
+        _b.FilterInput((ctx, line) =>
+        {
+            if (!ctx.InRoom(LoudRoom) || LoudRoomQuiet(ctx)) return InputFilterResult.Continue;
+            string normalized = line.Trim().ToLowerInvariant();
+            if (normalized is "bug")
+                return InputFilterResult.Reject("That's only your opinion.");
+            if (IsAllowedLoudRoomInput(line)) return InputFilterResult.Continue;
+            return LastWord(line) is { } word
+                ? InputFilterResult.Reject($"{word}... {word}...")
+                : InputFilterResult.Reject("I beg your pardon?");
+        });
+
+        LoudRoom.OnEnter = ctx =>
+        {
+            if (LoudRoomQuiet(ctx)) return;
+            ctx.Say("The rest of your commands have been lost in the noise.");
+            ctx.StopCommandChain = true;
+        };
+    }
+
+    private static bool IsAllowedLoudRoomInput(string line)
+    {
+        string normalized = line.Trim().ToLowerInvariant();
+        if (normalized is "echo" or "say echo") return true;
+        if (normalized is "save" or "restore" or "quit" or "help" or "score") return true;
+        if (normalized is "west" or "w" or "east" or "e" or "up" or "u") return true;
+        return normalized is "go west" or "go east" or "go up"
+            or "walk west" or "walk east" or "walk up"
+            or "run west" or "run east" or "run up"
+            or "head west" or "head east" or "head up";
     }
 
     /// <summary>The last run of letters in a (possibly marked-up) line, or null if there is none.</summary>
@@ -703,7 +733,6 @@ internal sealed partial class ZorkWorld
         return VerbResult.Done;
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.LoudRoom — only ECHO garbles text; original garbles all commands.
     private VerbResult EchoHandler(VerbContext ctx)
     {
         if (!ctx.InRoom(LoudRoom)) { ctx.Say("You hear nothing special."); return VerbResult.Done; }

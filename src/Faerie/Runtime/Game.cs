@@ -56,6 +56,14 @@ public sealed class Game
     /// </summary>
     public IReadOnlyList<Func<GameContext, string, string?>> OutputFilters { get; init; } = [];
 
+    /// <summary>
+    /// Input filters applied before each command line is parsed. Each receives the context and raw
+    /// line; return <see cref="InputFilterResult.Continue"/> to proceed, or
+    /// <see cref="InputFilterResult.Reject"/> to skip parsing and turn execution. Installed via
+    /// <see cref="Building.GameBuilder.FilterInput"/>.
+    /// </summary>
+    public IReadOnlyList<Func<GameContext, string, InputFilterResult>> InputFilters { get; init; } = [];
+
     /// <summary>Maximum achievable score (0 if the game does not use scoring).</summary>
     public int MaxScore { get; init; }
 

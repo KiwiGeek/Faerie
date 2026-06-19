@@ -77,4 +77,74 @@ public class LoudRoomTests
         Assert.Contains("room... room...", term.Output, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("yellow", term.Output, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void Zork_LoudRoom_InvalidCommand_EchoesWithoutTurn()
+    {
+        Game game = ZorkGame.Build();
+        InMemoryTerminal term = new();
+        GameEngine engine = new(game, term, randomSeed: 1);
+        engine.Start();
+
+        Room loudRoom = game.World.Rooms.First(r => r.Name == "Loud Room");
+        Thing bar = game.World.Things.First(t => t.Name == "platinum bar");
+        Thing lantern = game.World.Things.First(t => t.Name == "brass lantern");
+
+        engine.State.TakeIntoInventory(lantern);
+        lantern.Set(Attr.Lit);
+        engine.State.CurrentRoom = loudRoom;
+        int turns = engine.State.TurnCount;
+
+        term.Reset();
+        engine.Submit("take bar");
+
+        Assert.Equal(turns, engine.State.TurnCount);
+        Assert.Contains("bar... bar...", term.Output, StringComparison.OrdinalIgnoreCase);
+        Assert.False(engine.State.IsCarried(bar));
+        Assert.True(bar.Has(Attr.Concealed));
+    }
+
+    [Fact]
+    public void Zork_LoudRoom_Movement_AllowedWhileLoud()
+    {
+        Game game = ZorkGame.Build();
+        InMemoryTerminal term = new();
+        GameEngine engine = new(game, term, randomSeed: 1);
+        engine.Start();
+
+        Room loudRoom = game.World.Rooms.First(r => r.Name == "Loud Room");
+        Room roundRoom = game.World.Rooms.First(r => r.Name == "Round Room");
+        Thing lantern = game.World.Things.First(t => t.Name == "brass lantern");
+
+        engine.State.TakeIntoInventory(lantern);
+        lantern.Set(Attr.Lit);
+        engine.State.CurrentRoom = loudRoom;
+
+        term.Reset();
+        engine.Submit("west");
+
+        Assert.Equal(roundRoom, engine.State.CurrentRoom);
+    }
+
+    [Fact]
+    public void Zork_LoudRoom_Bug_IsOpinionOnly()
+    {
+        Game game = ZorkGame.Build();
+        InMemoryTerminal term = new();
+        GameEngine engine = new(game, term, randomSeed: 1);
+        engine.Start();
+
+        Room loudRoom = game.World.Rooms.First(r => r.Name == "Loud Room");
+        Thing lantern = game.World.Things.First(t => t.Name == "brass lantern");
+        engine.State.TakeIntoInventory(lantern);
+        lantern.Set(Attr.Lit);
+        engine.State.CurrentRoom = loudRoom;
+        int turns = engine.State.TurnCount;
+
+        term.Reset();
+        engine.Submit("bug");
+
+        Assert.Equal(turns, engine.State.TurnCount);
+        Assert.Contains("only your opinion", term.Output, StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -162,10 +162,11 @@ public sealed class GameEngine
             return;
         }
 
+        _context.StopCommandChain = false;
         foreach (string part in parts)
         {
             Submit(part);
-            if (QuitRequested || State.IsOver) break;
+            if (QuitRequested || State.IsOver || _context.StopCommandChain) break;
         }
     }
 
@@ -186,6 +187,12 @@ public sealed class GameEngine
         if (IsUndo(trimmed))
         {
             UndoLastTurn();
+            return;
+        }
+
+        if (TryApplyInputFilters(trimmed))
+        {
+            RefreshBars();
             return;
         }
 
@@ -281,6 +288,20 @@ public sealed class GameEngine
         }
 
         Submit(_lastSuccessfulCommand);
+    }
+
+    private bool TryApplyInputFilters(string input)
+    {
+        foreach (Func<GameContext, string, InputFilterResult> filter in _game.InputFilters)
+        {
+            InputFilterResult result = filter(_context, input);
+            if (result.ShouldContinue) continue;
+            if (result.Message is not null)
+                Out.PrintLine(result.Message);
+            return true;
+        }
+
+        return false;
     }
 
     private void UndoLastTurn()

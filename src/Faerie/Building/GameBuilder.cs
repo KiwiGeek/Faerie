@@ -28,6 +28,7 @@ public sealed class GameBuilder
     private readonly List<TurnDaemon> _daemons = [];
     private readonly List<ScheduledTimer> _timers = [];
     private readonly List<Func<GameContext, string, string?>> _outputFilters = [];
+    private readonly List<Func<GameContext, string, InputFilterResult>> _inputFilters = [];
     private readonly HashSet<string> _modules = [];
     private readonly Dictionary<string, int> _idCounters = [];
 
@@ -277,6 +278,19 @@ public sealed class GameBuilder
         return this;
     }
 
+    /// <summary>
+    /// Registers an input filter. It runs on each player command line before parsing; return
+    /// <see cref="InputFilterResult.Continue"/> to proceed normally, or
+    /// <see cref="InputFilterResult.Reject"/> to skip parsing and turn execution (optionally with a
+    /// player-facing message). Filters run in registration order; the first rejection wins. Use the
+    /// context to scope the effect (e.g. a loud room that only accepts movement and meta verbs).
+    /// </summary>
+    public GameBuilder FilterInput(Func<GameContext, string, InputFilterResult> filter)
+    {
+        _inputFilters.Add(filter);
+        return this;
+    }
+
     /// <summary>Begins a fluent reaction registration for a thing.</summary>
     public ReactionScope On(Thing thing) => new(this, thing);
 
@@ -390,6 +404,7 @@ public sealed class GameBuilder
             Daemons = _daemons,
             Timers = _timers,
             OutputFilters = _outputFilters,
+            InputFilters = _inputFilters,
             MaxScore = _maxScore,
             CarryLimit = _carryLimit,
             OnStart = _onStart,

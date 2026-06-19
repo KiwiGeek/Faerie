@@ -723,6 +723,26 @@ Notes:
 - The title bar and status bar are **not** filtered, and a filter is bypassed for any text it prints itself, so
   it can't loop. Keep filters to pure string work (don't call `ctx.Say` from inside one).
 
+### Intercepting player input (`FilterInput`)
+
+Some rooms need to restrict what commands the player can type — the Loud Room in Zork I echoes invalid input
+back without spending a turn. Register an input filter; it runs on each command line **before** parsing:
+
+```csharp
+b.FilterInput((ctx, line) =>
+    ctx.InRoom(loudRoom) && !ctx.Get(roomQuiet)
+        ? IsAllowed(line) ? InputFilterResult.Continue : InputFilterResult.Reject($"{LastWord(line)}...")
+        : InputFilterResult.Continue);
+```
+
+Return `InputFilterResult.Continue` to parse and run the command normally. Return
+`InputFilterResult.Reject(message)` to skip parsing and **not** advance a turn (the optional message is printed).
+Filters run in registration order; the first rejection wins. Pair with `FilterOutput` when both input and output
+need special handling in the same room.
+
+Set `ctx.StopCommandChain = true` from a handler (e.g. `Room.OnEnter`) to discard any further commands on the
+same `SubmitLine` after a `.` or `,` separator.
+
 ---
 
 ## 10. The window: title bar, status bar, native title, icon

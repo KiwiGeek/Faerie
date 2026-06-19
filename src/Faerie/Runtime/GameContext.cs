@@ -50,6 +50,12 @@ public class GameContext
     /// <summary>True when the host repaints mid-turn (e.g. Avalonia); false in headless/script runs.</summary>
     public bool LivePresentation => Engine.PresentationDelay is not null;
 
+    /// <summary>
+    /// When set during a handler (e.g. <see cref="Room.OnEnter"/>), remaining commands on the
+    /// current <see cref="GameEngine.SubmitLine"/> input line are not executed.
+    /// </summary>
+    public bool StopCommandChain { get; set; }
+
     /// <summary>Prints a prompt and blocks until the player enters a line (mid-turn).</summary>
     public string PromptLine(string prompt)
     {
