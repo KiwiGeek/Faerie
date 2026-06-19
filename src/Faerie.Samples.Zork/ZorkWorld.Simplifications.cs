@@ -24,7 +24,7 @@ internal static class ZorkSimplifications
     internal const string Thief = nameof(Thief);
 
     /// <summary>AGENTS.md §6 — IMPLEMENTED: yellow/brown gate flag, bolt toggle, 8-turn drain/fill,
-    /// blue-button flood, red lights. See ZorkWorld.Dam.cs. Loud Room input garbling deferred (#86).</summary>
+    /// blue-button flood, red lights, loud-room integration. See ZorkWorld.Dam.cs.</summary>
     internal const string Dam = nameof(Dam);
 
     /// <summary>AGENTS.md §7 — Gas-room explosion with open flame not implemented.</summary>

@@ -125,4 +125,26 @@ public class LoudRoomTests
 
         Assert.Equal(roundRoom, engine.State.CurrentRoom);
     }
+
+    [Fact]
+    public void Zork_LoudRoom_Bug_IsOpinionOnly()
+    {
+        Game game = ZorkGame.Build();
+        InMemoryTerminal term = new();
+        GameEngine engine = new(game, term, randomSeed: 1);
+        engine.Start();
+
+        Room loudRoom = game.World.Rooms.First(r => r.Name == "Loud Room");
+        Thing lantern = game.World.Things.First(t => t.Name == "brass lantern");
+        engine.State.TakeIntoInventory(lantern);
+        lantern.Set(Attr.Lit);
+        engine.State.CurrentRoom = loudRoom;
+        int turns = engine.State.TurnCount;
+
+        term.Reset();
+        engine.Submit("bug");
+
+        Assert.Equal(turns, engine.State.TurnCount);
+        Assert.Contains("only your opinion", term.Output, StringComparison.OrdinalIgnoreCase);
+    }
 }

@@ -740,6 +740,9 @@ Return `InputFilterResult.Continue` to parse and run the command normally. Retur
 Filters run in registration order; the first rejection wins. Pair with `FilterOutput` when both input and output
 need special handling in the same room.
 
+Set `ctx.StopCommandChain = true` from a handler (e.g. `Room.OnEnter`) to discard any further commands on the
+same `SubmitLine` after a `.` or `,` separator.
+
 ---
 
 ## 10. The window: title bar, status bar, native title, icon

@@ -446,6 +446,9 @@ internal sealed partial class ZorkWorld
         _b.FilterInput((ctx, line) =>
         {
             if (!ctx.InRoom(LoudRoom) || LoudRoomQuiet(ctx)) return InputFilterResult.Continue;
+            string normalized = line.Trim().ToLowerInvariant();
+            if (normalized is "bug")
+                return InputFilterResult.Reject("That's only your opinion.");
             if (IsAllowedLoudRoomInput(line)) return InputFilterResult.Continue;
             return LastWord(line) is { } word
                 ? InputFilterResult.Reject($"{word}... {word}...")
@@ -454,8 +457,9 @@ internal sealed partial class ZorkWorld
 
         LoudRoom.OnEnter = ctx =>
         {
-            if (!LoudRoomQuiet(ctx))
-                ctx.Say("The rest of your commands have been lost in the noise.");
+            if (LoudRoomQuiet(ctx)) return;
+            ctx.Say("The rest of your commands have been lost in the noise.");
+            ctx.StopCommandChain = true;
         };
     }
 

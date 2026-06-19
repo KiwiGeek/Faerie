@@ -50,4 +50,25 @@ public sealed class InputFilterTests
         Assert.True(engine.State.IsCarried(lamp));
         Assert.Equal(1, engine.State.TurnCount);
     }
+
+    [Fact]
+    public void StopCommandChain_aborts_remaining_SubmitLine_parts()
+    {
+        GameBuilder b = GameBuilder.Create("T").AddStandardVerbs();
+        Room entry = b.Room("Entry");
+        Room inner = b.Room("Inner");
+        entry.Connect(Direction.North, inner);
+        inner.OnEnter = ctx => ctx.StopCommandChain = true;
+        b.StartIn(entry);
+
+        InMemoryTerminal term = new();
+        GameEngine engine = new(b.Build(), term, randomSeed: 1);
+        engine.Start();
+
+        term.Reset();
+        engine.SubmitLine("north. inventory");
+
+        Assert.Equal(inner, engine.State.CurrentRoom);
+        Assert.DoesNotContain("carrying", term.Output, StringComparison.OrdinalIgnoreCase);
+    }
 }

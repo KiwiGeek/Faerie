@@ -162,10 +162,11 @@ public sealed class GameEngine
             return;
         }
 
+        _context.StopCommandChain = false;
         foreach (string part in parts)
         {
             Submit(part);
-            if (QuitRequested || State.IsOver) break;
+            if (QuitRequested || State.IsOver || _context.StopCommandChain) break;
         }
     }
 
