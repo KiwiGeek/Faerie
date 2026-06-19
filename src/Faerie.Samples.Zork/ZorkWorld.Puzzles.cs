@@ -132,25 +132,6 @@ internal sealed partial class ZorkWorld
         _b.On(KitchenWindow).Before(_b.Verbs.Close!, ctx => { ctx.Set(_windowOpen, false); return VerbResult.Pass; });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Grating — no push-through from clearing.
-    private void DefineGrating()
-    {
-        GratingRoom.LitWhen(ctx => ctx.Get(_gratingOpen));
-
-        _b.On(Leaves).Before(_move, ctx =>
-        {
-            Grating.Set(Attr.Concealed, false);
-            ctx.Say("Moving the leaves reveals a rusty grating.");
-            return VerbResult.Done;
-        });
-        _b.On(Grating).After(_b.Verbs.Open!, ctx =>
-        {
-            ctx.Set(_gratingOpen, true);
-            return VerbResult.Pass;
-        });
-        _b.On(Grating).After(_b.Verbs.Close!, ctx => { ctx.Set(_gratingOpen, false); return VerbResult.Pass; });
-    }
-
     // ENGINE-LIMIT: ZorkSimplifications.Scoring — one-time Put bits; no score loss on take from case or death penalty.
     private void DefineTrophyScoring()
     {

@@ -490,10 +490,10 @@ internal sealed partial class ZorkWorld
 
         // Grating
         Exit toGrating = Clearing1.Connect(Direction.Down, GratingRoom, reciprocal: false);
-        toGrating.Condition = ctx => ctx.Get(_gratingOpen);
+        toGrating.Condition = ctx => Grating.Has(Attr.Open);
         toGrating.BlockedMessage = "The grating is closed.";
         Exit fromGrating = GratingRoom.Connect(Direction.Up, Clearing1, reciprocal: false);
-        fromGrating.Condition = ctx => ctx.Get(_gratingOpen);
+        fromGrating.Condition = ctx => Grating.Has(Attr.Open);
         fromGrating.BlockedMessage = "The grating is closed.";
 
         // Troll

@@ -244,6 +244,24 @@ public static class ThingFluent
         return thing;
     }
 
+    /// <summary>
+    /// Allows PUT (and similar) to pass carried objects through this opening into
+    /// <paramref name="destination"/>.
+    /// </summary>
+    public static Thing PassObjectsTo(
+        this Thing thing,
+        Room destination,
+        int? maxSize = null,
+        string? tooLargeMessage = null,
+        string? successMessage = null)
+    {
+        thing.PassageDestination = destination;
+        thing.PassageMaxSize = maxSize;
+        thing.PassageTooLargeMessage = tooLargeMessage;
+        thing.PassageSuccessMessage = successMessage;
+        return thing;
+    }
+
     public static Thing Fixed(this Thing thing) { thing.Set(Attr.Fixed); thing.Set(Attr.Takeable, false); return thing; }
     public static Thing Plural(this Thing thing) { thing.Set(Attr.Plural); return thing; }
     public static Thing Concealed(this Thing thing, bool value = true) { thing.Set(Attr.Concealed, value); return thing; }

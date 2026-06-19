@@ -38,6 +38,24 @@ public class Thing : Element
     /// <summary>Optional override when a take is blocked by carry limit.</summary>
     public string? OnTakeBlockedMessage { get; set; }
 
+    /// <summary>When set, the player can PUT a carried item through this opening into the room.</summary>
+    public Room? PassageDestination { get; set; }
+
+    /// <summary>Maximum <see cref="Size"/> allowed through this passage; null means no limit.</summary>
+    public int? PassageMaxSize { get; set; }
+
+    /// <summary>When true (default), an <see cref="Attr.Openable"/> passage must be open to pass objects.</summary>
+    public bool PassageRequiresOpen { get; set; } = true;
+
+    /// <summary>Message when passage is closed. Defaults to <see cref="Passage.DefaultClosedMessage"/>.</summary>
+    public string? PassageClosedMessage { get; set; }
+
+    /// <summary>Message when an item is too large. Defaults to <see cref="Passage.DefaultTooLargeMessage"/>.</summary>
+    public string? PassageTooLargeMessage { get; set; }
+
+    /// <summary>Message after a successful pass. Defaults to a generic line in <see cref="Passage.TryPass"/>.</summary>
+    public string? PassageSuccessMessage { get; set; }
+
     /// <summary>Optional hook invoked the first time the player examines this thing.</summary>
     public Action<GameContext>? OnFirstExamine { get; set; }
 

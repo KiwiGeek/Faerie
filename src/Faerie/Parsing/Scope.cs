@@ -43,18 +43,33 @@ public sealed class Scope(GameState state, GameContext? context = null)
         foreach (Thing t in _state.Inventory) yield return t;
         foreach (Thing t in _state.Worn) yield return t;
 
-        if (!IsCurrentRoomLit) yield break;
+        if (!IsCurrentRoomLit)
+        {
+            Room room = _state.CurrentRoom;
+            foreach (Thing thing in _state.World.Things)
+            {
+                if (thing.PassageDestination == room)
+                    yield return thing;
+            }
+            yield break;
+        }
 
-        Room room = _state.CurrentRoom;
+        Room litRoom = _state.CurrentRoom;
         foreach (Thing thing in _state.World.Things)
         {
+            if (thing.PassageDestination == litRoom)
+            {
+                yield return thing;
+                continue;
+            }
+
             if (thing.Has(Attr.Concealed)) continue;
-            if (_state.RoomOf(thing) != room) continue;
+            if (_state.RoomOf(thing) != litRoom) continue;
             if (IsInsideClosedOpenable(thing)) continue;
             yield return thing;
         }
 
-        foreach (Thing thing in OrderableStock(room))
+        foreach (Thing thing in OrderableStock(litRoom))
             yield return thing;
     }
 
