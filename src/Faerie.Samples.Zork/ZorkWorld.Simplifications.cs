@@ -15,8 +15,8 @@ internal static class ZorkSimplifications
     /// player health, unconscious recovery and wake-on-leave. See ZorkWorld.DefineCombat/CombatRound.</summary>
     internal const string Combat = nameof(Combat);
 
-    /// <summary>AGENTS.md §4 — IMPLEMENTED: the Loud Room echoes all output via the engine's output-filter
-    /// seam (GameBuilder.FilterOutput); ECHO silences it. See ZorkWorld.DefineLoudRoom.</summary>
+    /// <summary>AGENTS.md §4 — IMPLEMENTED: Loud Room output/input filters; ECHO silences room.
+    /// Turn-end scramble via OnTurn. See ZorkWorld.DefineLoudRoom / ZorkWorld.Dam.cs.</summary>
     internal const string LoudRoom = nameof(LoudRoom);
 
     /// <summary>AGENTS.md §5 — IMPLEMENTED: I-THIEF roam, bag booty, sacred rooms, treasure-room defense.

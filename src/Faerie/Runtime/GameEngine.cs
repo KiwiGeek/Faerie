@@ -189,6 +189,12 @@ public sealed class GameEngine
             return;
         }
 
+        if (TryApplyInputFilters(trimmed))
+        {
+            RefreshBars();
+            return;
+        }
+
         ParsedCommand command = Parser.Parse(input, new Scope(State, _context), State);
 
         switch (command.Status)
@@ -281,6 +287,20 @@ public sealed class GameEngine
         }
 
         Submit(_lastSuccessfulCommand);
+    }
+
+    private bool TryApplyInputFilters(string input)
+    {
+        foreach (Func<GameContext, string, InputFilterResult> filter in _game.InputFilters)
+        {
+            InputFilterResult result = filter(_context, input);
+            if (result.ShouldContinue) continue;
+            if (result.Message is not null)
+                Out.PrintLine(result.Message);
+            return true;
+        }
+
+        return false;
     }
 
     private void UndoLastTurn()
