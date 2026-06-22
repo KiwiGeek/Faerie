@@ -66,6 +66,34 @@ public sealed class ScoringTests
         Assert.Equal(0, engine.State.Score);
     }
 
+    [Fact]
+    public void SyncTrophyCase_SharedBitScoresHighestCaseValueOnce()
+    {
+        GameBuilder b = GameBuilder.Create("S").AddCoreVerbs().WithMaxScore(100);
+        Room room = b.Room("Room");
+        Thing caseBox = b.Scenery("case").Container();
+        Thing egg = b.Item("egg").Takeable();
+        Thing canary = b.Item("canary").Takeable();
+        caseBox.StartsIn(room);
+        b.StartIn(room);
+        StateKey<int> caseScore = b.State("case-score", 0);
+        StateKey<int> touched = b.State("touched", 0);
+        Scoring.TrophyEntry[] entries =
+        [
+            new(egg, 1, CasePoints: 5, TouchPoints: 5),
+            new(canary, 1, CasePoints: 4, TouchPoints: 6, TouchBit: 2),
+        ];
+
+        GameEngine engine = new(b.Build(), new InMemoryTerminal(), randomSeed: 1);
+        engine.Start();
+        GameContext ctx = engine.Context;
+
+        ctx.State.Move(egg, Placement.Inside(caseBox));
+        ctx.State.Move(canary, Placement.Inside(caseBox));
+        Scoring.SyncTrophyCase(ctx, caseBox, caseScore, touched, entries);
+        Assert.Equal(5, engine.State.Score);
+    }
+
     private static World CreateWorld()
     {
         GameBuilder b = GameBuilder.Create("S");

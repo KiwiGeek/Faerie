@@ -31,7 +31,8 @@ internal sealed partial class ZorkWorld
         R(roomId).ExitTo(direction)?.When(ctx => FitsNarrowPassage(ctx), NarrowPassageMessage);
 
     private static bool FitsNarrowPassage(GameContext ctx) =>
-        !ctx.State.Inventory.Concat(ctx.State.Worn).Any(t => t.Size > NarrowPassageMaxItemSize);
+        !ctx.State.Inventory.Concat(ctx.State.Worn).Any(t =>
+            t.Size > NarrowPassageMaxItemSize && !t.Has(Attr.LightSource));
 
     private ExitGate ChimneyUpGate(GameContext ctx)
     {
@@ -78,7 +79,7 @@ internal sealed partial class ZorkWorld
         JadeFigurine.Size = 10;
         SapphireBracelet.Size = 10;
         SilverChalice.Size = 10;
-        Coal.Size = 20;
+        Coal.Size = 4;
         RustyKnife.Size = 20;
         BloodyAxe.Size = 25;
         SkeletonKey.Size = 10;

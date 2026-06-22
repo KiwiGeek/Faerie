@@ -199,6 +199,10 @@ internal sealed partial class ZorkWorld
         if (ctx.Get(_thiefEngrossed) && ctx.Random.Next(4) != 0)
             return false;
 
+        // Infocom THIEF-VS-ADVENTURER: defending the hideaway, the thief fights instead of robbing and fleeing.
+        if (visible && ctx.InRoom(TreasureRoom) && ctx.Here(Thief))
+            return false;
+
         if (!ctx.Get(_thiefHere) && !visible && ctx.Random.Next(10) < 3)
         {
             RevealThief(ctx);

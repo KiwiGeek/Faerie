@@ -22,27 +22,28 @@ internal sealed partial class ZorkWorld
         _trophyTouchedMask = _b.State("trophy-touched-mask", 0);
         _touchScoreMask = _b.State("touch-score-mask", 0);
 
+        // Egg and canary share case bit 1; each awards its own touch score (Infocom SCORE-TOUCH).
         _treasureScores =
         [
             new(Painting, 0, CasePoints: 6, TouchPoints: 4),
             new(JeweledEgg, 1, CasePoints: 5, TouchPoints: 5),
-            new(GoldenCanary, 2, CasePoints: 4, TouchPoints: 6),
-            new(BrassBauble, 3, CasePoints: 1, TouchPoints: 1),
-            new(BagOfCoins, 4, CasePoints: 5, TouchPoints: 10),
-            new(PlatinumBar, 5, CasePoints: 5, TouchPoints: 10),
-            new(TrunkOfJewels, 6, CasePoints: 5, TouchPoints: 15),
-            new(CrystalTrident, 7, CasePoints: 11, TouchPoints: 4),
-            new(IvoryTorch, 8, CasePoints: 6, TouchPoints: 14),
-            new(GoldCoffin, 9, CasePoints: 15, TouchPoints: 10),
-            new(Sceptre, 10, CasePoints: 6, TouchPoints: 4),
-            new(CrystalSkull, 11, CasePoints: 10, TouchPoints: 10),
-            new(LargeEmerald, 12, CasePoints: 10, TouchPoints: 5),
-            new(Scarab, 13, CasePoints: 5, TouchPoints: 5),
-            new(PotOfGold, 14, CasePoints: 10, TouchPoints: 10),
-            new(JadeFigurine, 15, CasePoints: 5, TouchPoints: 5),
-            new(SapphireBracelet, 16, CasePoints: 5, TouchPoints: 5),
-            new(HugeDiamond, 17, CasePoints: 10, TouchPoints: 10),
-            new(SilverChalice, 18, CasePoints: 5, TouchPoints: 10),
+            new(GoldenCanary, 1, CasePoints: 4, TouchPoints: 6, TouchBit: 18),
+            new(BrassBauble, 2, CasePoints: 1, TouchPoints: 1),
+            new(BagOfCoins, 3, CasePoints: 5, TouchPoints: 10),
+            new(PlatinumBar, 4, CasePoints: 5, TouchPoints: 10),
+            new(TrunkOfJewels, 5, CasePoints: 5, TouchPoints: 15),
+            new(CrystalTrident, 6, CasePoints: 11, TouchPoints: 4),
+            new(IvoryTorch, 7, CasePoints: 6, TouchPoints: 14),
+            new(GoldCoffin, 8, CasePoints: 15, TouchPoints: 10),
+            new(Sceptre, 9, CasePoints: 6, TouchPoints: 4),
+            new(CrystalSkull, 10, CasePoints: 10, TouchPoints: 10),
+            new(LargeEmerald, 11, CasePoints: 10, TouchPoints: 5),
+            new(Scarab, 12, CasePoints: 5, TouchPoints: 5),
+            new(PotOfGold, 13, CasePoints: 10, TouchPoints: 10),
+            new(JadeFigurine, 14, CasePoints: 5, TouchPoints: 5),
+            new(SapphireBracelet, 15, CasePoints: 5, TouchPoints: 5),
+            new(HugeDiamond, 16, CasePoints: 10, TouchPoints: 10),
+            new(SilverChalice, 17, CasePoints: 5, TouchPoints: 10),
         ];
     }
 

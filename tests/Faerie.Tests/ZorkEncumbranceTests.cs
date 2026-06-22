@@ -47,6 +47,45 @@ public sealed class ZorkEncumbranceTests
     }
 
     [Fact]
+    public void Zork_NarrowPassage_AllowsLantern()
+    {
+        (GameEngine engine, InMemoryTerminal term, Thing lantern, _, _, _, Room timber, Room drafty, _, _) = Build();
+
+        engine.State.TakeIntoInventory(lantern);
+        engine.State.CurrentRoom = timber;
+        term.Reset();
+
+        engine.Submit("go west");
+
+        Assert.Equal(drafty, engine.State.CurrentRoom);
+    }
+
+    [Fact]
+    public void Zork_NarrowPassage_AllowsCoalMineLoad()
+    {
+        (GameEngine engine, InMemoryTerminal term, Thing lantern, _, Thing garlic, _, Room timber, Room drafty, _, _) = Build();
+
+        Thing coal = engine.Game.World.Things.First(t => t.Nouns.Contains("coal"));
+        Thing screwdriver = engine.Game.World.Things.First(t => t.Nouns.Contains("screwdriver"));
+        Thing pump = engine.Game.World.Things.First(t => t.Nouns.Contains("pump"));
+
+        Assert.Equal(4, coal.Size);
+
+        engine.State.TakeIntoInventory(lantern);
+        engine.State.TakeIntoInventory(garlic);
+        engine.State.TakeIntoInventory(screwdriver);
+        engine.State.TakeIntoInventory(pump);
+        engine.State.TakeIntoInventory(coal);
+        engine.State.CurrentRoom = timber;
+        term.Reset();
+
+        engine.Submit("go west");
+
+        string inventory = string.Join(", ", engine.State.Inventory.Select(t => $"{t.Id}:{t.Size}"));
+        Assert.Equal(drafty, engine.State.CurrentRoom);
+    }
+
+    [Fact]
     public void Zork_NarrowPassage_BlocksHeavyItem()
     {
         (GameEngine engine, InMemoryTerminal term, _, Thing sword, _, _, Room timber, Room drafty, _, _) = Build();

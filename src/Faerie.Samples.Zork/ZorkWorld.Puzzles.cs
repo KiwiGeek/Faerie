@@ -130,7 +130,13 @@ internal sealed partial class ZorkWorld
             ctx.Set(_trapDoorOpen, true);
             return VerbResult.Pass;
         });
-        _b.On(TrapDoor).Before(_b.Verbs.Close!, ctx => { ctx.Set(_trapDoorOpen, false); return VerbResult.Pass; });
+        _b.On(TrapDoor).Before(_b.Verbs.Close!, ctx =>
+        {
+            ctx.Set(_trapDoorOpen, false);
+            return VerbResult.Pass;
+        });
+
+        Cellar.OnEnter = SlamTrapDoorOnFirstCellarEntry;
 
         _b.On(KitchenWindow).Before(_b.Verbs.Open!, ctx => { ctx.Set(_windowOpen, true); return VerbResult.Pass; });
         _b.On(KitchenWindow).After(_b.Verbs.Open!, ctx =>
@@ -139,6 +145,16 @@ internal sealed partial class ZorkWorld
             return VerbResult.Pass;
         });
         _b.On(KitchenWindow).Before(_b.Verbs.Close!, ctx => { ctx.Set(_windowOpen, false); return VerbResult.Pass; });
+    }
+
+    private void SlamTrapDoorOnFirstCellarEntry(GameContext ctx)
+    {
+        if (ctx.Get(_trapDoorSlammed) || !ctx.Get(_trapDoorOpen)) return;
+
+        ctx.Set(_trapDoorSlammed, true);
+        ctx.Set(_trapDoorOpen, false);
+        TrapDoor.Set(Attr.Open, false);
+        ctx.Say("The trap door crashes shut, and you hear someone barring it.");
     }
 
     // Full melee combat: attacking a villain trades blows over several turns. Either side can miss,
@@ -249,6 +265,11 @@ internal sealed partial class ZorkWorld
         }
 
         if (!ctx.Here(villain)) return;
+        if (villain == Thief)
+        {
+            if (Thief.Has(Attr.Concealed)) return;
+            if (ctx.Here(Troll) && !ctx.Get(_trollDefeated) && ctx.Get(_trollKO) == 0) return;
+        }
 
         Thing? yours = BestWeapon(ctx);
         int roll = ctx.Random.Next(100) + (yours is null ? 18 : 0);   // unarmed, you're easier prey
@@ -287,8 +308,19 @@ internal sealed partial class ZorkWorld
 
     // ---- weapon selection -----------------------------------------------------------------
 
-    private Thing? ChosenWeapon(VerbContext ctx) =>
-        ctx.IndirectObject is { } io && IsWeapon(io) && ctx.Carrying(io) ? io : BestWeapon(ctx);
+    private Thing? ChosenWeapon(VerbContext ctx)
+    {
+        if (ctx.IndirectObject is { } io && IsWeapon(io))
+        {
+            if (ctx.Carrying(io)) return io;
+            if (ctx.Here(io) && io.Has(Attr.Takeable))
+            {
+                ctx.Take(io);
+                return io;
+            }
+        }
+        return BestWeapon(ctx);
+    }
 
     private Thing? BestWeapon(GameContext ctx) =>
         ctx.Carrying(Sword) ? Sword :
@@ -535,6 +567,31 @@ internal sealed partial class ZorkWorld
                 ctx.State.Move(t, Placement.InRoom(LandOfTheDead));
             return VerbResult.Done;
         });
+
+        _b.On(Skeleton).Before(_b.Verbs.Search!, ctx => RevealSkeletonKey(ctx, searched: true));
+        _b.On(Skeleton).Before(_move, ctx => RevealSkeletonKey(ctx, searched: false));
+        _b.On(Skeleton).Before(_b.Verbs.Examine!, ctx =>
+        {
+            if (!SkeletonKey.Has(Attr.Concealed)) return VerbResult.Pass;
+            ctx.Say("A skeleton, probably the remains of a luckless adventurer, lies here.");
+            return VerbResult.Done;
+        });
+    }
+
+    private VerbResult RevealSkeletonKey(VerbContext ctx, bool searched)
+    {
+        if (ctx.DirectObject != Skeleton) return VerbResult.Pass;
+        if (!SkeletonKey.Has(Attr.Concealed))
+        {
+            ctx.Say(searched ? "You find nothing of interest." : "The skeleton is not impressed.");
+            return VerbResult.Done;
+        }
+
+        SkeletonKey.Set(Attr.Concealed, false);
+        ctx.Say(searched
+            ? "There is a skeleton key here."
+            : "A skeleton key falls out of the skeleton's rib cage.");
+        return VerbResult.Done;
     }
 
     private void DefineDomeAndRope()

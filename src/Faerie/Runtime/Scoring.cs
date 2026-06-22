@@ -41,7 +41,13 @@ public static class Scoring
     }
 
     /// <summary>One treasure tracked for dynamic trophy-case scoring.</summary>
-    public readonly record struct TrophyEntry(Thing Treasure, int Bit, int CasePoints, int TouchPoints = 0);
+    /// <param name="Bit">Trophy-case slot; treasures sharing a bit contribute only the highest <see cref="CasePoints"/> present.</param>
+    /// <param name="TouchPoints">One-time points for first take.</param>
+    /// <param name="TouchBit">Touch-score bit; defaults to <paramref name="Bit"/>. Use a distinct bit when touch points are independent (e.g. Zork egg and canary).</param>
+    public readonly record struct TrophyEntry(Thing Treasure, int Bit, int CasePoints, int TouchPoints = 0, int TouchBit = -1)
+    {
+        public int EffectiveTouchBit => TouchBit >= 0 ? TouchBit : Bit;
+    }
 
     /// <summary>
     /// Recomputes trophy-case points from current contents. Score changes when treasures are put in
@@ -59,11 +65,21 @@ public static class Scoring
         int newSum = 0;
         int touchedMask = ctx.Get(touchedMaskKey);
 
-        foreach (TrophyEntry entry in entries)
+        // Treasures sharing a case bit (e.g. Zork egg and canary) score once — the highest value present.
+        for (int bit = 0; bit < 32; bit++)
         {
-            if (!contents.Contains(entry.Treasure)) continue;
-            newSum += entry.CasePoints;
-            touchedMask |= 1 << entry.Bit;
+            int bestCase = 0;
+            bool present = false;
+            foreach (TrophyEntry entry in entries)
+            {
+                if (entry.Bit != bit || !contents.Contains(entry.Treasure)) continue;
+                present = true;
+                bestCase = Math.Max(bestCase, entry.CasePoints);
+            }
+
+            if (!present) continue;
+            newSum += bestCase;
+            touchedMask |= 1 << bit;
         }
 
         int lastSum = ctx.Get(caseScoreKey);
@@ -89,7 +105,7 @@ public static class Scoring
         TrophyEntry entry)
     {
         if (entry.TouchPoints <= 0) return false;
-        return AwardOnce(ctx, touchMaskKey, entry.Bit, entry.TouchPoints);
+        return AwardOnce(ctx, touchMaskKey, entry.EffectiveTouchBit, entry.TouchPoints);
     }
 
     /// <summary>Counts how many bits are set in a mask (up to <paramref name="maxBits"/>).</summary>
