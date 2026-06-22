@@ -67,6 +67,7 @@ internal sealed partial class ZorkWorld
     internal Thing Thief = null!;
     internal Thing BloodyAxe = null!;
     internal Thing Sand = null!;
+    internal Thing Basket = null!;
 
     private Thing Reg(string id, Thing thing)
     {
@@ -219,6 +220,8 @@ internal sealed partial class ZorkWorld
             .Adjectives("jeweled", "beautiful").Describe("A beautiful jeweled scarab.").Concealed());
 
         Sand = Reg("sand", _b.Scenery("sand").Adjectives("ground").Describe("Sand covers the floor.").Fixed());
+        Basket = Reg("basket", _b.Scenery("basket").Called("basket")
+            .Describe("From the chain is suspended a basket.").Container(open: true));
 
         PotOfGold = Reg("pot", _b.Item("pot of gold").Called("pot").Adjectives("gold")
             .Describe("A pot of gold. What more need be said?").Concealed());
@@ -322,6 +325,7 @@ internal sealed partial class ZorkWorld
         SapphireBracelet.StartsIn(GasRoom);
         Scarab.StartsIn(SandyCave);
         Sand.StartsIn(SandyCave);
+        Basket.StartsIn(R(ZorkIds.ShaftRoom));
         PotOfGold.StartsIn(EndOfRainbow);
         LargeEmerald.StartsInside(RedBuoy);
         RedBuoy.StartsIn(FrigidRiver);

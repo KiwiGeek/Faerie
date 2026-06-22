@@ -235,6 +235,8 @@ internal sealed partial class ZorkWorld
                   (robbedPlayer ? "your possession" : "the room") + ", mumbling something about \"Doing unto others before...\""
                 : "A \"lean and hungry\" gentleman just wandered through, carrying a large bag. " +
                   "Finding nothing of value, he left disgruntled.");
+            if (robbedPlayer)
+                MaybeStoleLight(ctx);
         }
         else if (robbedPlayer)
         {
@@ -256,15 +258,19 @@ internal sealed partial class ZorkWorld
 
     private bool RobRoomTreasures(GameContext ctx, Room room, int percent)
     {
-        bool robbed = false;
-        foreach (Thing t in ctx.State.ContentsOf(room).Where(IsTreasure).ToList())
+        List<Thing> candidates = ctx.State.ContentsOf(room)
+            .Where(IsTreasure)
+            .Where(t => t != Thief && t != LargeBag && t != Stiletto)
+            .ToList();
+
+        foreach (Thing t in candidates.OrderBy(_ => ctx.Random.Next()))
         {
-            if (t == Thief || t == LargeBag || t == Stiletto) continue;
             if (ctx.Random.Next(100) >= percent) continue;
             MoveToThiefBooty(ctx, t);
-            robbed = true;
+            return true;
         }
-        return robbed;
+
+        return false;
     }
 
     private bool RobPlayerTreasures(GameContext ctx, int percent)
@@ -272,15 +278,21 @@ internal sealed partial class ZorkWorld
         if (IsSacredRoom(ctx.CurrentRoom))
             return false;
 
-        bool robbed = false;
-        foreach (Thing t in ctx.State.Inventory.Where(IsTreasure).Where(t => t != Sword && t != Lantern).ToList())
-        {
-            if (ctx.Random.Next(100) >= percent) continue;
-            ctx.Remove(t);
-            MoveToThiefBooty(ctx, t);
-            robbed = true;
-        }
-        return robbed;
+        List<Thing> candidates = ctx.State.Inventory
+            .Where(IsTreasure)
+            .Where(t => t != Sword && t != Lantern)
+            .ToList();
+
+        if (candidates.Count == 0)
+            return false;
+
+        Thing target = candidates[ctx.Random.Next(candidates.Count)];
+        if (ctx.Random.Next(100) >= percent)
+            return false;
+
+        ctx.Remove(target);
+        MoveToThiefBooty(ctx, target);
+        return true;
     }
 
     private void StealJunkFromRoom(GameContext ctx, Room room)
@@ -368,8 +380,11 @@ internal sealed partial class ZorkWorld
 
     private void MaybeStoleLight(GameContext ctx)
     {
-        if (!new Scope(ctx.State, ctx).IsCurrentRoomLit && ctx.Carrying(Lantern) && Lantern.Has(Attr.Lit))
-            ctx.Say("The thief seems to have left you in the dark.");
+        if (!ctx.Carrying(Lantern) || !Lantern.Has(Attr.Lit))
+            return;
+
+        Lantern.Set(Attr.Lit, false);
+        ctx.Say("The thief seems to have left you in the dark.");
     }
 
     internal void DropThiefLoot(GameContext ctx)

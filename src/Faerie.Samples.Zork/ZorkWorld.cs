@@ -77,6 +77,7 @@ internal sealed partial class ZorkWorld
     private StateKey<bool> _lowTide = null!;
     private StateKey<bool> _rainbowSolid = null!;
     private StateKey<bool> _boatInflated = null!;
+    private StateKey<bool> _inBoat = null!;
     private StateKey<bool> _eggBroken = null!;
     private StateKey<bool> _coalProcessed = null!;
     private StateKey<bool> _magicFlag = null!;
@@ -99,7 +100,8 @@ internal sealed partial class ZorkWorld
     private StateKey<int> _thiefHp = null!;
     private StateKey<int> _trollKO = null!;      // turns the troll stays unconscious (0 = on his feet)
     private StateKey<int> _thiefKO = null!;
-    private StateKey<bool> _loudQuieted = null!;  // the Loud Room has been silenced
+    private StateKey<bool> _loudQuieted = null!;
+    private StateKey<bool> _basketLowered = null!;  // the Loud Room has been silenced
 
     internal ZorkWorld(GameBuilder b) => _b = b;
 
@@ -134,6 +136,7 @@ internal sealed partial class ZorkWorld
         _lowTide = _b.State("low-tide", false);
         _rainbowSolid = _b.State("rainbow-solid", false);
         _boatInflated = _b.State("boat-inflated", false);
+        _inBoat = _b.State("in-boat", false);
         _eggBroken = _b.State("egg-broken", false);
         _coalProcessed = _b.State("coal-processed", false);
         _magicFlag = _b.State("magic-flag", false);
@@ -156,6 +159,7 @@ internal sealed partial class ZorkWorld
         _trollKO = _b.State("troll-ko", 0);
         _thiefKO = _b.State("thief-ko", 0);
         _loudQuieted = _b.State("loud-quieted", false);
+        _basketLowered = _b.State("basket-lowered", false);
     }
 
     private void DefineRooms()

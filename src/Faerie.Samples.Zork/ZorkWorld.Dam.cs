@@ -331,7 +331,7 @@ internal sealed partial class ZorkWorld
         ctx.Set(_lowTide, false);
         TrunkOfJewels.Set(Attr.Concealed, true);
 
-        if (ctx.InRoom(Reservoir) && !ctx.Carrying(Boat) && !ctx.State.Inventory.Contains(Boat))
+        if (ctx.InRoom(Reservoir) && !BoatPresentForFlood(ctx))
         {
             ctx.Die("You are lifted up by the rising river! You try to swim, but the currents are too strong. " +
                     "You come closer, closer to the awesome structure of Flood Control Dam #3. The dam beckons to you. " +

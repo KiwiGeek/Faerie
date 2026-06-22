@@ -1,5 +1,5 @@
 # Full Zork I walkthrough for Faerie headless replay (--seed 1).
-# Adapted from johnesco zork1-v2 + eristic guide; routes avoid boat boarding (ENGINE-LIMIT).
+# Adapted from johnesco zork1-v2 + eristic guide; boat river segment uses board/launch/land.
 
 # --- Opening: egg and house entry ---
 north
@@ -272,7 +272,8 @@ east
 down
 take plastic
 inflate plastic
-east
+board boat
+launch
 down
 down
 down
@@ -280,6 +281,7 @@ take buoy
 open buoy
 take emerald
 east
+disembark
 take shovel
 northeast
 dig sand
@@ -287,9 +289,12 @@ dig sand
 dig sand
 dig sand
 take scarab
+drop shovel
 southwest
+board boat
+launch
 west
-west
+disembark
 north
 west
 west

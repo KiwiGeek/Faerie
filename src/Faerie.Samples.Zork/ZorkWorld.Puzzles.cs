@@ -27,14 +27,14 @@ internal sealed partial class ZorkWorld
     private Verb _temple = null!;
     private Verb _ring = null!;
 
-    // ENGINE-LIMIT: ZorkSimplifications.Verbs — only a minimal custom verb set; many Infocom verbs absent.
+    // ENGINE-LIMIT: ZorkSimplifications.Verbs — exotic spell verbs (frotz, etc.) not implemented.
     // Go omits "move" so "move north" does not travel; custom move (registered after AddCoreVerbs) overrides core push for object commands.
     private void DefineCustomVerbs()
     {
         _go = _b.DefineVerb(StandardVerbIds.Go, ["go", "walk", "run", "head"],
             VerbForms.Transitive | VerbForms.Intransitive, GoHandler);
 
-        _attack = _b.DefineVerb("attack", ["attack", "kill", "fight", "hit", "strike", "swing"],
+        _attack = _b.DefineVerb("attack", ["attack", "kill", "fight", "hit", "strike", "swing", "brandish"],
             VerbForms.Transitive | VerbForms.Ditransitive, AttackHandler);
         _move = _b.DefineVerb("move", ["move", "push", "pull", "slide"], VerbForms.Transitive, MoveHandler);
         _climb = _b.DefineVerb("climb", ["climb", "scale"], VerbForms.Transitive | VerbForms.Intransitive, ClimbHandler);
@@ -53,6 +53,8 @@ internal sealed partial class ZorkWorld
         _temple = _b.DefineVerb("temple", ["temple"], VerbForms.Intransitive, TempleHandler);
         _ring = _b.DefineVerb("ring", ["ring"], VerbForms.Transitive, RingHandler);
         _rub = _b.DefineVerb("rub", ["rub", "touch", "feel", "pat"], VerbForms.Transitive | VerbForms.Ditransitive, RubHandler);
+        DefineZorkVerbs();
+        WireCombatFidelity();
     }
 
     private static VerbResult RubHandler(VerbContext ctx)
@@ -74,7 +76,9 @@ internal sealed partial class ZorkWorld
         DefineThief();
         DefineDamAndReservoir();
         DefineBoat();
+        DefineBoatRiver();
         DefineMachineRoom();
+        DefineBasket();
         DefineLoudRoom();
         DefineEggAndCanary();
         DefineRainbowAndPot();
@@ -207,7 +211,12 @@ internal sealed partial class ZorkWorld
         // A senseless villain is defenceless: finish him.
         if (ctx.Get(ko) > 0) { kill(ctx); return VerbResult.Done; }
 
-        int roll = ctx.Random.Next(100) + power * 12;   // a finer weapon tips the odds your way
+        int roll = ctx.Random.Next(100) + power * 12 + CombatRollBonus(ctx, villain, weapon, hp);
+        if (villain == Thief && ctx.Get(_thiefEngrossed))
+        {
+            roll += 12;
+            ctx.Set(_thiefEngrossed, false);
+        }
         if (!ctx.Get(_lucky)) roll -= 20;
         if (roll >= 92)
         {
@@ -228,7 +237,21 @@ internal sealed partial class ZorkWorld
         }
         else
         {
-            ctx.Say($"The {name} parries your attack{with} and counters.");
+            if (IsWeaknessWeapon(villain, weapon))
+            {
+                int left = ctx.Get(hp) - 1;
+                ctx.Set(hp, left);
+                VillainCombatStrength(ctx, villain, weapon, hp);
+                if (left <= 0)
+                {
+                    ctx.Say($"The {name} parries your attack{with}, but you wear him down.");
+                    kill(ctx);
+                }
+                else
+                    ctx.Say($"The {name} parries your attack{with}, but you wear him down.");
+            }
+            else
+                ctx.Say($"The {name} parries your attack{with} and counters.");
         }
         return VerbResult.Done;
     }
@@ -269,6 +292,11 @@ internal sealed partial class ZorkWorld
         {
             if (Thief.Has(Attr.Concealed)) return;
             if (ctx.Here(Troll) && !ctx.Get(_trollDefeated) && ctx.Get(_trollKO) == 0) return;
+            if (ThiefShouldFlee(ctx))
+            {
+                ThiefFleesCombat(ctx);
+                return;
+            }
         }
 
         Thing? yours = BestWeapon(ctx);
@@ -385,8 +413,8 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Thief — see ZorkWorld.Thief.cs (I-THIEF daemon).
-    // ENGINE-LIMIT: ZorkSimplifications.BoatAndRiver — inflate/deflate only; river rooms not gated on boat state.
+    // Thief daemon — ZorkWorld.Thief.cs (I-THIEF, THIEF-VS-ADVENTURER).
+    // Boat inflate/deflate — ZorkWorld.Boat.cs for river navigation.
     private void DefineBoat()
     {
         _b.On(PileOfPlastic).Before(_inflate, ctx =>
@@ -527,17 +555,6 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Bat — instant death without garlic; no bat steal/repel loop.
-    private void DefineBatAndGarlic()
-    {
-        BatRoom.OnEnter = ctx =>
-        {
-            if (ctx.Carrying(Garlic) || ctx.Wearing(Garlic)) return;
-            ctx.Die("A bat swoops down and carries you off into the darkness.");
-        };
-    }
-
-    // ENGINE-LIMIT: ZorkSimplifications.Sand — four digs reveal scarab; fifth-dig collapse death omitted.
     private void DefineSandAndScarab()
     {
         _b.On(Sand).Before(_dig, ctx =>
@@ -549,22 +566,47 @@ internal sealed partial class ZorkWorld
             }
             int digs = ctx.Get(_sandDigs) + 1;
             ctx.Set(_sandDigs, digs);
-            if (digs < 4) { ctx.Say("You dig a hole in the sand."); return VerbResult.Done; }
-            Scarab.Set(Attr.Concealed, false);
-            ctx.PlaceHere(Scarab);
-            ctx.Say("You uncover a beautiful jeweled scarab!");
+            if (digs < 4)
+            {
+                ctx.Say("You dig a hole in the sand.");
+                return VerbResult.Done;
+            }
+
+            if (digs == 4)
+            {
+                Scarab.Set(Attr.Concealed, false);
+                ctx.PlaceHere(Scarab);
+                ctx.Say("You uncover a beautiful jeweled scarab!");
+                return VerbResult.Done;
+            }
+
+            if (!ctx.Carrying(Scarab) && ctx.Here(Scarab))
+            {
+                ctx.Die("The hole collapses, smothering you in sand.");
+                return VerbResult.Done;
+            }
+
+            ctx.Say("The hole collapses on itself.");
             return VerbResult.Done;
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Death — curse banishes treasures on take attempt; no undead/revival mode.
+    // ENGINE-LIMIT: ZorkSimplifications.Death — no undead play mode after third death.
     private void DefineSkeleton()
     {
         _b.On(Skeleton).Before(_b.Verbs.Take!, ctx =>
         {
-            ctx.Say("A ghost appears and curses your valuables, banishing them to the Land of the Dead!");
-            foreach (Thing t in ctx.State.Inventory.Where(IsTreasure).ToList())
-                ctx.State.Move(t, Placement.InRoom(LandOfTheDead));
+            List<Thing> treasures = ctx.State.Inventory.Where(IsTreasure).ToList();
+            if (treasures.Count > 0)
+            {
+                ctx.Say("A ghost appears in the room and curses your valuables, banishing them to the Land of the Dead!");
+                foreach (Thing t in treasures)
+                    ctx.State.Move(t, Placement.InRoom(LandOfTheDead));
+            }
+            else
+                ctx.Say("A ghost appears and disappears in the room, laughing hideously.");
+
+            ctx.Say("The bones are still here.");
             return VerbResult.Done;
         });
 
@@ -605,13 +647,6 @@ internal sealed partial class ZorkWorld
             ctx.Say("The rope is tied to the railing.");
             return VerbResult.Done;
         });
-    }
-
-    // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — chimney flag on studio enter; gnome encounter omitted.
-    private void DefineMagicAndChimney()
-    {
-        Gallery.OnFirstEnter = ctx => ctx.Set(_magicFlag, true);
-        R(ZorkIds.Studio).OnFirstEnter = ctx => ctx.Set(_chimneyFlag, true);
     }
 
     private void DefineStoneBarrowWin()

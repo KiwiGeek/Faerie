@@ -358,7 +358,7 @@ internal sealed partial class ZorkWorld
         LinkOneWay(ZorkIds.Stream, Direction.Out, ZorkIds.StreamView);
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.BoatAndRiver — river map exists; no board/disembark or boat-gated movement.
+    // River map and boat-gated movement — ZorkWorld.Boat.cs
     private void ConnectRiver()
     {
         Link(ZorkIds.River1, Direction.East, ZorkIds.Shore);
@@ -500,14 +500,14 @@ internal sealed partial class ZorkWorld
 
         // Cyclops room exits configured in ZorkWorld.Cyclops.cs
 
-        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — magic flag from gallery visit, not gnome encounter.
+        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — gnome encounter in ZorkWorld.MagicPassage.cs; cyclops wall via ODYSSEUS.
         Exit toStrange = LivingRoom.Connect(Direction.West, StrangePassage, reciprocal: false);
         toStrange.Condition = ctx => ctx.Get(_magicFlag);
         toStrange.BlockedMessage = "The door is nailed shut.";
 
         // Cyclops east exit configured in ZorkWorld.Cyclops.cs
 
-        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — chimney flag on studio enter.
+        // Chimney flag set on successful studio-up climb (ZorkWorld.Encumbrance.ChimneyUpGate).
         Exit toStudio = Kitchen.Connect(Direction.Down, R(ZorkIds.Studio), reciprocal: false);
         toStudio.Condition = ctx => ctx.Get(_chimneyFlag);
         toStudio.BlockedMessage = "Only Santa Claus climbs down chimneys.";
@@ -521,6 +521,8 @@ internal sealed partial class ZorkWorld
         ConfigureRainbowExits();
 
         ConfigureEncumbranceExits();
+
+        ConfigureBoatExits();
 
         // Hades
         R(ZorkIds.EntranceToHades).ExitTo(Direction.In)!.Condition = ctx => ctx.Get(_hadesOpen);
@@ -542,7 +544,7 @@ internal sealed partial class ZorkWorld
         Exit toBarrowIn = WestOfHouse.Connect(Direction.In, StoneBarrow, reciprocal: false);
         toBarrowIn.Condition = ctx => ctx.Get(_wonFlag);
 
-        // Beach boat restrictions handled in puzzles
+        // Beach boat restrictions — ZorkWorld.Boat.cs
     }
 
     private void ConfigureTrollExits()
