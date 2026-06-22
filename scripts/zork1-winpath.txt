@@ -1,7 +1,13 @@
-# https://johnesco.github.io/zork1-v2/walkthrough.html
+# Full Zork I walkthrough for Faerie headless replay (--seed 1).
+# Adapted from johnesco zork1-v2 + eristic guide; routes avoid boat boarding (ENGINE-LIMIT).
+
+# --- Opening: egg and house entry ---
+north
 north
 up
 take egg
+open egg
+take canary
 down
 south
 east
@@ -18,6 +24,7 @@ east
 turn on lamp
 up
 take rope
+take knife
 down
 open sack
 take garlic
@@ -34,6 +41,15 @@ take painting
 west
 north
 north
+
+# --- Troll (RNG: repeat until defeated) ---
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
+kill troll with sword
 kill troll with sword
 kill troll with sword
 kill troll with sword
@@ -48,6 +64,8 @@ kill troll with sword
 kill troll with sword
 kill troll with sword
 drop sword
+
+# --- Maze coins/key, loud room, dam ---
 east
 east
 east
@@ -67,6 +85,14 @@ south
 south
 turn bolt
 drop wrench
+wait
+wait
+wait
+wait
+wait
+wait
+wait
+wait
 south
 southwest
 south
@@ -76,6 +102,9 @@ west
 south
 east
 up
+take coins
+search bones
+take key
 southwest
 east
 south
@@ -86,6 +115,7 @@ east
 turn off lamp
 put painting in case
 put platinum bar in case
+put coins in case
 turn on lamp
 open trap door
 down
@@ -146,15 +176,11 @@ east
 down
 south
 down
-take coffin
 open coffin
 take sceptre
 up
 south
 pray
-turn off lamp
-drop lamp
-drop screwdriver
 south
 north
 east
@@ -169,15 +195,33 @@ up
 northwest
 south
 west
-take lamp
 east
 south
 east
 west
 west
-put coffin in case
 put sceptre in case
 put pot of gold in case
+open trap door
+down
+north
+east
+east
+southeast
+east
+down
+south
+down
+take coffin
+up
+south
+pray
+east
+south
+east
+in
+west
+put coffin in case
 turn on lamp
 open trap door
 down
@@ -194,6 +238,8 @@ north
 take trident
 south
 south
+drop shovel
+drop knife
 take trunk
 south
 southeast
@@ -214,20 +260,192 @@ east
 turn off lamp
 put trunk in case
 put trident in case
-east
-out
-northwest
-north
-west
-take screwdriver
-east
-south
-south
-east
-west
-west
-take torch from case
 turn on lamp
 open trap door
 down
 north
+east
+east
+east
+up
+east
+down
+take plastic
+inflate plastic
+east
+down
+down
+down
+take buoy
+open buoy
+take emerald
+east
+take shovel
+northeast
+dig sand
+dig sand
+dig sand
+dig sand
+take scarab
+southwest
+west
+west
+north
+west
+west
+up
+southwest
+south
+west
+west
+south
+up
+turn off lamp
+put emerald in case
+put scarab in case
+turn on lamp
+drop key
+drop rope
+drop shovel
+drop buoy
+drop boat
+drop sword
+open trap door
+down
+north
+east
+east
+south
+south
+rub mirror
+north
+west
+north
+west
+north
+take figurine
+east
+north
+down
+take bracelet
+up
+south
+west
+south
+east
+south
+down
+up
+put bracelet in case
+put figurine in case
+drop pump
+open trap door
+down
+north
+east
+east
+south
+south
+rub mirror
+north
+west
+north
+west
+north
+east
+north
+down
+east
+northeast
+southeast
+southwest
+down
+down
+south
+take coal
+north
+west
+west
+south
+put coal in machine
+take diamond
+north
+east
+east
+up
+up
+north
+east
+south
+north
+up
+south
+west
+south
+east
+south
+down
+up
+put diamond in case
+turn on lamp
+open trap door
+down
+north
+east
+east
+west
+west
+take sword
+west
+south
+east
+up
+southwest
+east
+south
+southeast
+up
+take sword
+take sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+kill thief with sword
+take chalice
+down
+east
+east
+turn off lamp
+put chalice in case
+turn on lamp
+take canary from case
+east
+out
+north
+north
+wind canary
+take bauble
+south
+east
+in
+west
+put bauble in case
+put canary in case
+score
+east
+out
+north
+west
+southwest
+score

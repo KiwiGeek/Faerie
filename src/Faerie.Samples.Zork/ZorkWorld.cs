@@ -64,6 +64,7 @@ internal sealed partial class ZorkWorld
     // Puzzle flags
     private StateKey<bool> _rugMoved = null!;
     private StateKey<bool> _trapDoorOpen = null!;
+    private StateKey<bool> _trapDoorSlammed = null!;
     private StateKey<bool> _windowOpen = null!;
     private StateKey<bool> _trollDefeated = null!;
     private StateKey<bool> _cyclopsFlag = null!;
@@ -120,6 +121,7 @@ internal sealed partial class ZorkWorld
     {
         _rugMoved = _b.State("rug-moved", false);
         _trapDoorOpen = _b.State("trap-open", false);
+        _trapDoorSlammed = _b.State("trap-door-slammed", false);
         _windowOpen = _b.State("window-open", false);
         _trollDefeated = _b.State("troll-defeated", false);
         _cyclopsFlag = _b.State("cyclops-flag", false);
@@ -183,5 +185,6 @@ internal sealed partial class ZorkWorld
     private bool InDarkWithoutLight(GameContext ctx) =>
         !new Faerie.Parsing.Scope(ctx.State, ctx).IsCurrentRoomLit;
 
-    internal const int TreasureCount = 19;
+    /// <summary>Distinct trophy-case slots (egg and canary share one bird treasure).</summary>
+    internal const int TreasureCount = 18;
 }
