@@ -24,6 +24,7 @@ public sealed class StandardVerbSet
     public Verb? Drop { get; internal set; }
     public Verb? Open { get; internal set; }
     public Verb? Close { get; internal set; }
+    public Verb? Break { get; internal set; }
     public Verb? Lock { get; internal set; }
     public Verb? Unlock { get; internal set; }
     public Verb? Put { get; internal set; }

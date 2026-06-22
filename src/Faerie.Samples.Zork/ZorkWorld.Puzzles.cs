@@ -52,6 +52,13 @@ internal sealed partial class ZorkWorld
         _tie = _b.DefineVerb("tie", ["tie"], VerbForms.Transitive | VerbForms.Ditransitive, TieHandler);
         _temple = _b.DefineVerb("temple", ["temple"], VerbForms.Intransitive, TempleHandler);
         _ring = _b.DefineVerb("ring", ["ring"], VerbForms.Transitive, RingHandler);
+        _rub = _b.DefineVerb("rub", ["rub", "touch", "feel", "pat"], VerbForms.Transitive | VerbForms.Ditransitive, RubHandler);
+    }
+
+    private static VerbResult RubHandler(VerbContext ctx)
+    {
+        if (ctx.DirectObject is null) { ctx.Say("Rub what?"); return VerbResult.Done; }
+        return VerbResult.Pass;
     }
 
     private void DefinePuzzles()
@@ -73,6 +80,7 @@ internal sealed partial class ZorkWorld
         DefineRainbowAndPot();
         DefineHades();
         DefineGasRoom();
+        DefineMirrors();
         DefineBatAndGarlic();
         DefineSandAndScarab();
         DefineSkeleton();
@@ -218,6 +226,7 @@ internal sealed partial class ZorkWorld
         if (ctx.Get(ko) > 0) { kill(ctx); return VerbResult.Done; }
 
         int roll = ctx.Random.Next(100) + power * 12;   // a finer weapon tips the odds your way
+        if (!ctx.Get(_lucky)) roll -= 20;
         if (roll >= 92)
         {
             ctx.SayInline($"A masterful stroke{with}! ");

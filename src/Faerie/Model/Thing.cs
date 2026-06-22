@@ -41,6 +41,18 @@ public class Thing : Element
     /// <summary>When set, the player can PUT a carried item through this opening into the room.</summary>
     public Room? PassageDestination { get; set; }
 
+    /// <summary>When set, this thing is a mirror terminal for the pair.</summary>
+    public MirrorPair? MirrorLink { get; set; }
+
+    /// <summary>Message when a breakable thing is already broken.</summary>
+    public string? BreakAlreadyMessage { get; set; }
+
+    /// <summary>Message after a successful break.</summary>
+    public string? BreakSuccessMessage { get; set; }
+
+    /// <summary>Optional hook after <see cref="Attr.Broken"/> is set.</summary>
+    public Action<GameContext>? OnBreak { get; set; }
+
     /// <summary>Maximum <see cref="Size"/> allowed through this passage; null means no limit.</summary>
     public int? PassageMaxSize { get; set; }
 

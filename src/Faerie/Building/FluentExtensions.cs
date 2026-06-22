@@ -336,6 +336,24 @@ public static class ThingFluent
         return thing;
     }
 
+    /// <summary>Can be broken with the standard <c>break</c> verb.</summary>
+    public static Thing Breakable(this Thing thing, string? alreadyBrokenMessage = null, string? successMessage = null)
+    {
+        thing.Set(Attr.Breakable);
+        thing.BreakAlreadyMessage = alreadyBrokenMessage;
+        thing.BreakSuccessMessage = successMessage;
+        return thing;
+    }
+
+    /// <summary>Registers <paramref name="mirror"/> as the mirror terminal in <paramref name="room"/>.</summary>
+    public static Thing MirrorIn(this Thing mirror, MirrorPair pair, Room room)
+    {
+        pair.RegisterMirror(mirror, room);
+        mirror.MirrorLink = pair;
+        mirror.Fixed().Breakable();
+        return mirror;
+    }
+
     public static Thing Switchable(this Thing thing, bool on = false)
     {
         thing.Set(Attr.Switchable);

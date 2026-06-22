@@ -31,7 +31,8 @@ internal static class ZorkSimplifications
     /// See ZorkWorld.GasRoom.cs.</summary>
     internal const string GasRoom = nameof(GasRoom);
 
-    /// <summary>AGENTS.md §8 — Mirror rooms connected; no break/swap behavior.</summary>
+    /// <summary>AGENTS.md §8 — IMPLEMENTED: rub teleport/swap, break, bad-luck flag.
+    /// See ZorkWorld.Mirrors.cs.</summary>
     internal const string Mirrors = nameof(Mirrors);
 
     /// <summary>AGENTS.md §9 — IMPLEMENTED: bell drops hot, candles drop and go out, relight, read prayer.
