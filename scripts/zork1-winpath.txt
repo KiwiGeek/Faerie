@@ -20,6 +20,7 @@ take sword
 take lamp
 open case
 put egg in case
+# CHECKPOINT: egg
 east
 turn on lamp
 up
@@ -93,6 +94,7 @@ wait
 wait
 wait
 wait
+# CHECKPOINT: dam-drain
 south
 southwest
 south
@@ -202,6 +204,7 @@ west
 west
 put sceptre in case
 put pot of gold in case
+# CHECKPOINT: pot
 open trap door
 down
 north
@@ -453,4 +456,5 @@ out
 north
 west
 southwest
+# CHECKPOINT: barrow
 score

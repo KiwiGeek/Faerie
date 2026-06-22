@@ -19,9 +19,9 @@ When changing the engine to close a gap, prefer extending existing patterns (`Ga
 
 ## Zork I port: backlog on GitHub
 
-Simplified Infocom behaviors are tracked in [#104](https://github.com/KiwiGeek/Faerie/issues/104) (fidelity tracker) and [open **ZORK1:** issues](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1+is%3Aopen). In-source markers: `ZorkSimplifications` and `// ENGINE-LIMIT:` comments.
+Simplified Infocom behaviors were tracked in [#104](https://github.com/KiwiGeek/Faerie/issues/104) (fidelity tracker — **complete**). Remaining optional gaps: `ZorkSimplifications` and `// ENGINE-LIMIT:` comments.
 
-**Winpath oracle:** `scripts/zork1-winpath.txt` (`--seed 1`) reaches **350/350** and stone barrow win as of [#105](https://github.com/KiwiGeek/Faerie/pull/105). Regression: `ZorkWalkthroughTests`.
+**Winpath oracle:** `scripts/zork1-winpath.txt` (`--seed 1`) reaches **350/350** and stone barrow win. Regression: `ZorkWalkthroughTests` (full script), `ZorkWalkthroughCheckpointTests` (egg / dam-drain / pot / barrow milestones).
 
 ### Walkthrough failure triage
 
@@ -30,7 +30,7 @@ When `ZorkWalkthroughTests` or a headless replay fails:
 1. **Read the transcript** at the failing command (`scripts/zork1-winpath.transcript.txt` if you ran with `-o`). Compare output to Infocom expectations, not to a guessed fix.
 2. **Classify the gap** using the list above: `content` (missing puzzle/verb in this sample), `convenience` (awkward but doable with current APIs), or `deficiency` (needs an engine feature).
 3. **Do not patch the walkthrough** to skip a puzzle unless the original Infocom game allows that shortcut. Prefer fixing the port.
-4. **Add a focused test** when the fix is non-obvious (`Zork*Tests`, `DamPuzzleTests`, `ZorkConcealedRevealTests`, …) so the behavior stays locked without re-running the full script every time.
+4. **Add a focused test** when the fix is non-obvious (`Zork*Tests`, `DamPuzzleTests`, `ZorkConcealedRevealTests`, …) so the behavior stays locked without re-running the full script every time. Partial winpath milestones: `ZorkWalkthroughCheckpointTests` (`# CHECKPOINT:` markers in `scripts/zork1-winpath.txt`).
 5. **Check `ENGINE-LIMIT` / `ZorkSimplifications`** before “fixing” something that is intentionally simplified; update those markers when fidelity improves.
 
 Headless replay:
@@ -55,7 +55,7 @@ dotnet run --project src/Faerie.Samples.Zork/Faerie.Samples.Zork.csproj -- --scr
 | 2 | Boat / river | **done** — [#23](https://github.com/KiwiGeek/Faerie/issues/23) | [#5](https://github.com/KiwiGeek/Faerie/issues/5) (optional engine polish) |
 | 3 | Combat fidelity | **done** — [#24](https://github.com/KiwiGeek/Faerie/issues/24) | [#18](https://github.com/KiwiGeek/Faerie/issues/18) (optional module) |
 | 5 | Thief | **done** — [#25](https://github.com/KiwiGeek/Faerie/issues/25) | [#12](https://github.com/KiwiGeek/Faerie/issues/12), [#13](https://github.com/KiwiGeek/Faerie/issues/13) |
-| 6 | Dam / flood | [#26](https://github.com/KiwiGeek/Faerie/issues/26) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
+| 6 | Dam / flood | **done** — [#26](https://github.com/KiwiGeek/Faerie/issues/26) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
 | 7 | Gas room | **done** — [#27](https://github.com/KiwiGeek/Faerie/issues/27) | [#14](https://github.com/KiwiGeek/Faerie/issues/14) |
 | 8 | Mirrors | **done** — [#28](https://github.com/KiwiGeek/Faerie/issues/28) | [#8](https://github.com/KiwiGeek/Faerie/issues/8) |
 | 9 | Hades ritual | **done** — [#29](https://github.com/KiwiGeek/Faerie/issues/29) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
