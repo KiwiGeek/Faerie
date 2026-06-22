@@ -358,7 +358,7 @@ internal sealed partial class ZorkWorld
         LinkOneWay(ZorkIds.Stream, Direction.Out, ZorkIds.StreamView);
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.BoatAndRiver — river map exists; no board/disembark or boat-gated movement.
+    // River map and boat-gated movement — ZorkWorld.Boat.cs
     private void ConnectRiver()
     {
         Link(ZorkIds.River1, Direction.East, ZorkIds.Shore);
@@ -522,6 +522,8 @@ internal sealed partial class ZorkWorld
 
         ConfigureEncumbranceExits();
 
+        ConfigureBoatExits();
+
         // Hades
         R(ZorkIds.EntranceToHades).ExitTo(Direction.In)!.Condition = ctx => ctx.Get(_hadesOpen);
         R(ZorkIds.EntranceToHades).ExitTo(Direction.In)!.BlockedMessage =
@@ -542,7 +544,7 @@ internal sealed partial class ZorkWorld
         Exit toBarrowIn = WestOfHouse.Connect(Direction.In, StoneBarrow, reciprocal: false);
         toBarrowIn.Condition = ctx => ctx.Get(_wonFlag);
 
-        // Beach boat restrictions handled in puzzles
+        // Beach boat restrictions — ZorkWorld.Boat.cs
     }
 
     private void ConfigureTrollExits()

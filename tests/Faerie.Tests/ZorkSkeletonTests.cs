@@ -77,4 +77,27 @@ public sealed class ZorkSkeletonTests
         Assert.Contains("ghost appears", term.Output, StringComparison.OrdinalIgnoreCase);
         Assert.Equal(landOfDead, engine.State.RoomOf(painting));
     }
+
+    [Fact]
+    public void Zork_CursedTreasure_RecoverableFromLandOfTheDead()
+    {
+        (GameEngine engine, InMemoryTerminal term, Room maze5, _, _, _) = Build();
+
+        Thing painting = engine.Game.World.Things.First(t => t.Name == "painting");
+        Room landOfDead = engine.Game.World.Rooms.First(r => r.Name == "Land of the Dead");
+
+        engine.State.CurrentRoom = maze5;
+        engine.State.TakeIntoInventory(painting);
+        term.Reset();
+
+        engine.Submit("take bones");
+        Assert.Equal(landOfDead, engine.State.RoomOf(painting));
+
+        engine.State.CurrentRoom = landOfDead;
+        term.Reset();
+
+        engine.Submit("take painting");
+
+        Assert.True(engine.State.IsCarried(painting));
+    }
 }

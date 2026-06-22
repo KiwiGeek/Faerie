@@ -8,19 +8,20 @@ namespace Faerie.Samples.Zork;
 /// </summary>
 internal static class ZorkSimplifications
 {
-    /// <summary>AGENTS.md §2 — Inflate/deflate only; no river boarding or water-room travel.</summary>
+    /// <summary>AGENTS.md §2 — IMPLEMENTED: board/disembark/launch, river landings, beach carry limits.
+    /// See ZorkWorld.Boat.cs.</summary>
     internal const string BoatAndRiver = nameof(BoatAndRiver);
 
-    /// <summary>AGENTS.md §3 — IMPLEMENTED: turn-by-turn melee (hit/miss/wound/knockout/disarm/kill),
-    /// player health, unconscious recovery and wake-on-leave. See ZorkWorld.DefineCombat/CombatRound.</summary>
+    /// <summary>AGENTS.md §3 — IMPLEMENTED: melee combat, score-based fight strength, weapon weaknesses,
+    /// thrown weapons, thief disengage. See ZorkWorld.DefineCombat / ZorkWorld.CombatFidelity.cs.</summary>
     internal const string Combat = nameof(Combat);
 
     /// <summary>AGENTS.md §4 — IMPLEMENTED: Loud Room output/input filters; ECHO silences room.
     /// Turn-end scramble via OnTurn. See ZorkWorld.DefineLoudRoom / ZorkWorld.Dam.cs.</summary>
     internal const string LoudRoom = nameof(LoudRoom);
 
-    /// <summary>AGENTS.md §5 — IMPLEMENTED: I-THIEF roam, bag booty, sacred rooms, treasure-room defense.
-    /// See ZorkWorld.Thief.cs. Full melee/rob tables still simplified.</summary>
+    /// <summary>AGENTS.md §5 — IMPLEMENTED: I-THIEF roam, bag booty, sacred rooms, treasure-room defense,
+    /// engrossed state, single-item rob tables, lantern snuff. See ZorkWorld.Thief.cs.</summary>
     internal const string Thief = nameof(Thief);
 
     /// <summary>AGENTS.md §6 — IMPLEMENTED: yellow/brown gate flag, bolt toggle, 8-turn drain/fill,
@@ -70,7 +71,8 @@ internal static class ZorkSimplifications
     /// See ZorkWorld.Puzzles.DefineSandAndScarab.</summary>
     internal const string Sand = nameof(Sand);
 
-    /// <summary>AGENTS.md §19 — Many Infocom verbs absent; minimal custom verb set added.</summary>
+    /// <summary>AGENTS.md §19 — IMPLEMENTED: board/launch/land/disembark, throw, brandish, smell, listen,
+    /// count, shake, fill, answer, plug, lower/raise basket. See ZorkWorld.Verbs.cs, ZorkWorld.Basket.cs, ZorkWorld.Boat.cs.</summary>
     internal const string Verbs = nameof(Verbs);
 
     /// <summary>AGENTS.md §20 — IMPLEMENTED: gallery gnome sets magic flag; chimney flag on studio-up climb;

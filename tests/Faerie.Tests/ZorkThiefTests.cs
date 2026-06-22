@@ -75,4 +75,28 @@ public sealed class ZorkThiefTests
         Assert.False(engine.State.IsLocatedIn(thief, treasureRoom));
         Assert.Contains("falls to the floor, dead", term.Output, StringComparison.OrdinalIgnoreCase);
     }
+
+    [Fact]
+    public void Zork_GiveThiefTreasure_EngrossesThief()
+    {
+        (GameEngine engine, InMemoryTerminal term, _, Thing thief, _, _, Thing lantern) = Build();
+
+        Room roundRoom = engine.Game.World.Rooms.First(r => r.Name == "Round Room");
+        Thing painting = engine.Game.World.Things.First(t => t.Name == "painting");
+
+        engine.State.TurnCount = 50;
+        engine.State.TakeIntoInventory(painting);
+        engine.State.TakeIntoInventory(lantern);
+        lantern.Set(Attr.Lit, true);
+        engine.MovePlayerTo(roundRoom);
+        engine.State.Move(thief, Placement.InRoom(roundRoom));
+        thief.Set(Attr.Concealed, false);
+        term.Reset();
+
+        engine.Submit("give painting to thief");
+
+        Assert.Contains("thanks you politely", term.Output, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(painting, engine.State.ContentsOf(
+            engine.Game.World.Things.First(t => t.Nouns.Contains("bag") && t.Adjectives.Contains("large"))));
+    }
 }
