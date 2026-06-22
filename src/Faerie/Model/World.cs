@@ -33,4 +33,7 @@ public sealed class World
 
     /// <summary>Finds a thing by id (used by save/load); returns null if not found.</summary>
     public Thing? FindThing(string id) => _things.FirstOrDefault(t => t.Id == id);
+
+    /// <summary>Paired mirror rooms registered at build time.</summary>
+    public IReadOnlyList<MirrorPair> MirrorPairs { get; internal set; } = [];
 }

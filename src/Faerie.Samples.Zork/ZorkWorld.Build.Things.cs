@@ -22,6 +22,8 @@ internal sealed partial class ZorkWorld
     internal Thing DomeRailing = null!;
     internal Thing Leaves = null!;
     internal Thing Grating = null!;
+    internal Thing Mirror1 = null!;
+    internal Thing Mirror2 = null!;
     internal Thing SkeletonKey = null!;
     internal Thing Nest = null!;
     internal Thing Painting = null!;
@@ -94,6 +96,9 @@ internal sealed partial class ZorkWorld
 
         Grating = Reg("grating", _b.Scenery("grating").Called("grate").Adjectives("rusty", "metal")
             .Describe("The grating is closed.").LockedWith(SkeletonKey).Openable(open: false));
+
+        Mirror1 = Reg("mirror_1", _b.Scenery("enormous mirror").Called("mirror", "reflection").Adjectives("enormous"));
+        Mirror2 = Reg("mirror_2", _b.Scenery("enormous mirror").Called("mirror", "reflection").Adjectives("enormous"));
 
         Rug = Reg("rug", _b.Scenery("oriental rug").Called("rug", "carpet").Adjectives("large", "oriental")
             .Describe("The rug is too heavy to lift, but you might be able to move it."));
@@ -264,6 +269,8 @@ internal sealed partial class ZorkWorld
         KitchenWindow.StartsIn(EastOfHouse);
         Leaves.StartsIn(Clearing1);
         Grating.StartsIn(Clearing1).Concealed();
+        Mirror1.StartsIn(MirrorRoom1);
+        Mirror2.StartsIn(MirrorRoom2);
 
         Rug.StartsIn(LivingRoom);
         TrapDoor.StartsIn(LivingRoom).Concealed();

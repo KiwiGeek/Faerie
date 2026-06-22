@@ -15,6 +15,7 @@ public static class StandardVerbIds
     public const string Drop = "drop";
     public const string Open = "open";
     public const string Close = "close";
+    public const string Break = "break";
     public const string Lock = "lock";
     public const string Unlock = "unlock";
     public const string Put = "put";

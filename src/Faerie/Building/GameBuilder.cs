@@ -48,6 +48,7 @@ public sealed class GameBuilder
     private string? _inputPrompt;
 
     private readonly RoomLinkRegistry _roomLinks = new();
+    private readonly List<MirrorPair> _mirrorPairs = [];
 
     private GameBuilder(string title) => Title = title;
 
@@ -73,6 +74,14 @@ public sealed class GameBuilder
 
     /// <summary>Forward reference to a room identified by <paramref name="id"/> (must match <see cref="Element.Id"/>).</summary>
     public RoomRef RoomRef(string id) => _roomLinks.Ref(id);
+
+    /// <summary>Registers a mirror pair whose room contents swap when a mirror is rubbed.</summary>
+    public MirrorPair MirrorRooms(Room roomA, Room roomB, StateKey<bool>? brokenKey = null)
+    {
+        MirrorPair pair = new(roomA, roomB) { BrokenKey = brokenKey };
+        _mirrorPairs.Add(pair);
+        return pair;
+    }
 
     /// <summary>Registers a manually constructed room and resolves any pending links to its id.</summary>
     public Room Register(Room room)
@@ -367,6 +376,7 @@ public sealed class GameBuilder
             case StandardVerbIds.Drop: Verbs.Drop = verb; break;
             case StandardVerbIds.Open: Verbs.Open = verb; break;
             case StandardVerbIds.Close: Verbs.Close = verb; break;
+            case StandardVerbIds.Break: Verbs.Break = verb; break;
             case StandardVerbIds.Lock: Verbs.Lock = verb; break;
             case StandardVerbIds.Unlock: Verbs.Unlock = verb; break;
             case StandardVerbIds.Put: Verbs.Put = verb; break;
@@ -403,6 +413,8 @@ public sealed class GameBuilder
 
         _roomLinks.EnsureResolved();
 
+        World.MirrorPairs = _mirrorPairs;
+
         return new Game
         {
             Title = Title,
@@ -415,6 +427,7 @@ public sealed class GameBuilder
             World = World,
             Verbs = Library,
             Reactions = Reactions,
+            MirrorPairs = _mirrorPairs,
             Daemons = _daemons,
             Timers = _timers,
             OutputFilters = _outputFilters,

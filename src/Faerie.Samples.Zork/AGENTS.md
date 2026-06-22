@@ -39,7 +39,7 @@ Simplified Infocom behaviors are tracked as [open **ZORK1:** issues](https://git
 | 5 | Thief | [#25](https://github.com/KiwiGeek/Faerie/issues/25) | [#12](https://github.com/KiwiGeek/Faerie/issues/12), [#13](https://github.com/KiwiGeek/Faerie/issues/13) |
 | 6 | Dam / flood | [#26](https://github.com/KiwiGeek/Faerie/issues/26) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
 | 7 | Gas room | **done** — [#27](https://github.com/KiwiGeek/Faerie/issues/27) | [#14](https://github.com/KiwiGeek/Faerie/issues/14) |
-| 8 | Mirrors | [#28](https://github.com/KiwiGeek/Faerie/issues/28) | [#8](https://github.com/KiwiGeek/Faerie/issues/8) |
+| 8 | Mirrors | **done** — [#28](https://github.com/KiwiGeek/Faerie/issues/28) | [#8](https://github.com/KiwiGeek/Faerie/issues/8) |
 | 9 | Hades ritual | [#29](https://github.com/KiwiGeek/Faerie/issues/29) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
 | 10 | Grating pass-through | **done** — [#30](https://github.com/KiwiGeek/Faerie/issues/30) | [#9](https://github.com/KiwiGeek/Faerie/issues/9) |
 | 12 | Scoring | [#32](https://github.com/KiwiGeek/Faerie/issues/32) | [#15](https://github.com/KiwiGeek/Faerie/issues/15) |

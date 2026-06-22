@@ -779,6 +779,24 @@ b.HazardEveryTurn(gas, Hazards.HasCarriedOpenFlame, ctx =>
 `EveryTurn` daemon scoped to one room. Block lighting a flame in the room with a global
 `BeforeAny` reaction on the switch-on verb when `thing.Has(Attr.Flame)`.
 
+### Paired mirror rooms (`MirrorRooms`, `MirrorIn`, `break`)
+
+Link two rooms whose portable contents swap when the player rubs a mirror:
+
+```csharp
+StateKey<bool> broken = b.State("mirror-broken", false);
+MirrorPair pair = b.MirrorRooms(northRoom, southRoom, broken);
+
+Thing northMirror = b.Scenery("enormous mirror").Called("mirror")
+    .MirrorIn(pair, northRoom);
+Thing southMirror = b.Scenery("enormous mirror").Called("mirror")
+    .MirrorIn(pair, southRoom);
+```
+
+`MirrorPair.SwapContents(ctx)` exchanges loose, non-scenery items between the rooms.
+Use a custom `rub` verb (or reactions on the mirror things) to teleport the player and swap.
+The standard `break` verb understands `Attr.Breakable` / `Attr.Broken` on scenery.
+
 ---
 
 ## 10. The window: title bar, status bar, native title, icon

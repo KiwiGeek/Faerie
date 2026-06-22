@@ -46,6 +46,9 @@ public static class StandardVerbs
         b.Verbs.Open = b.DefineVerb(StandardVerbIds.Open, ["open"], VerbForms.Transitive, Open);
         b.Verbs.Close = b.DefineVerb(StandardVerbIds.Close, ["close", "shut"], VerbForms.Transitive, Close);
 
+        b.Verbs.Break = b.DefineVerb(StandardVerbIds.Break, ["break", "smash", "shatter", "destroy", "mung"],
+            VerbForms.Transitive, Break);
+
         b.Verbs.Unlock = b.DefineVerb(StandardVerbIds.Unlock, ["unlock"],
             VerbForms.Transitive | VerbForms.Ditransitive, Unlock);
         b.Verbs.Lock = b.DefineVerb(StandardVerbIds.Lock, ["lock"],
@@ -324,6 +327,21 @@ public static class StandardVerbs
         thing.Set(Attr.Open, false);
         ctx.State.LastReferencedThing = thing;
         ctx.Say($"You close {The(thing)}.");
+        return VerbResult.Done;
+    }
+
+    private static VerbResult Break(VerbContext ctx)
+    {
+        if (ctx.DirectObject is not { } thing) { ctx.Say("Break what?"); return VerbResult.Done; }
+
+        if (Breakable.TryBreak(ctx, thing, out string? message) is bool)
+        {
+            if (message is not null) ctx.Say(message);
+            ctx.State.LastReferencedThing = thing;
+            return VerbResult.Done;
+        }
+
+        ctx.Say($"You can't break {The(thing)}.");
         return VerbResult.Done;
     }
 

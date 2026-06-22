@@ -275,7 +275,6 @@ internal sealed partial class ZorkWorld
         Link(ZorkIds.ColdPassage, Direction.West, ZorkIds.SlideRoom);
         Link(ZorkIds.ColdPassage, Direction.South, ZorkIds.MirrorRoom1);
 
-        // ENGINE-LIMIT: ZorkSimplifications.Mirrors — connections only; no mirror break or item swap.
         Link(ZorkIds.MirrorRoom1, Direction.East, ZorkIds.Cave2);
         Link(ZorkIds.MirrorRoom1, Direction.North, ZorkIds.ColdPassage);
 
