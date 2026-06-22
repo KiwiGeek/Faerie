@@ -80,5 +80,11 @@ public enum Attr : long
     /// Can be ordered by name when <see cref="Thing.Vendor"/> is present in the current room,
     /// even if the thing itself is still offstage.
     /// </summary>
-    Orderable = 1L << 22
+    Orderable = 1L << 22,
+
+    /// <summary>
+    /// An open flame (candles, match, torch). Unlike <see cref="LightSource"/> alone, this is
+    /// hazardous in gas-filled rooms. Battery lanterns are light sources but not flames.
+    /// </summary>
+    Flame = 1L << 23
 }

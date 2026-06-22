@@ -120,6 +120,29 @@ public static class RoomFluent
     }
 
     /// <summary>
+    /// Runs <paramref name="action"/> when the player enters while <paramref name="when"/> is true.
+    /// Chains with any existing <see cref="Room.OnEnter"/> handler.
+    /// </summary>
+    public static Room HazardOnEnter(this Room room, Func<GameContext, bool> when, Action<GameContext> action)
+    {
+        Action<GameContext>? prior = room.OnEnter;
+        room.OnEnter = ctx =>
+        {
+            if (when(ctx))
+            {
+                action(ctx);
+                if (ctx.State.IsOver) return;
+            }
+            prior?.Invoke(ctx);
+        };
+        return room;
+    }
+
+    /// <summary>Runs <paramref name="action"/> on every entry to this room.</summary>
+    public static Room HazardOnEnter(this Room room, Action<GameContext> action) =>
+        room.HazardOnEnter(_ => true, action);
+
+    /// <summary>
     /// Connects this room to another in a direction. By default the reciprocal exit is created on
     /// the destination too. Returns the created <see cref="Exit"/> so doors/conditions can be added.
     /// </summary>
@@ -300,6 +323,16 @@ public static class ThingFluent
         thing.Set(Attr.Lit, lit);
         thing.Set(Attr.Switchable);
         thing.Set(Attr.On, lit);
+        return thing;
+    }
+
+    /// <summary>
+    /// Marks an open flame (candles, torch, match). Use <see cref="LightSource"/> for battery lanterns.
+    /// </summary>
+    public static Thing OpenFlame(this Thing thing, bool lit = false)
+    {
+        thing.Set(Attr.Flame);
+        thing.LightSource(lit);
         return thing;
     }
 
