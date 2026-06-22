@@ -37,7 +37,8 @@ internal static class ZorkSimplifications
     /// See ZorkWorld.Hades.cs. Pour-water-on-bell recovery included.</summary>
     internal const string Hades = nameof(Hades);
 
-    /// <summary>AGENTS.md §10 — Grating is a gated exit; no push-through from clearing.</summary>
+    /// <summary>AGENTS.md §10 — IMPLEMENTED: pass-through PUT, unlock/lock sides, leaves reveal/drop.
+    /// See ZorkWorld.Grating.cs.</summary>
     internal const string Grating = nameof(Grating);
 
     /// <summary>AGENTS.md §12 — One-time trophy bits; no death penalty or case removal penalty.</summary>

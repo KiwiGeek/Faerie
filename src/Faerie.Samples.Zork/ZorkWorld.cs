@@ -78,7 +78,6 @@ internal sealed partial class ZorkWorld
     private StateKey<bool> _boatInflated = null!;
     private StateKey<bool> _eggBroken = null!;
     private StateKey<bool> _coalProcessed = null!;
-    private StateKey<bool> _gratingOpen = null!;
     private StateKey<bool> _magicFlag = null!;
     private StateKey<bool> _wonFlag = null!;
     private StateKey<bool> _allTreasuresInCase = null!;
@@ -134,7 +133,6 @@ internal sealed partial class ZorkWorld
         _boatInflated = _b.State("boat-inflated", false);
         _eggBroken = _b.State("egg-broken", false);
         _coalProcessed = _b.State("coal-processed", false);
-        _gratingOpen = _b.State("grating-open", false);
         _magicFlag = _b.State("magic-flag", false);
         _wonFlag = _b.State("won-flag", false);
         _allTreasuresInCase = _b.State("all-treasures", false);

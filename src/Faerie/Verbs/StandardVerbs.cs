@@ -388,6 +388,12 @@ public static class StandardVerbs
         if (!ctx.Carrying(thing)) { ctx.Say($"You need to be holding {The(thing)} first."); return VerbResult.Done; }
         if (thing == target) { ctx.Say("That's not going to work."); return VerbResult.Done; }
 
+        if (Passage.TryPass(ctx, thing, target, out string? passageMessage) is bool passed)
+        {
+            if (passageMessage is not null) ctx.Say(passageMessage);
+            return VerbResult.Done;
+        }
+
         bool onto = ctx.Preposition is "on" or "onto";
 
         if (onto)

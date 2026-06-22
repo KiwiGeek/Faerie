@@ -743,6 +743,22 @@ need special handling in the same room.
 Set `ctx.StopCommandChain = true` from a handler (e.g. `Room.OnEnter`) to discard any further commands on the
 same `SubmitLine` after a `.` or `,` separator.
 
+### Passing objects through openings (`PassObjectsTo`)
+
+Doors, grates, and similar openings can move a carried item into a linked room when the player types
+`PUT item IN grate` (handled by the standard `put` verb before container logic):
+
+```csharp
+Room below = b.Room("Below");
+Thing grate = b.Scenery("grating").Called("grate")
+    .Openable(open: false)
+    .PassObjectsTo(below, maxSize: 20, tooLargeMessage: "It won't fit through the grating.");
+```
+
+When `PassageDestination` is set, the opening is also in scope from the destination room (so the player
+can `UNLOCK GRATE` from below even though the object lives upstairs). Use `Before`/`After` handlers on
+the grate for side-specific rules (which side can lock it, custom open messages, etc.).
+
 ---
 
 ## 10. The window: title bar, status bar, native title, icon
