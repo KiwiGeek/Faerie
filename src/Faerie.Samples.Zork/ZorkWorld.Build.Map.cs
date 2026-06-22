@@ -500,14 +500,14 @@ internal sealed partial class ZorkWorld
 
         // Cyclops room exits configured in ZorkWorld.Cyclops.cs
 
-        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — magic flag from gallery visit, not gnome encounter.
+        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — gnome encounter in ZorkWorld.MagicPassage.cs; cyclops wall via ODYSSEUS.
         Exit toStrange = LivingRoom.Connect(Direction.West, StrangePassage, reciprocal: false);
         toStrange.Condition = ctx => ctx.Get(_magicFlag);
         toStrange.BlockedMessage = "The door is nailed shut.";
 
         // Cyclops east exit configured in ZorkWorld.Cyclops.cs
 
-        // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — chimney flag on studio enter.
+        // Chimney flag set on successful studio-up climb (ZorkWorld.Encumbrance.ChimneyUpGate).
         Exit toStudio = Kitchen.Connect(Direction.Down, R(ZorkIds.Studio), reciprocal: false);
         toStudio.Condition = ctx => ctx.Get(_chimneyFlag);
         toStudio.BlockedMessage = "Only Santa Claus climbs down chimneys.";

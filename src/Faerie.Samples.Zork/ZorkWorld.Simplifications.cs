@@ -62,15 +62,18 @@ internal static class ZorkSimplifications
     /// sword dodge. Uses <see cref="CreatureMood"/> and <see cref="Fluid"/>. See ZorkWorld.Cyclops.cs.</summary>
     internal const string Cyclops = nameof(Cyclops);
 
-    /// <summary>AGENTS.md §17 — Bat room instant death without garlic; no steal loop.</summary>
+    /// <summary>AGENTS.md §17 — IMPLEMENTED: bat steals treasure to shaft room; garlic repels.
+    /// See ZorkWorld.Bat.cs.</summary>
     internal const string Bat = nameof(Bat);
 
-    /// <summary>AGENTS.md §18 — Four digs reveal scarab; sand collapse death omitted.</summary>
+    /// <summary>AGENTS.md §18 — IMPLEMENTED: four digs reveal scarab; fifth without scarab taken collapses.
+    /// See ZorkWorld.Puzzles.DefineSandAndScarab.</summary>
     internal const string Sand = nameof(Sand);
 
     /// <summary>AGENTS.md §19 — Many Infocom verbs absent; minimal custom verb set added.</summary>
     internal const string Verbs = nameof(Verbs);
 
-    /// <summary>AGENTS.md §20 — Magic/chimney flags on first-enter; no gnome or cyclops wall break.</summary>
+    /// <summary>AGENTS.md §20 — IMPLEMENTED: gallery gnome sets magic flag; chimney flag on studio-up climb;
+    /// cyclops east wall via ODYSSEUS. See ZorkWorld.MagicPassage.cs, ZorkWorld.Cyclops.cs.</summary>
     internal const string MagicPassage = nameof(MagicPassage);
 }

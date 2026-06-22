@@ -19,7 +19,9 @@ When changing the engine to close a gap, prefer extending existing patterns (`Ga
 
 ## Zork I port: backlog on GitHub
 
-Simplified Infocom behaviors are tracked as [open **ZORK1:** issues](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1+is%3Aopen), with related **ENGINE:** issues cross-linked in each body. In-source markers: `ZorkSimplifications` (`ZorkWorld.Simplifications.cs`) and `// ENGINE-LIMIT:` comments.
+Simplified Infocom behaviors are tracked in [#104](https://github.com/KiwiGeek/Faerie/issues/104) (fidelity tracker) and [open **ZORK1:** issues](https://github.com/KiwiGeek/Faerie/issues?q=label%3Azork1+is%3Aopen). In-source markers: `ZorkSimplifications` and `// ENGINE-LIMIT:` comments.
+
+**Winpath oracle:** `scripts/zork1-winpath.txt` (`--seed 1`) reaches **350/350** and stone barrow win as of [#105](https://github.com/KiwiGeek/Faerie/pull/105). Regression: `ZorkWalkthroughTests`.
 
 ### Reality check: engine gap vs unimplemented content
 
@@ -40,15 +42,15 @@ Simplified Infocom behaviors are tracked as [open **ZORK1:** issues](https://git
 | 6 | Dam / flood | [#26](https://github.com/KiwiGeek/Faerie/issues/26) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
 | 7 | Gas room | **done** — [#27](https://github.com/KiwiGeek/Faerie/issues/27) | [#14](https://github.com/KiwiGeek/Faerie/issues/14) |
 | 8 | Mirrors | **done** — [#28](https://github.com/KiwiGeek/Faerie/issues/28) | [#8](https://github.com/KiwiGeek/Faerie/issues/8) |
-| 9 | Hades ritual | [#29](https://github.com/KiwiGeek/Faerie/issues/29) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
+| 9 | Hades ritual | **done** — [#29](https://github.com/KiwiGeek/Faerie/issues/29) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
 | 10 | Grating pass-through | **done** — [#30](https://github.com/KiwiGeek/Faerie/issues/30) | [#9](https://github.com/KiwiGeek/Faerie/issues/9) |
 | 12 | Scoring | **done** — [#32](https://github.com/KiwiGeek/Faerie/issues/32) | [#15](https://github.com/KiwiGeek/Faerie/issues/15) |
 | 13 | Death scatter | **done** — [#33](https://github.com/KiwiGeek/Faerie/issues/33) | [#16](https://github.com/KiwiGeek/Faerie/issues/16) |
 | 16 | Cyclops | **done** — [#35](https://github.com/KiwiGeek/Faerie/issues/35) | [#20](https://github.com/KiwiGeek/Faerie/issues/20) |
-| 17 | Bat | [#36](https://github.com/KiwiGeek/Faerie/issues/36) | (game code only) |
-| 18 | Sand collapse | [#37](https://github.com/KiwiGeek/Faerie/issues/37) | (game code only) |
+| 17 | Bat | **done** — [#36](https://github.com/KiwiGeek/Faerie/issues/36) | (game code only) |
+| 18 | Sand collapse | **done** — [#37](https://github.com/KiwiGeek/Faerie/issues/37) | (game code only) |
 | 19 | Verbs | [#38](https://github.com/KiwiGeek/Faerie/issues/38) | [#19](https://github.com/KiwiGeek/Faerie/issues/19) |
-| 20 | Magic / gnome / passage | [#39](https://github.com/KiwiGeek/Faerie/issues/39) | [#21](https://github.com/KiwiGeek/Faerie/issues/21), [#4](https://github.com/KiwiGeek/Faerie/issues/4) |
+| 20 | Magic / gnome / passage | **done** — [#39](https://github.com/KiwiGeek/Faerie/issues/39) | [#21](https://github.com/KiwiGeek/Faerie/issues/21), [#4](https://github.com/KiwiGeek/Faerie/issues/4) |
 
 ---
 

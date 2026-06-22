@@ -527,17 +527,6 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Bat — instant death without garlic; no bat steal/repel loop.
-    private void DefineBatAndGarlic()
-    {
-        BatRoom.OnEnter = ctx =>
-        {
-            if (ctx.Carrying(Garlic) || ctx.Wearing(Garlic)) return;
-            ctx.Die("A bat swoops down and carries you off into the darkness.");
-        };
-    }
-
-    // ENGINE-LIMIT: ZorkSimplifications.Sand — four digs reveal scarab; fifth-dig collapse death omitted.
     private void DefineSandAndScarab()
     {
         _b.On(Sand).Before(_dig, ctx =>
@@ -549,10 +538,27 @@ internal sealed partial class ZorkWorld
             }
             int digs = ctx.Get(_sandDigs) + 1;
             ctx.Set(_sandDigs, digs);
-            if (digs < 4) { ctx.Say("You dig a hole in the sand."); return VerbResult.Done; }
-            Scarab.Set(Attr.Concealed, false);
-            ctx.PlaceHere(Scarab);
-            ctx.Say("You uncover a beautiful jeweled scarab!");
+            if (digs < 4)
+            {
+                ctx.Say("You dig a hole in the sand.");
+                return VerbResult.Done;
+            }
+
+            if (digs == 4)
+            {
+                Scarab.Set(Attr.Concealed, false);
+                ctx.PlaceHere(Scarab);
+                ctx.Say("You uncover a beautiful jeweled scarab!");
+                return VerbResult.Done;
+            }
+
+            if (!ctx.Carrying(Scarab) && ctx.Here(Scarab))
+            {
+                ctx.Die("The hole collapses, smothering you in sand.");
+                return VerbResult.Done;
+            }
+
+            ctx.Say("The hole collapses on itself.");
             return VerbResult.Done;
         });
     }
@@ -605,13 +611,6 @@ internal sealed partial class ZorkWorld
             ctx.Say("The rope is tied to the railing.");
             return VerbResult.Done;
         });
-    }
-
-    // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — chimney flag on studio enter; gnome encounter omitted.
-    private void DefineMagicAndChimney()
-    {
-        Gallery.OnFirstEnter = ctx => ctx.Set(_magicFlag, true);
-        R(ZorkIds.Studio).OnFirstEnter = ctx => ctx.Set(_chimneyFlag, true);
     }
 
     private void DefineStoneBarrowWin()

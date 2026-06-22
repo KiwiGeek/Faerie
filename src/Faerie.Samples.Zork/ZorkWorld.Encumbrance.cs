@@ -36,9 +36,6 @@ internal sealed partial class ZorkWorld
 
     private ExitGate ChimneyUpGate(GameContext ctx)
     {
-        if (!ctx.Get(_chimneyFlag))
-            return ExitGate.Block("You can't go that way.");
-
         IReadOnlyList<Thing> carried = ctx.State.Inventory.Concat(ctx.State.Worn).ToList();
         if (carried.Count == 0)
             return ExitGate.Block(ChimneyEmptyHandsMessage);
@@ -47,6 +44,7 @@ internal sealed partial class ZorkWorld
         if (carried.Count > 2)
             return ExitGate.Block(ChimneyOverloadMessage);
 
+        ctx.Set(_chimneyFlag, true);
         return ExitGate.Open;
     }
 
