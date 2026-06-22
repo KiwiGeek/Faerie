@@ -550,7 +550,7 @@ internal sealed partial class ZorkWorld
         });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — flags on first-enter; cyclops wall break not wired.
+    // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — chimney flag on studio enter; gnome encounter omitted.
     private void DefineMagicAndChimney()
     {
         Gallery.OnFirstEnter = ctx => ctx.Set(_magicFlag, true);

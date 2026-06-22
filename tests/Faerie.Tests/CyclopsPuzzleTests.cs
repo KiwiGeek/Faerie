@@ -2,6 +2,7 @@ using Faerie.Model;
 using Faerie.Runtime;
 using Faerie.Samples.Zork;
 using Xunit;
+using static Faerie.Runtime.Fluid;
 
 namespace Faerie.Tests;
 
@@ -81,6 +82,48 @@ public sealed class CyclopsPuzzleTests
         term.Reset();
         engine.Submit("up");
         Assert.Equal(treasureRoom, engine.State.CurrentRoom);
+    }
+
+    [Fact]
+    public void Zork_Cyclops_ClosedBottle_RefusedBeforeLunch()
+    {
+        (GameEngine engine, InMemoryTerminal term, Game game, _, _, _) = BuildAtCyclops();
+        Thing bottle = game.World.Things.First(t => t.Name == "glass bottle");
+        engine.State.TakeIntoInventory(bottle);
+
+        term.Reset();
+        engine.Submit("give bottle to cyclops");
+
+        Assert.Contains("not thirsty", term.Output, StringComparison.OrdinalIgnoreCase);
+        Assert.True(ContainerHolds(engine.State, bottle, game.World.Things.First(t => t.Name == "water")));
+    }
+
+    [Fact]
+    public void Zork_Cyclops_WaterRefusedBeforeLunch()
+    {
+        (GameEngine engine, InMemoryTerminal term, Game game, _, _, _) = BuildAtCyclops();
+        Thing bottle = game.World.Things.First(t => t.Name == "glass bottle");
+        engine.State.TakeIntoInventory(bottle);
+        engine.Submit("open bottle");
+
+        term.Reset();
+        engine.Submit("give bottle to cyclops");
+
+        Assert.Contains("not thirsty", term.Output, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Zork_Cyclops_SwordAttack_DodgesInsteadOfKilling()
+    {
+        (GameEngine engine, InMemoryTerminal term, Game game, _, _, _) = BuildAtCyclops();
+        Thing sword = game.World.Things.First(t => t.Name == "elvish sword");
+        engine.State.TakeIntoInventory(sword);
+
+        term.Reset();
+        engine.Submit("attack cyclops");
+
+        Assert.Contains("stupid as my father", term.Output, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains(sword, engine.State.Inventory);
     }
 
     [Fact]

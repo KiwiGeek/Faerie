@@ -624,6 +624,19 @@ Scoring.SyncTrophyCase(ctx, trophyCase, caseScoreKey, touchedMaskKey, entries);
 deposit and down on removal. `AwardOnce` handles place visits and task bonuses. Pair touch
 bonuses with `AwardTreasureTouch` on take.
 
+### Creature mood and fluids
+
+```csharp
+int wrath = CreatureMood.Escalate(ctx.Get(moodKey));
+if (CreatureMood.IsLethal(wrath, threshold)) { ... }
+
+if (Fluid.CanPourFrom(ctx.State, bottle, water))
+    Fluid.TryConsume(ctx, bottle, water, bottle);
+```
+
+`CreatureMood` models signed counters that escalate toward two extremes. `Fluid` helps with
+open-container pour/give puzzles (e.g. cyclops water-from-bottle).
+
 ### Win when the player reaches a place with the treasure
 
 ```csharp

@@ -2,6 +2,8 @@ using Faerie.Building;
 using Faerie.Model;
 using Faerie.Runtime;
 using Faerie.Verbs;
+using static Faerie.Runtime.CreatureMood;
+using static Faerie.Runtime.Fluid;
 
 namespace Faerie.Samples.Zork;
 
@@ -167,7 +169,7 @@ internal sealed partial class ZorkWorld
         ctx.Say("The cyclops says \"Mmm Mmm. I love hot peppers! But oh, could I use a drink. Perhaps I could drink the blood of that thing.\"  " +
                 "From the gleam in his eye, it could be surmised that you are \"that thing\".");
         int wrath = ctx.Get(_cyclopsWrath);
-        ctx.Set(_cyclopsWrath, Math.Min(-1, -wrath));
+        ctx.Set(_cyclopsWrath, ThirstyAfterMeal(wrath));
         ctx.Set(_cyclopsDaemon, true);
         return VerbResult.Done;
     }
@@ -180,24 +182,20 @@ internal sealed partial class ZorkWorld
             return VerbResult.Done;
         }
 
-        if (ctx.DirectObject == Bottle && !Bottle.Has(Attr.Open))
+        Thing? gift = ctx.DirectObject;
+        if (gift == Bottle && !CanPourFrom(ctx.State, Bottle, Water))
         {
             ctx.Say("The cyclops apparently is not thirsty and refuses your generous offer.");
             return VerbResult.Done;
         }
 
-        if (ctx.State.ContentsOf(Bottle).Contains(Water))
-            ctx.Remove(Water);
-        else if (ctx.DirectObject == Water)
-            ctx.Remove(Water);
+        if (gift != Water && gift != Bottle)
+            return VerbResult.Pass;
 
-        if (ctx.Carrying(Bottle))
-        {
-            ctx.Remove(Bottle);
-            ctx.PlaceHere(Bottle);
-        }
+        if (!TryConsume(ctx, Bottle, Water, gift))
+            return VerbResult.Done;
 
-        Bottle.Set(Attr.Open, true);
+        DropOpenContainer(ctx, Bottle);
         ctx.Set(_cyclopsFlag, true);
         ctx.Say("The cyclops takes the bottle, checks that it's open, and drinks the water. " +
                 "A moment later, he lets out a yawn that nearly blows you over, and then falls fast asleep (what did you put in that drink, anyway?).");
@@ -214,7 +212,14 @@ internal sealed partial class ZorkWorld
             return VerbResult.Done;
         }
 
-        AggravateCyclops(ctx);
+        ctx.Set(_cyclopsDaemon, true);
+        if (HasSword(ctx))
+        {
+            ctx.Say("\"Do you think I'm as stupid as my father was?\", he says, dodging.");
+            return VerbResult.Done;
+        }
+
+        ctx.Say("The cyclops shrugs but otherwise ignores your pitiful attempt.");
         return VerbResult.Done;
     }
 
@@ -224,14 +229,26 @@ internal sealed partial class ZorkWorld
         ctx.Set(_cyclopsFlag, false);
         int wrath = ctx.Get(_cyclopsWrath);
         if (wrath < 0)
-            ctx.Set(_cyclopsWrath, -wrath);
+            ctx.Set(_cyclopsWrath, FlipSign(wrath));
         ctx.Set(_cyclopsDaemon, true);
     }
 
-    private void AggravateCyclops(GameContext ctx)
+    private void CyclopsDaemonTick(GameContext ctx)
     {
-        ctx.Set(_cyclopsDaemon, true);
-        ctx.Say("The cyclops shrugs but otherwise ignores your pitiful attempt.");
+        int wrath = ctx.Get(_cyclopsWrath);
+        if (IsLethal(wrath, CyclopsWrathDeath))
+        {
+            ctx.Die("The cyclops, tired of all of your games and trickery, grabs you firmly. " +
+                     "As he licks his chops, he says \"Mmm. Just like Mom used to make 'em.\" " +
+                     "It's nice to be appreciated.");
+            return;
+        }
+
+        wrath = Escalate(wrath);
+        ctx.Set(_cyclopsWrath, wrath);
+
+        int index = StageIndex(wrath, CyclopsMadMessages.Length - 1);
+        ctx.Say(CyclopsMadMessages[index]);
     }
 
     private void WireCyclopsDaemon()
@@ -244,24 +261,6 @@ internal sealed partial class ZorkWorld
             if (ctx.Get(_cyclopsDaemon) && !ctx.InRoom(CyclopsRoom))
                 ctx.Set(_cyclopsDaemon, false);
         });
-    }
-
-    private void CyclopsDaemonTick(GameContext ctx)
-    {
-        int wrath = ctx.Get(_cyclopsWrath);
-        if (Math.Abs(wrath) >= CyclopsWrathDeath)
-        {
-            ctx.Die("The cyclops, tired of all of your games and trickery, grabs you firmly. " +
-                     "As he licks his chops, he says \"Mmm. Just like Mom used to make 'em.\" " +
-                     "It's nice to be appreciated.");
-            return;
-        }
-
-        wrath = wrath < 0 ? wrath - 1 : wrath + 1;
-        ctx.Set(_cyclopsWrath, wrath);
-
-        int index = Math.Clamp(Math.Abs(wrath) - 1, 0, CyclopsMadMessages.Length - 1);
-        ctx.Say(CyclopsMadMessages[index]);
     }
 
     private VerbResult OdysseusHandler(VerbContext ctx)
