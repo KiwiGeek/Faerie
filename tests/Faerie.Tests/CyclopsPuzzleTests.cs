@@ -99,7 +99,13 @@ public sealed class CyclopsPuzzleTests
         term.Reset();
         engine.Submit("wait");
 
-        Assert.True(engine.State.IsOver);
+        Assert.False(engine.State.IsOver);
         Assert.Contains("trickery", term.Output, StringComparison.OrdinalIgnoreCase);
+
+        term.Reset();
+        engine.Submit("inventory");
+
+        Assert.False(engine.State.IsOver);
+        Assert.Contains("Forest", engine.State.CurrentRoom.Name, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -251,7 +251,7 @@ internal sealed partial class ZorkWorld
         int wrath = ctx.Get(_cyclopsWrath);
         if (Math.Abs(wrath) >= CyclopsWrathDeath)
         {
-            ctx.Lose("The cyclops, tired of all of your games and trickery, grabs you firmly. " +
+            ctx.Die("The cyclops, tired of all of your games and trickery, grabs you firmly. " +
                      "As he licks his chops, he says \"Mmm. Just like Mom used to make 'em.\" " +
                      "It's nice to be appreciated.");
             return;

@@ -89,7 +89,7 @@ internal sealed partial class ZorkWorld
     private StateKey<int> _grueTurns = null!;
     private StateKey<int> _scoredMask = null!;
     private StateKey<int> _placeScoreMask = null!;
-    // ENGINE-LIMIT: ZorkSimplifications.Death, Scoring — tracked but death penalty and treasure scatter not wired.
+    // Death penalty and treasure scatter wired in ZorkWorld.Death.cs.
     private StateKey<int> _deathCount = null!;
     private StateKey<int> _sandDigs = null!;
     private StateKey<int> _thiefLocation = null!;
@@ -111,6 +111,7 @@ internal sealed partial class ZorkWorld
         PlaceThings();
         ConnectMap();
         ConfigureConditionalExits();
+        DefineDeath();
         DefineCustomVerbs();
         DefinePuzzles();
     }
