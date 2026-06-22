@@ -87,7 +87,6 @@ internal sealed partial class ZorkWorld
     private StateKey<bool> _chimneyFlag = null!;
     private StateKey<int> _lanternTurns = null!;
     private StateKey<int> _grueTurns = null!;
-    private StateKey<int> _scoredMask = null!;
     private StateKey<int> _placeScoreMask = null!;
     // Death penalty and treasure scatter wired in ZorkWorld.Death.cs.
     private StateKey<int> _deathCount = null!;
@@ -108,6 +107,7 @@ internal sealed partial class ZorkWorld
         DefineState();
         DefineRooms();
         DefineThings();
+        DefineScoringState();
         PlaceThings();
         ConnectMap();
         ConfigureConditionalExits();
@@ -143,7 +143,6 @@ internal sealed partial class ZorkWorld
         _chimneyFlag = _b.State("chimney-flag", false);
         _lanternTurns = _b.State("lantern-turns", 385);
         _grueTurns = _b.State("grue-turns", 0);
-        _scoredMask = _b.State("scored-mask", 0);
         _placeScoreMask = _b.State("place-score-mask", 0);
         _deathCount = _b.State("deaths", 0);
         _sandDigs = _b.State("sand-digs", 0);
@@ -183,41 +182,6 @@ internal sealed partial class ZorkWorld
 
     private bool InDarkWithoutLight(GameContext ctx) =>
         !new Faerie.Parsing.Scope(ctx.State, ctx).IsCurrentRoomLit;
-
-    // ENGINE-LIMIT: ZorkSimplifications.Scoring — one-time treasure bits; no decrement when removing from case.
-    private void AwardTreasure(VerbContext ctx, int bit, int points, string message)
-    {
-        int mask = ctx.Get(_scoredMask);
-        if ((mask & (1 << bit)) != 0) return;
-        ctx.Set(_scoredMask, mask | (1 << bit));
-        ctx.State.Score += points;
-        ctx.Say(message);
-        CheckTreasuresComplete(ctx);
-    }
-
-    private void AwardPlaceScore(GameContext ctx, int bit, int points)
-    {
-        int mask = ctx.Get(_placeScoreMask);
-        if ((mask & (1 << bit)) != 0) return;
-        ctx.Set(_placeScoreMask, mask | (1 << bit));
-        ctx.State.Score += points;
-    }
-
-    private void CheckTreasuresComplete(GameContext ctx)
-    {
-        int mask = ctx.Get(_scoredMask);
-        int count = 0;
-        for (int i = 0; i < TreasureCount; i++)
-            if ((mask & (1 << i)) != 0) count++;
-
-        if (count >= TreasureCount && !ctx.Get(_allTreasuresInCase))
-        {
-            ctx.Set(_allTreasuresInCase, true);
-            ctx.Set(_wonFlag, true);
-            ctx.Say("{fg:gold}Your collection of treasures is complete! A map materializes in the " +
-                    "trophy case, hinting at a final secret.{/}");
-        }
-    }
 
     internal const int TreasureCount = 19;
 }

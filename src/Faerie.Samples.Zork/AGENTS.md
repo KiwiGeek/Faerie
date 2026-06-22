@@ -42,7 +42,7 @@ Simplified Infocom behaviors are tracked as [open **ZORK1:** issues](https://git
 | 8 | Mirrors | **done** — [#28](https://github.com/KiwiGeek/Faerie/issues/28) | [#8](https://github.com/KiwiGeek/Faerie/issues/8) |
 | 9 | Hades ritual | [#29](https://github.com/KiwiGeek/Faerie/issues/29) | [#11](https://github.com/KiwiGeek/Faerie/issues/11) |
 | 10 | Grating pass-through | **done** — [#30](https://github.com/KiwiGeek/Faerie/issues/30) | [#9](https://github.com/KiwiGeek/Faerie/issues/9) |
-| 12 | Scoring | [#32](https://github.com/KiwiGeek/Faerie/issues/32) | [#15](https://github.com/KiwiGeek/Faerie/issues/15) |
+| 12 | Scoring | **done** — [#32](https://github.com/KiwiGeek/Faerie/issues/32) | [#15](https://github.com/KiwiGeek/Faerie/issues/15) |
 | 13 | Death scatter | **done** — [#33](https://github.com/KiwiGeek/Faerie/issues/33) | [#16](https://github.com/KiwiGeek/Faerie/issues/16) |
 | 16 | Cyclops | [#35](https://github.com/KiwiGeek/Faerie/issues/35) | [#20](https://github.com/KiwiGeek/Faerie/issues/20) |
 | 17 | Bat | [#36](https://github.com/KiwiGeek/Faerie/issues/36) | (game code only) |

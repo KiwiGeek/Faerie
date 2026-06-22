@@ -37,6 +37,12 @@ public sealed class GameState
     /// <summary>The player's current score. Surfaced in the default title bar.</summary>
     public int Score { get; set; }
 
+    /// <summary>
+    /// Adds <paramref name="delta"/> to <see cref="Score"/>, clamping to <c>[0, maxScore]</c> when
+    /// <paramref name="maxScore"/> is positive.
+    /// </summary>
+    public int AdjustScore(int delta, int maxScore = 0) => Scoring.AdjustScore(this, delta, maxScore);
+
     /// <summary>True once the game has ended (win or lose).</summary>
     public bool IsOver { get; private set; }
 

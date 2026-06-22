@@ -141,40 +141,6 @@ internal sealed partial class ZorkWorld
         _b.On(KitchenWindow).Before(_b.Verbs.Close!, ctx => { ctx.Set(_windowOpen, false); return VerbResult.Pass; });
     }
 
-    // ENGINE-LIMIT: ZorkSimplifications.Scoring — one-time Put bits; no score loss on take from case or death penalty.
-    private void DefineTrophyScoring()
-    {
-        _b.Reactions.AfterAny(ctx =>
-        {
-            if (ctx.Verb != _b.Verbs.Put || ctx.IndirectObject != TrophyCase) return;
-            ScoreIfInCase(ctx, Painting, 0, 6);
-            ScoreIfInCase(ctx, JeweledEgg, 1, 5);
-            ScoreIfInCase(ctx, GoldenCanary, 2, 4);
-            ScoreIfInCase(ctx, BrassBauble, 3, 1);
-            ScoreIfInCase(ctx, BagOfCoins, 4, 5);
-            ScoreIfInCase(ctx, PlatinumBar, 5, 5);
-            ScoreIfInCase(ctx, TrunkOfJewels, 6, 5);
-            ScoreIfInCase(ctx, CrystalTrident, 7, 11);
-            ScoreIfInCase(ctx, IvoryTorch, 8, 6);
-            ScoreIfInCase(ctx, GoldCoffin, 9, 15);
-            ScoreIfInCase(ctx, Sceptre, 10, 6);
-            ScoreIfInCase(ctx, CrystalSkull, 11, 10);
-            ScoreIfInCase(ctx, LargeEmerald, 12, 10);
-            ScoreIfInCase(ctx, Scarab, 13, 5);
-            ScoreIfInCase(ctx, PotOfGold, 14, 10);
-            ScoreIfInCase(ctx, JadeFigurine, 15, 5);
-            ScoreIfInCase(ctx, SapphireBracelet, 16, 5);
-            ScoreIfInCase(ctx, HugeDiamond, 17, 10);
-            ScoreIfInCase(ctx, SilverChalice, 18, 5);
-        });
-    }
-
-    private void ScoreIfInCase(VerbContext ctx, Thing treasure, int bit, int points)
-    {
-        if (ctx.State.ContentsOf(TrophyCase).Contains(treasure))
-            AwardTreasure(ctx, bit, points, $"You have gained {points} points.");
-    }
-
     // Full melee combat: attacking a villain trades blows over several turns. Either side can miss,
     // wound, knock the other senseless, disarm, or kill. Your offense is the 'attack' verb; the
     // villain's offense (plus recovery and your slow healing) runs each turn in CombatRound. An
@@ -582,16 +548,6 @@ internal sealed partial class ZorkWorld
             ctx.Say("The rope is tied to the railing.");
             return VerbResult.Done;
         });
-    }
-
-    // ENGINE-LIMIT: ZorkSimplifications.Scoring — place bonuses only; task scores and death penalty omitted.
-    private void DefineExplorationScore()
-    {
-        Kitchen.OnFirstEnter = ctx => AwardPlaceScore(ctx, 0, 10);
-        Cellar.OnFirstEnter = ctx => { AwardPlaceScore(ctx, 1, 25); ctx.Say("You have entered the cellar. (+25)"); };
-        TreasureRoom.OnFirstEnter = ctx => AwardPlaceScore(ctx, 2, 25);
-        EwPassage.OnFirstEnter = ctx => AwardPlaceScore(ctx, 3, 5);
-        DraftyRoom.OnFirstEnter = ctx => AwardPlaceScore(ctx, 4, 13);
     }
 
     // ENGINE-LIMIT: ZorkSimplifications.MagicPassage — flags on first-enter; cyclops wall break not wired.
