@@ -23,6 +23,22 @@ public sealed class HeadlessRunnerTests
     }
 
     [Fact]
+    public void ScriptReader_ReadCommandsUntilCheckpoint_StopsAtMarker()
+    {
+        string script = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory, "..", "..", "..", "..", "..", "scripts", "zork1-winpath.txt"));
+        Assert.True(File.Exists(script));
+
+        string[] egg = ScriptReader.ReadCommandsUntilCheckpoint(script, "egg").ToArray();
+        Assert.Equal("put egg in case", egg[^1]);
+        Assert.True(egg.Length < ScriptReader.ReadCommands(script).Count());
+
+        string[] dam = ScriptReader.ReadCommandsUntilCheckpoint(script, "dam-drain").ToArray();
+        Assert.Equal("wait", dam[^1]);
+        Assert.Contains(dam, c => c.Equals("turn bolt", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
     public void Run_WritesTranscriptWithCommandsAndStrippedOutput()
     {
         string dir = Path.Combine(Path.GetTempPath(), "faerie-headless-" + Guid.NewGuid().ToString("N"));
