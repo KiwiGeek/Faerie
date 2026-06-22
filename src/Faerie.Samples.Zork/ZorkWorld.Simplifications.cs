@@ -43,7 +43,8 @@ internal static class ZorkSimplifications
     /// See ZorkWorld.Grating.cs.</summary>
     internal const string Grating = nameof(Grating);
 
-    /// <summary>AGENTS.md §12 — One-time trophy bits; no death penalty or case removal penalty.</summary>
+    /// <summary>AGENTS.md §12 — IMPLEMENTED: dynamic trophy-case scoring, touch bonuses, place/task awards.
+    /// See ZorkWorld.Scoring.cs.</summary>
     internal const string Scoring = nameof(Scoring);
 
     /// <summary>AGENTS.md §13 — IMPLEMENTED: revival with treasure scatter to dark rooms.

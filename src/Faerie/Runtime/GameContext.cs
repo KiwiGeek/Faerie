@@ -155,6 +155,9 @@ public class GameContext
     public T Get<T>(StateKey<T> key) => State.Get(key);
     public void Set<T>(StateKey<T> key, T value) => State.Set(key, value);
 
+    /// <summary>Adjusts score using <see cref="GameEngine.MaxScore"/> when set.</summary>
+    public int AdjustScore(int delta, string? message = null) => Scoring.Adjust(this, delta, message);
+
     /// <summary>Moves the player to a room, firing the room's enter hooks and describing it.</summary>
     public void MovePlayerTo(Room room) => Engine.MovePlayerTo(room);
 

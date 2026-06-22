@@ -38,7 +38,7 @@ internal sealed partial class ZorkWorld
         }
 
         ctx.Set(_deathCount, deaths + 1);
-        ctx.State.Score = Math.Max(0, ctx.State.Score - 10);
+        ctx.AdjustScore(-10);
 
         ctx.Say(@"
     ****  You have died  ****

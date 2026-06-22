@@ -610,6 +610,20 @@ ctx.Die("A grue eats you.");
 random rooms — treasures into one pool, everything else into another — with an optional per-item
 relocate hook (e.g. put the lantern back in the living room before scattering).
 
+### Scoring (`AdjustScore`, trophy case, one-time awards)
+
+```csharp
+ctx.AdjustScore(10, "You have entered the cellar. (+25)");
+
+Scoring.AwardOnce(ctx, taskMask, bit: 2, points: 25);
+
+Scoring.SyncTrophyCase(ctx, trophyCase, caseScoreKey, touchedMaskKey, entries);
+```
+
+`SyncTrophyCase` recomputes points from treasures currently in a container — score goes up on
+deposit and down on removal. `AwardOnce` handles place visits and task bonuses. Pair touch
+bonuses with `AwardTreasureTouch` on take.
+
 ### Win when the player reaches a place with the treasure
 
 ```csharp

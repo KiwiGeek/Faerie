@@ -315,7 +315,7 @@ internal sealed partial class ZorkWorld
         if (!ctx.Get(_damScoreAwarded))
         {
             ctx.Set(_damScoreAwarded, true);
-            ctx.State.Score += 4;
+            ctx.AdjustScore(4);
         }
 
         if (ctx.InRoom(Reservoir))
