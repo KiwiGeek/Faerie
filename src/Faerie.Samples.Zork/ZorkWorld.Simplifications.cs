@@ -46,7 +46,8 @@ internal static class ZorkSimplifications
     /// <summary>AGENTS.md §12 — One-time trophy bits; no death penalty or case removal penalty.</summary>
     internal const string Scoring = nameof(Scoring);
 
-    /// <summary>AGENTS.md §13 — No treasure scatter on death.</summary>
+    /// <summary>AGENTS.md §13 — IMPLEMENTED: revival with treasure scatter to dark rooms.
+    /// See ZorkWorld.Death.cs.</summary>
     internal const string Death = nameof(Death);
 
     /// <summary>AGENTS.md §14 — IMPLEMENTED: drop from Up a Tree breaks egg (`Thing.OnDrop`);

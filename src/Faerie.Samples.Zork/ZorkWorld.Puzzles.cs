@@ -289,7 +289,7 @@ internal sealed partial class ZorkWorld
         if (roll >= 94)
         {
             ctx.Set(_playerHp, 0);
-            ctx.Lose($"The {name}'s {weapon} finds its mark, and the world goes black. You have died.");
+            ctx.Die($"The {name}'s {weapon} finds its mark, and the world goes black. You have died.");
         }
         else if (roll >= 70)
         {
@@ -315,7 +315,7 @@ internal sealed partial class ZorkWorld
     {
         int left = ctx.Get(_playerHp) - amount;
         ctx.Set(_playerHp, left);
-        if (left <= 0) ctx.Lose("Your wounds are too grave. You sink to the ground, and your adventure ends here.");
+        if (left <= 0) ctx.Die("Your wounds are too grave. You sink to the ground, and your adventure ends here.");
         else ctx.Say(message);
     }
 
@@ -535,7 +535,7 @@ internal sealed partial class ZorkWorld
         BatRoom.OnEnter = ctx =>
         {
             if (ctx.Carrying(Garlic) || ctx.Wearing(Garlic)) return;
-            ctx.Lose("A bat swoops down and carries you off into the darkness.");
+            ctx.Die("A bat swoops down and carries you off into the darkness.");
         };
     }
 
@@ -636,7 +636,7 @@ internal sealed partial class ZorkWorld
             if (!InDarkWithoutLight(ctx)) { ctx.Set(_grueTurns, 0); return; }
             int turns = ctx.Get(_grueTurns) + 1;
             ctx.Set(_grueTurns, turns);
-            if (turns >= 3) ctx.Lose("It is pitch black. You are likely to be eaten by a grue.");
+            if (turns >= 3) ctx.Die("It is pitch black. You are likely to be eaten by a grue.");
         });
 
     }

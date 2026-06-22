@@ -32,9 +32,10 @@ public sealed class ZorkGasRoomTests
 
         engine.MovePlayerTo(gasRoom);
 
-        Assert.True(engine.State.IsOver);
+        Assert.False(engine.State.IsOver);
         Assert.Contains("coal gas", term.Output, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("BOOOOOOOOOOOM", term.Output);
+        Assert.Contains("deserve another chance", term.Output, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
@@ -64,8 +65,9 @@ public sealed class ZorkGasRoomTests
 
         engine.Submit("light candles");
 
-        Assert.True(engine.State.IsOver);
+        Assert.False(engine.State.IsOver);
         Assert.Contains("reeks of gas", term.Output, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("BOOOOOOOOOOOM", term.Output);
+        Assert.Contains("deserve another chance", term.Output, StringComparison.OrdinalIgnoreCase);
     }
 }

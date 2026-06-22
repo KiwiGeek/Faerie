@@ -49,6 +49,7 @@ public sealed class GameBuilder
 
     private readonly RoomLinkRegistry _roomLinks = new();
     private readonly List<MirrorPair> _mirrorPairs = [];
+    private readonly List<Action<DeathContext>> _onDeath = [];
 
     private GameBuilder(string title) => Title = title;
 
@@ -81,6 +82,13 @@ public sealed class GameBuilder
         MirrorPair pair = new(roomA, roomB) { BrokenKey = brokenKey };
         _mirrorPairs.Add(pair);
         return pair;
+    }
+
+    /// <summary>Registers a handler for <see cref="GameContext.Die"/>.</summary>
+    public GameBuilder OnDeath(Action<DeathContext> handler)
+    {
+        _onDeath.Add(handler);
+        return this;
     }
 
     /// <summary>Registers a manually constructed room and resolves any pending links to its id.</summary>
@@ -428,6 +436,7 @@ public sealed class GameBuilder
             Verbs = Library,
             Reactions = Reactions,
             MirrorPairs = _mirrorPairs,
+            OnDeath = _onDeath,
             Daemons = _daemons,
             Timers = _timers,
             OutputFilters = _outputFilters,

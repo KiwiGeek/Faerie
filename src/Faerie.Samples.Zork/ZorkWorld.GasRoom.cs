@@ -17,7 +17,7 @@ internal sealed partial class ZorkWorld
             "Fortunately, there is justice in the world.";
         const string boom = "\n      ** BOOOOOOOOOOOM **";
 
-        void Explode(GameContext ctx, string preamble) => ctx.Lose(preamble + boom);
+        void Explode(GameContext ctx, string preamble) => ctx.Die(preamble + boom);
 
         GasRoom.HazardOnEnter(Hazards.HasCarriedOpenFlame, ctx => Explode(ctx, enterMessage));
         _b.HazardEveryTurn(GasRoom, Hazards.HasCarriedOpenFlame, ctx => Explode(ctx, enterMessage));

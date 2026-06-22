@@ -69,6 +69,7 @@ public sealed class GameEngine
     }
 
     public GameState State { get; }
+    public GameContext Context => _context;
     public Game Game => _game;
     public OutputWriter Out { get; }
     public Parser Parser { get; }

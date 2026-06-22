@@ -52,6 +52,12 @@ public sealed class Game
     public IReadOnlyList<MirrorPair> MirrorPairs { get; init; } = [];
 
     /// <summary>
+    /// Invoked when <see cref="GameContext.Die"/> is called. Set
+    /// <see cref="DeathContext.Revived"/> to continue playing.
+    /// </summary>
+    public IReadOnlyList<Action<DeathContext>> OnDeath { get; init; } = [];
+
+    /// <summary>
     /// Output filters applied, in order, to every line of game text before it reaches the terminal.
     /// Each receives the context and the marked-up text and returns a rewritten string, or null to
     /// suppress it. Installed via <see cref="Building.GameBuilder.FilterOutput"/>. See

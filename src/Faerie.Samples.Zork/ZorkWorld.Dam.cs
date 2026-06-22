@@ -302,10 +302,10 @@ internal sealed partial class ZorkWorld
 
         ctx.Set(_maintenanceFlooded, true);
         if (ctx.InRoom(MaintenanceRoom))
-            ctx.Lose("I'm afraid you have done drowned yourself.");
+            ctx.Die("I'm afraid you have done drowned yourself.");
 
         if (ctx.Get(_boatInflated) && (ctx.InRoom(MaintenanceRoom) || ctx.InRoom(Dam) || ctx.InRoom(DamLobby)))
-            ctx.Lose("The rising water carries the boat over the dam, down the river, and over the falls. Tsk, tsk.");
+            ctx.Die("The rising water carries the boat over the dam, down the river, and over the falls. Tsk, tsk.");
     }
 
     private void DamDrainComplete(GameContext ctx)
@@ -333,7 +333,7 @@ internal sealed partial class ZorkWorld
 
         if (ctx.InRoom(Reservoir) && !ctx.Carrying(Boat) && !ctx.State.Inventory.Contains(Boat))
         {
-            ctx.Lose("You are lifted up by the rising river! You try to swim, but the currents are too strong. " +
+            ctx.Die("You are lifted up by the rising river! You try to swim, but the currents are too strong. " +
                     "You come closer, closer to the awesome structure of Flood Control Dam #3. The dam beckons to you. " +
                     "The roar of the water nearly deafens you, but you remain conscious as you tumble over the dam " +
                     "toward your certain doom among the rocks at its base.");

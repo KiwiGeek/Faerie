@@ -185,6 +185,25 @@ public class GameContext
     public void Win(string message) => EndGame(true, message);
     public void Lose(string message) => EndGame(false, message);
 
+    /// <summary>
+    /// Player death. Runs <see cref="Game.OnDeath"/> handlers; ends the game unless one sets
+    /// <see cref="DeathContext.Revived"/>.
+    /// </summary>
+    public void Die(string message)
+    {
+        if (State.IsOver) return;
+        Say(message);
+
+        DeathContext death = new(this);
+        foreach (Action<DeathContext> handler in Engine.Game.OnDeath)
+        {
+            handler(death);
+            if (death.Revived) return;
+        }
+
+        State.EndGame(false);
+    }
+
     /// <summary>Schedules a one-shot action to run after <paramref name="turns"/> player turns.</summary>
     public void ScheduleIn(int turns, Action<GameContext> action, Func<GameContext, bool>? when = null) =>
         Engine.ScheduleIn(null, turns, action, when);

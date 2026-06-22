@@ -588,6 +588,28 @@ ctx.Win("You step into the sunlight, free at last. You win!");
 ctx.Lose("The floor gives way and you tumble into darkness. You have died.");
 ```
 
+### Revivable death (`Die` + `OnDeath`)
+
+For games where the player can die and come back (Zork-style), call `ctx.Die(message)` instead of
+`ctx.Lose`. That prints the death message, runs every `OnDeath` handler, and ends the game only if
+no handler sets `death.Revived = true`:
+
+```csharp
+b.OnDeath(death =>
+{
+    death.Context.MovePlayerTo(checkpoint);
+    death.Context.State.Score = Math.Max(0, death.Context.State.Score - 10);
+    death.Revived = true;
+});
+
+// In a hazard handler:
+ctx.Die("A grue eats you.");
+```
+
+`Death.ScatterCarried(ctx, isTreasure, darkRooms, surfaceRooms, relocate?)` moves inventory to
+random rooms — treasures into one pool, everything else into another — with an optional per-item
+relocate hook (e.g. put the lantern back in the living room before scattering).
+
 ### Win when the player reaches a place with the treasure
 
 ```csharp
