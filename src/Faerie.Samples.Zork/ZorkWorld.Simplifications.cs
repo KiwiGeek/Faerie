@@ -27,7 +27,8 @@ internal static class ZorkSimplifications
     /// blue-button flood, red lights, loud-room integration. See ZorkWorld.Dam.cs.</summary>
     internal const string Dam = nameof(Dam);
 
-    /// <summary>AGENTS.md §7 — Gas-room explosion with open flame not implemented.</summary>
+    /// <summary>AGENTS.md §7 — IMPLEMENTED: open-flame hazard on enter, each turn, and lighting.
+    /// See ZorkWorld.GasRoom.cs.</summary>
     internal const string GasRoom = nameof(GasRoom);
 
     /// <summary>AGENTS.md §8 — Mirror rooms connected; no break/swap behavior.</summary>

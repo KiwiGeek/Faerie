@@ -544,8 +544,6 @@ internal sealed partial class ZorkWorld
         toBarrowIn.Condition = ctx => ctx.Get(_wonFlag);
 
         // Beach boat restrictions handled in puzzles
-
-        // ENGINE-LIMIT: ZorkSimplifications.GasRoom — gas explosion with open flame not implemented.
     }
 
     private void ConfigureTrollExits()

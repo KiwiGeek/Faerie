@@ -230,6 +230,20 @@ public sealed class GameBuilder
         return this;
     }
 
+    /// <summary>
+    /// Runs <paramref name="action"/> at the start of each turn while the player is in
+    /// <paramref name="room"/> and <paramref name="when"/> is true.
+    /// </summary>
+    public GameBuilder HazardEveryTurn(Room room, Func<GameContext, bool> when, Action<GameContext> action)
+    {
+        EveryTurn(ctx =>
+        {
+            if (!ctx.InRoom(room) || !when(ctx)) return;
+            action(ctx);
+        });
+        return this;
+    }
+
     /// <summary>Registers an action that fires once, the first time the turn count reaches <paramref name="turn"/>.</summary>
     public GameBuilder AtTurn(int turn, Action<GameContext> action)
     {

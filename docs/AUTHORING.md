@@ -759,6 +759,26 @@ When `PassageDestination` is set, the opening is also in scope from the destinat
 can `UNLOCK GRATE` from below even though the object lives upstairs). Use `Before`/`After` handlers on
 the grate for side-specific rules (which side can lock it, custom open messages, etc.).
 
+### Area hazards (`HazardOnEnter`, `HazardEveryTurn`, `OpenFlame`)
+
+Mark open flames separately from battery lanterns with `OpenFlame()` (sets `Attr.Flame`).
+Use `Hazards.HasCarriedOpenFlame(ctx)` or `Hazards.HasOpenFlame(ctx)` to detect them:
+
+```csharp
+Room gas = b.Room("Gas Room").Dark();
+const string boom = "\n      ** BOOOOOOOOOOOM **";
+
+gas.HazardOnEnter(Hazards.HasCarriedOpenFlame, ctx =>
+    ctx.Lose("Oh dear..." + boom));
+
+b.HazardEveryTurn(gas, Hazards.HasCarriedOpenFlame, ctx =>
+    ctx.Lose("Oh dear..." + boom));
+```
+
+`HazardOnEnter` chains with existing `OnEnter` handlers. `HazardEveryTurn` registers an
+`EveryTurn` daemon scoped to one room. Block lighting a flame in the room with a global
+`BeforeAny` reaction on the switch-on verb when `thing.Has(Attr.Flame)`.
+
 ---
 
 ## 10. The window: title bar, status bar, native title, icon

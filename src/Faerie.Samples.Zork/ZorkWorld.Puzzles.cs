@@ -72,6 +72,7 @@ internal sealed partial class ZorkWorld
         DefineEggAndCanary();
         DefineRainbowAndPot();
         DefineHades();
+        DefineGasRoom();
         DefineBatAndGarlic();
         DefineSandAndScarab();
         DefineSkeleton();

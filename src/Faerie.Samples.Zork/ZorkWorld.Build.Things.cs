@@ -157,7 +157,7 @@ internal sealed partial class ZorkWorld
             .Describe("A brass bell."));
 
         PairOfCandles = Reg("candles", _b.Item("pair of candles").Called("candles").Adjectives("pair")
-            .Describe("A pair of candles.").LightSource(lit: false));
+            .Describe("A pair of candles.").OpenFlame(lit: false));
 
         Matchbook = Reg("matchbook", _b.Item("matchbook").Called("matches", "match").Adjectives("small")
             .Describe("A matchbook with a few matches remaining."));
