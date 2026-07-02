@@ -25,11 +25,14 @@
 
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.14" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.14" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.14" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Faerie\Faerie.csproj" />
     <ProjectReference Include="..\Faerie.Terminal\Faerie.Terminal.csproj" />
+    <ProjectReference Include="..\Faerie.Terminal.Headless\Faerie.Terminal.Headless.csproj" />
   </ItemGroup>
 
 </Project>
