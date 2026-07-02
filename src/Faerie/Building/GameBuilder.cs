@@ -66,12 +66,15 @@ public sealed class GameBuilder
 
     // ---- world authoring ------------------------------------------------------------------
 
-    /// <summary>Creates and registers a room.</summary>
+    /// <summary>Creates and registers a room with an auto-generated id from <paramref name="name"/>.</summary>
     public Room Room(string name)
     {
         Room room = new(NextId("room", name), name);
         return Register(room);
     }
+
+    /// <summary>Creates and registers a room with an explicit stable <paramref name="id"/>.</summary>
+    public Room Room(string id, string name) => Register(new Room(id, name));
 
     /// <summary>Forward reference to a room identified by <paramref name="id"/> (must match <see cref="Element.Id"/>).</summary>
     public RoomRef RoomRef(string id) => _roomLinks.Ref(id);

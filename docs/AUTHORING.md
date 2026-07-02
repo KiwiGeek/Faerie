@@ -57,10 +57,34 @@ Your game project needs references to two engine projects (add them to your `.cs
 </ItemGroup>
 ```
 
-The easiest thing is to **copy the three files** from `Faerie.Samples.HauntedHouse`
-(`Program.cs`, `App.cs`, and the `.csproj`) into your own project and just replace
-`HauntedHouseGame.Build()` with your own `MyGame.Build()`. `Program.cs` and `App.cs` are pure
-boilerplate that opens the window and starts the engine — you will almost never touch them.
+The easiest thing is to **copy `Program.cs` and the `.csproj`** from `Faerie.Samples.HauntedHouse`.
+The sample now uses `AvaloniaLauncher`, so `Program.cs` alone handles desktop + optional headless mode:
+
+```csharp
+[STAThread]
+public static int Main(string[] args) =>
+    AvaloniaLauncher.For(MyGame.Build)
+        .WithHeadlessFromArgs()
+        .WithDefaultAppDataSaveCatalog()
+        .Run(args);
+```
+
+If you prefer to control when headless runs, provide your own predicate:
+
+```csharp
+AvaloniaLauncher.For(MyGame.Build)
+    .WithHeadlessRunnerWhen(
+        shouldRunHeadless: a => a.Contains("--headless"),
+        optionsFactory: _ => new HeadlessOptions
+        {
+            ScriptPath = "tests\\smoke.txt",
+            TranscriptPath = "tests\\smoke.out.txt"
+        })
+    .Run(args);
+```
+
+If you want deterministic randomness, create the engine yourself with a seed and pass that engine to
+`AvaloniaDisplay.For(engine)`.
 
 The only file you actually write is your game definition. Everything below goes in one method:
 
