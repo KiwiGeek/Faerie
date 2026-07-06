@@ -54,8 +54,9 @@ Live query: `gh issue list --repo KiwiGeek/Faerie --label hhouse --state open`
 | [#113](https://github.com/KiwiGeek/Faerie/issues/113) | Puzzle exits rewired imperatively instead of declared via `Exit.Condition` | engine-usage refactor |
 | [#114](https://github.com/KiwiGeek/Faerie/issues/114) | Darkness/light logic duplicated and drifted (misses Dark Alcove) | engine-usage refactor + latent bug |
 | [#115](https://github.com/KiwiGeek/Faerie/issues/115) | `WithCarryLimit` never set — encumbrance hint non-functional | engine-usage refactor |
+| [#122](https://github.com/KiwiGeek/Faerie/issues/122) | Puzzle verb logic centralized in if-chains instead of per-thing reactions | engine-usage refactor (broader companion to #112/#113) |
 
-None of #112–#115 require engine changes — in each case the engine already ships the needed feature
+None of #112–#115 or #122 require engine changes — in each case the engine already ships the needed feature
 (see the closed engine issues cross-referenced from each one, e.g. #4 for carry limits, #9/#31 for the
 declarative-exit pattern). These are sample-only fixes: adopt the existing API, don't add a new one.
 
