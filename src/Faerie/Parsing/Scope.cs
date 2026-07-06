@@ -43,6 +43,11 @@ public sealed class Scope(GameState state, GameContext? context = null)
         foreach (Thing t in _state.Inventory) yield return t;
         foreach (Thing t in _state.Worn) yield return t;
 
+        // Global keywords (magic words, conversation topics, etc.) are always in scope, regardless
+        // of room, light, or placement - they have no physical location to check.
+        foreach (Thing t in _state.World.Things)
+            if (t.Has(Attr.Keyword)) yield return t;
+
         if (!IsCurrentRoomLit)
         {
             Room room = _state.CurrentRoom;

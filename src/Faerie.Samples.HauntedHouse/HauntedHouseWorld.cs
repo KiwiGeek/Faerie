@@ -19,7 +19,7 @@ internal sealed partial class HauntedHouseWorld
         DustyRoom = null!, RearTurret = null!, Clearing = null!, Footpath = null!,
         SideOfHouse = null!, BackOfHallway = null!, DarkAlcove = null!, SmallDarkRoom = null!,
         SpiralStaircaseBottom = null!, WidePassage = null!, SlipperySteps = null!, CliffTop = null!,
-        CrumblingWall = null!, GloomyPassage = null!, ShortCorridor = null!, ImpressiveHallway = null!,
+        CrumblingWall = null!, GloomyPassage = null!, PoolOfLight = null!, ImpressiveHallway = null!,
         LockedDoorHall = null!, TrophyRoom = null!, BarredCellar = null!, CliffPath1 = null!,
         CoatCupboard = null!, FrontHall = null!, SittingRoom = null!, SecretRoom = null!,
         MarbleStairs = null!, DiningRoom = null!, DeepCellar = null!, CliffPath2 = null!,
@@ -32,11 +32,11 @@ internal sealed partial class HauntedHouseWorld
 
     // ---- Things: first-class fields, assigned in DefineThings ----
     internal Thing Painting = null!, Ring = null!, MagicSpells = null!, Goblet = null!, OldScroll = null!,
-        OldCoins = null!, SmallStatue = null!, Glove = null!, Matches = null!, VacuumCleaner = null!,
+        OldCoins = null!, SmallStatue = null!, Candlestick = null!, Matches = null!, VacuumCleaner = null!,
         Batteries = null!, Shovel = null!, Axe = null!, Rope = null!, SmallBoat = null!, AerosolSpray = null!,
         Candle = null!, Key = null!;
-    internal Thing FrontDoor = null!, Vampires = null!, Ghosts = null!, Drawer = null!, Desk = null!,
-        Coat = null!, Rubbish = null!, Coffin = null!, Books = null!, Jellybabies = null!, WeakWall = null!,
+    internal Thing FrontDoor = null!, Bats = null!, Ghosts = null!, Drawer = null!, Desk = null!,
+        Coat = null!, Rubbish = null!, Coffin = null!, Books = null!, Xzanfar = null!, WeakWall = null!,
         GrimyCooker = null!;
 
     internal HauntedHouseWorld(GameBuilder house) => _house = house;

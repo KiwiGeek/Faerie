@@ -289,6 +289,12 @@ public static class ThingFluent
     public static Thing Plural(this Thing thing) { thing.Set(Attr.Plural); return thing; }
     public static Thing Concealed(this Thing thing, bool value = true) { thing.Set(Attr.Concealed, value); return thing; }
 
+    /// <summary>
+    /// Excludes this thing from the automatic room-contents listing / creature announcement while
+    /// keeping it fully resolvable by name. See <see cref="Attr.Unlisted"/>.
+    /// </summary>
+    public static Thing Unlisted(this Thing thing, bool value = true) { thing.Set(Attr.Unlisted, value); return thing; }
+
     public static Thing Container(this Thing thing, bool open = false)
     {
         thing.Set(Attr.Container);

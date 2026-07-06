@@ -22,6 +22,14 @@ internal static class HauntedHousePresentation
         }
 
         ctx.Out.PrintLine($"{{bold}}{{fg:white}}{room.Name}{{/}}{{/}}");
+
+        if (ctx.Moment is not RoomDescribeMoment.ReEnter)
+        {
+            string flavor = room.ResolveDescription(ctx.Context);
+            if (!string.IsNullOrEmpty(flavor))
+                ctx.Out.PrintLine($"{{fg:gray}}{flavor}{{/}}");
+        }
+
         DescribeContents(ctx);
         DescribeExits(ctx.Out, room);
     }
@@ -29,14 +37,14 @@ internal static class HauntedHousePresentation
     private static void DescribeContents(RoomDescribeContext ctx)
     {
         List<Thing> here = ctx.State.ContentsOf(ctx.Room)
-            .Where(t => !t.Has(Attr.Concealed) && !t.Has(Attr.Scenery) && !t.Has(Attr.Animate))
+            .Where(t => !t.Has(Attr.Concealed) && !t.Has(Attr.Unlisted) && !t.Has(Attr.Scenery) && !t.Has(Attr.Animate))
             .ToList();
 
         foreach (Thing thing in here)
             ctx.Out.PrintLine($"You can see {VerbText.A(thing)} here.");
 
         foreach (Thing creature in ctx.State.ContentsOf(ctx.Room)
-            .Where(t => !t.Has(Attr.Concealed) && t.Has(Attr.Animate)))
+            .Where(t => !t.Has(Attr.Concealed) && !t.Has(Attr.Unlisted) && t.Has(Attr.Animate)))
             ctx.Out.PrintLine($"You can see {VerbText.A(creature)} here.");
     }
 

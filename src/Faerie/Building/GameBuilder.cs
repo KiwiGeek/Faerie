@@ -132,6 +132,19 @@ public sealed class GameBuilder
     /// <summary>Creates a bare thing with no attributes set.</summary>
     public Thing Thing(string name) => CreateThing(name);
 
+    /// <summary>
+    /// Creates a "global keyword" - a nameable Thing that is always in scope everywhere (any room,
+    /// lit or dark), without ever being placed in a room or carried. Useful for magic words,
+    /// conversation topics, or other vocabulary the parser must resolve but which isn't a physical
+    /// object. Not takeable, and never appears in room or inventory listings.
+    /// </summary>
+    public Thing Keyword(string name)
+    {
+        Thing thing = CreateThing(name);
+        thing.Set(Attr.Keyword);
+        return thing;
+    }
+
     private Thing CreateThing(string name)
     {
         Thing thing = new(NextId("thing", name), name);

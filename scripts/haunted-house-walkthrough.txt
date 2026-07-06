@@ -1,0 +1,175 @@
+# Haunted House (Usborne "Write Your Own Adventure Programs") full walkthrough.
+# Transcribed from Dorothy Millard's C64-version walkthrough (solutionarchive.com, file id 9320),
+# converted 1:1 into Faerie commands. Used as a fidelity oracle against the original game:
+# every command below is exactly what the walkthrough says to type, in the original wording
+# (including object names the original used, e.g. "candle stick", "bats", "xzanfar") so that any
+# mismatch against this sample's current vocabulary/logic shows up as a script failure rather
+# than being silently "fixed" by rewording the walkthrough to match the port.
+#
+# Expected original outcome: "DOUBLE SCORE FOR REACHING HERE! / 32" (16 objects - every treasure
+# except the rope, which is never picked up in this route, and the small boat, which must be left
+# behind at the marsh - doubled) then "Well done! You have finished the game" after the final
+# SCORE at the iron gate.
+
+# --- Start on a path (iron gate), east to the crumbling wall debris for the aerosol ---
+e
+e
+e
+get aerosol
+w
+w
+# NOTE: the community walkthrough as published only lists two "w" here, but the original
+# game's route table requires three (retracing all three easts fully back to the iron gate)
+# before turning north into the porch/lobby - confirmed by simulating the entire walkthrough
+# against the authoritative room graph derived from jbanes/haunted's C reimplementation of the
+# BASIC listing. Two "w" strands the player one room short of the gate. Corrected here for
+# fidelity to the actual game rather than the transcription.
+w
+n
+n
+# (into the house - the door slams shut behind you)
+w
+n
+# (cupboard with hanging coat)
+examine coat
+get key
+s
+e
+n
+n
+# (gloomy passage)
+get vacuum
+n
+n
+e
+# (kitchen)
+get matches
+e
+n
+e
+get shovel
+w
+w
+get axe
+e
+s
+w
+w
+s
+s
+s
+e
+s
+# (library)
+get candle stick
+read books
+e
+# (study)
+examine desk
+open drawer
+get candle
+examine wall
+swing axe
+n
+# (secret room)
+get magic spells
+read magic spells
+
+s
+w
+n
+n
+# (pool of light)
+get batteries
+light candle
+n
+# (dark alcove)
+get coins
+e
+e
+# (bottom of spiral staircase)
+u
+e
+# (rear turret room)
+get scroll
+spray bats
+get scroll
+read scroll
+w
+s
+d
+w
+s
+e
+e
+# (hall by a thick wooden door)
+get statue
+unlock door
+s
+# (down the marble stairs, into the cobwebbed room - typed as "d" since the marble stairs
+# room itself uses Up/Down only rather than the original's redundant compass wording)
+d
+s
+w
+use vacuum
+w
+w
+# (front tower)
+get goblet
+e
+e
+n
+e
+e
+# (spooky room)
+get painting
+w
+w
+say xzanfar
+w
+# (cobwebby room)
+n
+# (up the marble stairs, back to the hall by the thick wooden door - typed as "u" for the
+# same reason as above)
+u
+e
+# (trophy room)
+
+n
+e
+# (slippery steps)
+d
+s
+# (deep cellar with a coffin)
+open coffin
+get ring
+n
+# (to where the barred window is)
+dig
+e
+# (cliff path)
+unlight candle
+n
+n
+n
+# (to where the blasted tree is)
+climb rope
+climb rope
+s
+s
+s
+score
+s
+s
+get boat
+s
+w
+s
+leave boat
+w
+w
+w
+w
+w
+# (front gate)
+score

@@ -91,5 +91,23 @@ public enum Attr : long
     /// An open flame (candles, match, torch). Unlike <see cref="LightSource"/> alone, this is
     /// hazardous in gas-filled rooms. Battery lanterns are light sources but not flames.
     /// </summary>
-    Flame = 1L << 25
+    Flame = 1L << 25,
+
+    /// <summary>
+    /// Excluded from the automatic room-contents listing ("You can see X here") and from the
+    /// initial creature announcement ("The bats are here"), but still fully resolvable as a noun
+    /// and reachable in <see cref="Faerie.Parsing.Scope.VisibleThings"/>. Use this for things the
+    /// original game never announces up front - lurking creatures, unremarkable fixtures mentioned
+    /// only in room flavor text, etc. - as opposed to <see cref="Concealed"/>, which also blocks
+    /// the player from referring to the thing by name at all until revealed.
+    /// </summary>
+    Unlisted = 1L << 26,
+
+    /// <summary>
+    /// Marks a "global keyword" Thing (e.g. a magic word, a topic of conversation) that is always
+    /// in scope everywhere - regardless of room, light, or placement - without needing to be
+    /// carried or placed in a room at all. Created via <see cref="Faerie.Building.GameBuilder.Keyword"/>.
+    /// Never appears in room or inventory listings since it has no physical location.
+    /// </summary>
+    Keyword = 1L << 27
 }

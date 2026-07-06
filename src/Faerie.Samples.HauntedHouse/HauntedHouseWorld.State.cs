@@ -14,7 +14,7 @@ internal sealed partial class HauntedHouseWorld
     internal StateKey<bool> CoatUnsearched = null!;
     internal StateKey<bool> LobbyDoorOpen = null!;
     internal StateKey<bool> FrontDoorLocked = null!;
-    internal StateKey<bool> VampiresPresent = null!;
+    internal StateKey<bool> BatsPresent = null!;
     internal StateKey<bool> GhostsBlocking = null!;
     internal StateKey<bool> VacuumOn = null!;
     internal StateKey<bool> TreeClimbReady = null!;
@@ -32,7 +32,7 @@ internal sealed partial class HauntedHouseWorld
         CoatUnsearched = _house.State("coat-unsearched", true);
         LobbyDoorOpen = _house.State("lobby-door-open", true);
         FrontDoorLocked = _house.State("front-door-locked", true);
-        VampiresPresent = _house.State("vampires-present", true);
+        BatsPresent = _house.State("bats-present", true);
         GhostsBlocking = _house.State("ghosts-blocking", false);
         VacuumOn = _house.State("vacuum-on", false);
         TreeClimbReady = _house.State("tree-climb-ready", false);
@@ -48,7 +48,7 @@ internal sealed partial class HauntedHouseWorld
 
     internal IEnumerable<Thing> Treasures =>
     [
-        Painting, Ring, MagicSpells, Goblet, OldScroll, OldCoins, SmallStatue, Glove,
+        Painting, Ring, MagicSpells, Goblet, OldScroll, OldCoins, SmallStatue, Candlestick,
         Matches, VacuumCleaner, Batteries, Shovel, Axe, Rope, SmallBoat, AerosolSpray, Candle, Key
     ];
 

@@ -12,20 +12,20 @@ internal sealed partial class HauntedHouseWorld
 
     private static readonly string[] HintLines =
     [
-        "You will need a light in dark places. A candle, matches and a glove may help.",
-        "Deal with the vampires using the aerosol spray.",
+        "You will need a light in dark places. A candle, matches and a candlestick may help.",
+        "Deal with the bats using the aerosol spray.",
         "The vacuum cleaner needs batteries, then USE it when ghosts are about.",
         "Dig in the cellar with the barred window using the shovel.",
         "Swing the axe at the weak wall in the study.",
         "Unlock the front door with the key from the coat pocket.",
-        "Read the magic spells, then SAY JELLYBABIES in the ice-cold chamber.",
+        "Read the magic spells, then SAY XZANFAR in the ice-cold chamber.",
         "Leave objects with LEAVE when you have collected too many to carry.",
     ];
 
     private static readonly string[] UsborneVerbList =
     [
         "HELP", "CARRYING", "GO", "N", "S", "W", "E", "U", "D", "GET", "TAKE", "OPEN", "EXAMINE", "READ", "SAY",
-        "DIG", "SWING", "CLIMB", "LIGHT", "OFF", "SPRAY", "USE", "UNLOCK", "LEAVE", "SCORE", "SAVE", "LOAD", "QUIT", "HINT"
+        "DIG", "SWING", "CLIMB", "LIGHT", "UNLIGHT", "SPRAY", "USE", "UNLOCK", "LEAVE", "SCORE", "SAVE", "LOAD", "QUIT", "HINT"
     ];
 
     private void DefineVerbs()
@@ -41,7 +41,7 @@ internal sealed partial class HauntedHouseWorld
         _house.DefineVerb("swing", ["swing"], VerbForms.Transitive, SwingHandler);
         _house.DefineVerb("climb", ["climb"], VerbForms.Transitive | VerbForms.Intransitive, ClimbHandler);
         _house.DefineVerb("light", ["light"], VerbForms.Transitive, LightHandler);
-        _house.DefineVerb("off", ["off"], VerbForms.Intransitive, SnuffHandler);
+        _house.DefineVerb("off", ["off", "unlight"], VerbForms.Intransitive | VerbForms.Transitive, SnuffHandler);
         _house.DefineVerb("spray", ["spray"], VerbForms.Transitive, SprayHandler);
         _house.DefineVerb(Use, ["use"], VerbForms.Transitive, UseHandler);
         _house.DefineVerb(Unlock, ["unlock"], VerbForms.Transitive, UnlockHandler);
@@ -116,6 +116,7 @@ internal sealed partial class HauntedHouseWorld
         if (ctx.CurrentRoom == Study && (thing == Drawer || thing == Desk))
         {
             ctx.Set(DrawerClosed, false);
+            Candle.Concealed(false);
             ctx.Say("The drawer is now open");
             return VerbResult.Done;
         }
@@ -129,6 +130,7 @@ internal sealed partial class HauntedHouseWorld
         if (ctx.CurrentRoom == DeepCellar && thing == Coffin)
         {
             ctx.Set(CoffinClosed, false);
+            Ring.Concealed(false);
             ctx.Say("It is now open");
             return VerbResult.Done;
         }
@@ -150,6 +152,7 @@ internal sealed partial class HauntedHouseWorld
         if (thing == Coat && ctx.Get(CoatUnsearched))
         {
             ctx.Set(CoatUnsearched, false);
+            Key.Concealed(false);
             ctx.Say("Something falls out of the pocket.");
             return VerbResult.Done;
         }
@@ -198,9 +201,9 @@ internal sealed partial class HauntedHouseWorld
             return VerbResult.Done;
         }
 
-        if ((thing == MagicSpells || thing == Jellybabies) && ctx.Carrying(MagicSpells) && !ctx.Get(SpellsBarrierDown))
+        if ((thing == MagicSpells || thing == Xzanfar) && ctx.Carrying(MagicSpells) && !ctx.Get(SpellsBarrierDown))
         {
-            ctx.Say("It says:'Use this word with care _ JELLYBABIES'");
+            ctx.Say("It says:'Use this word with care _ XZANFAR'");
             return VerbResult.Done;
         }
 
@@ -218,7 +221,7 @@ internal sealed partial class HauntedHouseWorld
         string word = ctx.DirectObjectText ?? ctx.DirectObject?.Name ?? "";
         ctx.Say($"Ready '{word}'");
 
-        if (!ctx.Carrying(MagicSpells) || ctx.DirectObject != Jellybabies)
+        if (!ctx.Carrying(MagicSpells) || ctx.DirectObject != Xzanfar)
             return VerbResult.Done;
 
         if (ctx.CurrentRoom != IceColdChamber)
@@ -255,7 +258,7 @@ internal sealed partial class HauntedHouseWorld
         if (ctx.DirectObject is null)
             return Fail(ctx);
 
-        if (ctx.CurrentRoom == ThickForest && !ctx.Carrying(Rope))
+        if (ctx.CurrentRoom == BlastedTree && !ctx.Carrying(Rope))
         {
             ctx.Say("This is no time to play games!");
             return VerbResult.Done;
@@ -274,7 +277,7 @@ internal sealed partial class HauntedHouseWorld
             {
                 ctx.Set(WeakWallIntact, false);
                 Study.Name = "In a study with a secret room connected";
-                Study.SetExit(Direction.West, SecretRoom);
+                Study.SetExit(Direction.North, SecretRoom);
                 ctx.Say("You have broken the thin wall");
             }
             return VerbResult.Done;
@@ -291,7 +294,7 @@ internal sealed partial class HauntedHouseWorld
             return VerbResult.Done;
         }
 
-        if (ctx.CurrentRoom != ThickForest)
+        if (ctx.CurrentRoom != BlastedTree)
             return Fail(ctx);
 
         if (!ctx.Get(TreeClimbReady))
@@ -312,7 +315,7 @@ internal sealed partial class HauntedHouseWorld
         if (ctx.DirectObject != Candle || !ctx.Carrying(Candle))
             return Fail(ctx);
 
-        if (!ctx.Carrying(Glove))
+        if (!ctx.Carrying(Candlestick))
         {
             ctx.Say("It will burn your hands!");
             return VerbResult.Done;
@@ -344,11 +347,11 @@ internal sealed partial class HauntedHouseWorld
 
     private VerbResult SprayHandler(VerbContext ctx)
     {
-        if (ctx.DirectObject != Vampires || !ctx.Carrying(AerosolSpray))
+        if (ctx.DirectObject != Bats || !ctx.Carrying(AerosolSpray))
             return Fail(ctx);
 
         ctx.Say("Pfffft! Got them!");
-        ctx.Set(VampiresPresent, false);
+        ctx.Set(BatsPresent, false);
         return VerbResult.Done;
     }
 
@@ -356,15 +359,18 @@ internal sealed partial class HauntedHouseWorld
     {
         if (ctx.DirectObject == VacuumCleaner && ctx.Carrying(VacuumCleaner) && ctx.Carrying(Batteries))
         {
+            bool wasOn = ctx.Get(VacuumOn);
             ctx.Set(VacuumOn, true);
-            ctx.Say("It is switched on");
-            return VerbResult.Done;
-        }
 
-        if (ctx.Get(GhostsBlocking) && ctx.Get(VacuumOn))
-        {
-            ctx.Set(GhostsBlocking, false);
-            ctx.Say("Whizzzz! You have vacuumed the ghosts up!");
+            if (ctx.Get(GhostsBlocking))
+            {
+                ctx.Set(GhostsBlocking, false);
+                ctx.Say("Whizzzz! You have vacuumed the ghosts up!");
+                return VerbResult.Done;
+            }
+
+            if (!wasOn)
+                ctx.Say("It is switched on");
             return VerbResult.Done;
         }
 
@@ -384,7 +390,7 @@ internal sealed partial class HauntedHouseWorld
         {
             ctx.Set(FrontDoorLocked, false);
             LockedDoorHall.Name = "By a huge open door";
-            LockedDoorHall.East(HouseCorner, reciprocal: false);
+            LockedDoorHall.South(MarbleStairs, reciprocal: false);
             ctx.Say("The key turns!");
             return VerbResult.Done;
         }
@@ -406,16 +412,26 @@ internal sealed partial class HauntedHouseWorld
     {
         int score = CarriedTreasureCount(ctx);
 
-        if (score == 17 && !ctx.Carrying(SmallBoat) && ctx.CurrentRoom != IronGate)
+        // The walkthrough reaches "you have everything" with 16 objects carried (every treasure
+        // except the rope - which is used in place at the blasted tree and never picked up - and
+        // the small boat, which must be left behind at the marsh). jbanes/haunted's C reimplementation
+        // uses a literal constant of 17 here, but that never actually triggers given the rope is
+        // not obtainable in normal play; 16 is the value validated against the full walkthrough.
+        const int allTreasuresExceptBoat = 16;
+
+        if (score == allTreasuresExceptBoat && !ctx.Carrying(SmallBoat) && ctx.CurrentRoom != IronGate)
         {
             ctx.Say("You have everything");
             ctx.Say("Return to the gate for your final score:");
             return VerbResult.Done;
         }
 
-        if (score == 17 && ctx.CurrentRoom == IronGate)
+        if (score == allTreasuresExceptBoat && ctx.CurrentRoom == IronGate && !ctx.Carrying(SmallBoat))
         {
-            ctx.Win($"DOUBLE SCORE FOR REACHING HERE!\n{score * 2}");
+            int doubled = score * 2;
+            ctx.Say("DOUBLE SCORE FOR REACHING HERE!");
+            ctx.Say($"Your score is {doubled}");
+            ctx.Win("Well done! You have finished the game");
             return VerbResult.Done;
         }
 

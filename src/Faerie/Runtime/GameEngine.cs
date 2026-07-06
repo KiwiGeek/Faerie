@@ -475,11 +475,11 @@ public sealed class GameEngine
     private void DescribeContents(Room room)
     {
         List<Thing> loose = State.ContentsOf(room)
-            .Where(t => !t.Has(Attr.Concealed) && !t.Has(Attr.Scenery) && !t.Has(Attr.Animate))
+            .Where(t => !t.Has(Attr.Concealed) && !t.Has(Attr.Unlisted) && !t.Has(Attr.Scenery) && !t.Has(Attr.Animate))
             .ToList();
 
         List<Thing> creatures = State.ContentsOf(room)
-            .Where(t => !t.Has(Attr.Concealed) && t.Has(Attr.Animate))
+            .Where(t => !t.Has(Attr.Concealed) && !t.Has(Attr.Unlisted) && t.Has(Attr.Animate))
             .ToList();
 
         List<Thing> plain = [];

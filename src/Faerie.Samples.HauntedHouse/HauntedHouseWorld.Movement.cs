@@ -33,6 +33,15 @@ internal sealed partial class HauntedHouseWorld
 
     private VerbResult MovementBefore(VerbContext ctx)
     {
+        // Bats attack on any action taken in the rear turret except spraying them (1/3 chance
+        // of being left alone each turn), matching the original's flag/verb check exactly.
+        if (ctx.Get(BatsPresent) && ctx.CurrentRoom == RearTurret &&
+            ctx.Verb.Id != "spray" && ctx.Random.Next(3) != 2)
+        {
+            ctx.Say("{fg:red}{bold}BATS ATTACKING!{/}{/}");
+            return VerbResult.Done;
+        }
+
         if (ctx.Verb.Id != Go) return VerbResult.Pass;
 
         if (ctx.Direction is not null)
@@ -55,13 +64,6 @@ internal sealed partial class HauntedHouseWorld
     {
         if (ctx.Direction is null) return VerbResult.Pass;
 
-        if (ctx.Get(TreeClimbing) && ctx.CurrentRoom == ThickForest)
-        {
-            ctx.Say("crash! You fell out of the tree!");
-            ctx.Set(TreeClimbing, false);
-            return VerbResult.Done;
-        }
-
         if (ctx.Get(GhostsBlocking) && ctx.CurrentRoom == UpperGallery)
         {
             ctx.Say("Ghosts will not let you move!");
@@ -74,10 +76,10 @@ internal sealed partial class HauntedHouseWorld
             return VerbResult.Done;
         }
 
-        if (ctx.CurrentRoom == DarkAlcove && !HasLight(ctx) &&
-            (ctx.Direction == Direction.North || ctx.Direction == Direction.West))
+        if (ctx.CurrentRoom == PoolOfLight && !HasLight(ctx) &&
+            (ctx.Direction == Direction.North || ctx.Direction == Direction.East))
         {
-            ctx.Say("It is too dark to move and you need a light. Have you found the glove and candle?");
+            ctx.Say("It is too dark to move and you need a light. Have you found the candlestick and candle?");
             return VerbResult.Done;
         }
 
@@ -96,12 +98,6 @@ internal sealed partial class HauntedHouseWorld
         if (IsDarkHall(ctx.CurrentRoom) && !HasLight(ctx))
         {
             ctx.Say("It is too dark to move");
-            return VerbResult.Done;
-        }
-
-        if (ctx.Get(VampiresPresent) && ctx.CurrentRoom == RearTurret && ctx.Random.Next(3) != 2)
-        {
-            ctx.Say("{fg:red}{bold}VAMPIRES ATTACKING!{/}{/}");
             return VerbResult.Done;
         }
 
