@@ -76,4 +76,33 @@ Advanced hooks:
 - `WithDefaultAppDataSaveCatalog(...)` to derive save-folder and base-name defaults from the game title.
 - `WithPromptMarkup(...)` to override the fallback prompt.
 - `ApplyGameWindowChrome(false)` / `ApplyGameTerminalStyle(false)` to opt out of game metadata defaults.
+- `WithTuiWindowChrome(false)` to keep the native OS title bar instead of the in-TUI window chrome.
 - `ConfigureEngine(...)` / `WithSaveCatalog(...)` for custom engine wiring before host build.
+
+## Borderless, fully-TUI window chrome
+
+By default the window is borderless (`SystemDecorations="None"`): the whole window is the character
+grid, and the window controls are drawn *inside* the TUI on row 0 (the title row). Placement follows
+the host OS — a red/yellow/green traffic-light cluster at the top-left on macOS, and
+minimize/maximize/close at the top-right on Windows and Linux.
+
+- **Move**: drag the title row (anywhere except the buttons). Double-click the title row to
+  maximize/restore.
+- **Resize**: drag any edge or corner (the outer few pixels); the cursor changes to a resize arrow.
+- **Controls**: click the drawn buttons to minimize, maximize/restore, or close.
+- **Cell-snapped sizing**: in the normal (non-maximized) state the window snaps to a whole number of
+  character cells, so there is never a black border between the window edge and the text. Zooming
+  (`Ctrl`+`+`/`-`/`0`, or `Ctrl`+mouse wheel) keeps the window as close to its current size as possible
+  and reflows the grid to the new font size, snapping back to the nearest whole cell. A centered border
+  appears only when maximized or fullscreen (`F11`), to preserve font fidelity.
+- **Title bar**: the controls sit on the title row and never overlap the game's title text (the engine
+  composes the bar clear of the reserved button columns). If a game defines no title bar of its own,
+  the window title is drawn there by default so the row still reads as a title bar.
+- **Glyphs**: the buttons use `●` traffic-light dots (macOS) and `_`/`□`/`×` (Windows/Linux), each with
+  an ASCII fallback (`O`/`#`/`x`) for retro fonts that lack the Unicode form.
+
+Preview the other platform's styling without changing OS by setting the `FAERIE_WINDOW_CHROME`
+environment variable to `macos`, `windows`, or `linux` before launching.
+
+Opt out with `.WithTuiWindowChrome(false)` on the display builder, or `TerminalWindow.UseTuiWindowChrome
+= false`, to restore the native OS title bar and borders.

@@ -40,6 +40,7 @@ public sealed class AvaloniaDisplayBuilder
     private string _promptMarkup = "{fg:lightgreen}>{/} ";
     private bool _applyGameWindowChrome = true;
     private bool _applyGameTerminalStyle = true;
+    private bool _useTuiWindowChrome = true;
 
     private AvaloniaDisplayBuilder(GameEngine engine, TerminalBuffer buffer)
     {
@@ -89,6 +90,17 @@ public sealed class AvaloniaDisplayBuilder
     public AvaloniaDisplayBuilder ApplyGameTerminalStyle(bool enabled = true)
     {
         _applyGameTerminalStyle = enabled;
+        return this;
+    }
+
+    /// <summary>
+    /// Enables the borderless, fully-TUI window chrome (default). When enabled, the native OS title
+    /// bar and borders are removed and the window controls (close/minimize/maximize) are drawn inside
+    /// the TUI on row 0 with platform-appropriate placement. Disable to keep native window chrome.
+    /// </summary>
+    public AvaloniaDisplayBuilder WithTuiWindowChrome(bool enabled = true)
+    {
+        _useTuiWindowChrome = enabled;
         return this;
     }
 
@@ -165,6 +177,7 @@ public sealed class AvaloniaDisplayBuilder
         _engineConfig?.Invoke(_engine);
 
         TerminalWindow window = _window ?? new TerminalWindow();
+        window.UseTuiWindowChrome = _useTuiWindowChrome;
         TerminalControl terminal = window.Terminal;
 
         if (_applyGameWindowChrome)

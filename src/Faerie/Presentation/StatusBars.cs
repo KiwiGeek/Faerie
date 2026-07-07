@@ -26,22 +26,29 @@ public sealed class BarContent
 /// <summary>Lays bar content out into a fixed-width row of <see cref="GlyphCell"/>.</summary>
 public static class BarComposer
 {
-    public static GlyphCell[] Compose(BarContent content, int width)
+    public static GlyphCell[] Compose(BarContent content, int width, int leftInset = 0, int rightInset = 0)
     {
         GlyphCell[] row = new GlyphCell[width];
         for (int i = 0; i < width; i++) row[i] = new GlyphCell(' ', content.Style);
+
+        // The usable region excludes any columns reserved for host window chrome (issue #116).
+        leftInset = Math.Clamp(leftInset, 0, width);
+        rightInset = Math.Clamp(rightInset, 0, width - leftInset);
+        int regionStart = leftInset;
+        int regionEnd = width - rightInset;                 // exclusive
+        int regionWidth = Math.Max(0, regionEnd - regionStart);
 
         IReadOnlyList<StyledSpan> left = Markup.Parse(content.Left, content.Style);
         IReadOnlyList<StyledSpan> center = Markup.Parse(content.Center, content.Style);
         IReadOnlyList<StyledSpan> right = Markup.Parse(content.Right, content.Style);
 
-        Place(row, left, 0, width);
+        Place(row, left, regionStart, regionEnd);
 
         int centerLen = Length(center);
-        Place(row, center, Math.Max(0, (width - centerLen) / 2), width);
+        Place(row, center, regionStart + Math.Max(0, (regionWidth - centerLen) / 2), regionEnd);
 
         int rightLen = Length(right);
-        Place(row, right, Math.Max(0, width - rightLen), width);
+        Place(row, right, Math.Max(regionStart, regionEnd - rightLen), regionEnd);
 
         return row;
     }
@@ -53,14 +60,14 @@ public static class BarComposer
         return n;
     }
 
-    private static void Place(GlyphCell[] row, IReadOnlyList<StyledSpan> spans, int start, int width)
+    private static void Place(GlyphCell[] row, IReadOnlyList<StyledSpan> spans, int start, int endExclusive)
     {
         int col = start;
         foreach (StyledSpan span in spans)
         {
             foreach (char c in span.Text)
             {
-                if (col < 0 || col >= width) { col++; continue; }
+                if (col < 0 || col >= endExclusive) { col++; continue; }
                 row[col] = new GlyphCell(c, span.Style);
                 col++;
             }

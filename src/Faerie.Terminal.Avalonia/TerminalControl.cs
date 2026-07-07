@@ -35,6 +35,13 @@ public sealed class TerminalControl : Control
     }
 
     private static readonly Cursor HiddenCursor = new(StandardCursorType.None);
+    private static readonly Cursor ResizeCursorNS = new(StandardCursorType.SizeNorthSouth);
+    private static readonly Cursor ResizeCursorWE = new(StandardCursorType.SizeWestEast);
+    private static readonly Cursor ResizeCursorNwSe = new(StandardCursorType.TopLeftCorner);
+    private static readonly Cursor ResizeCursorNeSw = new(StandardCursorType.TopRightCorner);
+
+    /// <summary>How many device-independent pixels along each window edge grab a resize.</summary>
+    private const double ResizeBorderThickness = 6.0;
 
     public TerminalControl()
     {
@@ -92,6 +99,7 @@ public sealed class TerminalControl : Control
 
     private double _gridOffsetX, _gridOffsetY;   // last render's centring offset (for pointer hit-testing)
     private int _pointerCol = -1, _pointerRow = -1;
+    private WindowControlKind? _hoveredControl;  // window control the pointer is over (chrome row), if any
     private int _windowTop;                      // first visible wrapped-row index (set during Render)
 
     // Text selection, stored in wrapped-row coordinates so it survives scrolling/resizing.
@@ -110,6 +118,9 @@ public sealed class TerminalControl : Control
         {
             _fontSpec = value;
             (_typeface, _boldTypeface) = TerminalFont.Resolve(value);
+            _glyphAvailability.Clear();
+            _glyphTypeface = null;
+            _glyphTypefaceResolved = false;
             MeasureCell();
             ApplyGrid(Bounds.Size);
             InvalidateVisual();
@@ -119,12 +130,47 @@ public sealed class TerminalControl : Control
     /// <summary>The caret shape, chosen by the game.</summary>
     public TerminalCursor CursorStyle { get; set; } = TerminalCursor.Block;
 
+    private bool _showWindowControls;
+
+    /// <summary>
+    /// When true, row 0 is treated as a window-chrome row: the close/minimize/maximize controls are
+    /// drawn as character cells and can be clicked, and the rest of the row acts as a drag-to-move
+    /// region. The chrome row is guaranteed to exist (the title bar is forced on) so the controls
+    /// always have a home, even for games that do not define their own title bar.
+    /// </summary>
+    public bool ShowWindowControls
+    {
+        get => _showWindowControls;
+        set
+        {
+            if (_showWindowControls == value) return;
+            _showWindowControls = value;
+            EnforceChromeRow();
+            InvalidateVisual();
+        }
+    }
+
+    /// <summary>The platform whose convention drives window-control placement/styling.</summary>
+    public HostPlatform WindowControlPlatform { get; set; } = HostPlatformDetector.Current;
+
+    /// <summary>
+    /// Fallback title text drawn on the chrome row when window controls are shown but the game defined
+    /// no title bar of its own. Typically the host window's title.
+    /// </summary>
+    public string? WindowTitle { get; set; }
+
     /// <summary>The current font size in device-independent pixels.</summary>
     public double FontSize
     {
         get => _fontSize;
         set => SetFontSize(value);
     }
+
+    /// <summary>Width of one character cell in device-independent pixels (0 until first measured).</summary>
+    public double CellPixelWidth => _cellWidth;
+
+    /// <summary>Height of one character cell in device-independent pixels (0 until first measured).</summary>
+    public double CellPixelHeight => _cellHeight;
 
     private TerminalBuffer? _buffer;
     public TerminalBuffer? Buffer
@@ -151,6 +197,22 @@ public sealed class TerminalControl : Control
     /// <summary>Raised when the control is shutting down (e.g. the host window is closing).</summary>
     public event Action? ShuttingDown;
 
+    /// <summary>Raised when a window control (close/minimize/maximize) on the chrome row is clicked.</summary>
+    public event Action<WindowControlKind>? WindowControlInvoked;
+
+    /// <summary>Raised when the pointer presses the chrome row's drag region (to move the window).</summary>
+    public event Action<PointerPressedEventArgs>? WindowMoveRequested;
+
+    /// <summary>Raised when the pointer presses a resize border/corner (to resize the window).</summary>
+    public event Action<(WindowEdge Edge, PointerPressedEventArgs Args)>? WindowResizeRequested;
+
+    /// <summary>
+    /// Raised after the cell size changes (zoom / font change), so the host window can re-snap its size
+    /// to the nearest whole number of cells — keeping the window as close to its current size as
+    /// possible while removing any partial-cell border.
+    /// </summary>
+    public event Action? CellMetricsChanged;
+
     /// <summary>True after <see cref="Shutdown"/> has been called.</summary>
     public bool IsShuttingDown => _isShuttingDown;
 
@@ -176,9 +238,39 @@ public sealed class TerminalControl : Control
 
     // ---- layout / sizing ------------------------------------------------------------------
 
+    /// <summary>
+    /// Guarantees a chrome row when window controls are shown: the buffer's title bar is forced on so
+    /// row 0 is reserved for the controls. The engine re-applies <c>ConfigureBars</c> from the game
+    /// definition at start, so this is re-asserted on every layout pass (it is a no-op once the title
+    /// bar is already enabled).
+    /// </summary>
+    private void EnforceChromeRow()
+    {
+        if (_buffer is null) return;
+
+        if (!_showWindowControls)
+        {
+            _buffer.TitleBarInsetLeft = 0;
+            _buffer.TitleBarInsetRight = 0;
+            return;
+        }
+
+        // Guarantee the chrome row exists so the controls always have a home.
+        if (!_buffer.TitleEnabled)
+            _buffer.ConfigureBars(titleBar: true, statusBar: _buffer.StatusEnabled);
+
+        // Reserve columns on the cluster's side so the game's title content is composed clear of the
+        // buttons (the engine reads these insets when it composes the title bar).
+        int reserve = WindowControlLayout.EdgeMargin + WindowControlLayout.ClusterWidth(WindowControlPlatform) + 1;
+        bool left = WindowControlLayout.IsLeftAligned(WindowControlPlatform);
+        _buffer.TitleBarInsetLeft = left ? reserve : 0;
+        _buffer.TitleBarInsetRight = left ? 0 : reserve;
+    }
+
     private void ApplyGrid(Size size)
     {
         if (_buffer is null || _cellWidth <= 0 || _cellHeight <= 0) return;
+        EnforceChromeRow();
         if (size.Width < _cellWidth * 4 || size.Height < _cellHeight * 2) return;
 
         int cols = Math.Max(1, (int)(size.Width / _cellWidth));
@@ -210,9 +302,14 @@ public sealed class TerminalControl : Control
     {
         double clamped = Math.Clamp(size, MinFontSize, MaxFontSize);
         if (Math.Abs(clamped - _fontSize) < 0.01) return;
+
+        // Zoom keeps the window roughly where it is: change the cell size, reflow the grid to the
+        // current window, then ask the host to re-snap to the nearest whole cell (a sub-cell nudge to
+        // remove the partial-cell border the new font size introduced).
         _fontSize = clamped;
         MeasureCell();
         ApplyGrid(Bounds.Size);
+        CellMetricsChanged?.Invoke();
         InvalidateVisual();
     }
 
@@ -597,6 +694,8 @@ public sealed class TerminalControl : Control
         base.OnPointerMoved(e);
         Point p = e.GetPosition(this);
         UpdatePointerCell(p);
+        UpdateHoveredControl();
+        UpdateCursor(p);
 
         if (_selecting && HitTestText(p, out int row, out int col)
             && (row != _selEndRow || col != _selEndCol))
@@ -622,6 +721,12 @@ public sealed class TerminalControl : Control
 
         if (!props.IsLeftButtonPressed) return;
         Focus();
+
+        // Borderless window chrome: a press on a control, resize border, or the drag region is
+        // consumed here before text selection can begin.
+        if (_showWindowControls && TryHandleChromePress(e))
+            return;
+
         if (!HitTestText(e.GetPosition(this), out int row, out int col)) return;
 
         switch (e.ClickCount)
@@ -661,11 +766,104 @@ public sealed class TerminalControl : Control
     protected override void OnPointerExited(PointerEventArgs e)
     {
         base.OnPointerExited(e);
-        if (_pointerCol != -1 || _pointerRow != -1)
+        if (_pointerCol != -1 || _pointerRow != -1 || _hoveredControl is not null)
         {
             _pointerCol = _pointerRow = -1;
+            _hoveredControl = null;
             InvalidateVisual();
         }
+    }
+
+    private void UpdateHoveredControl()
+    {
+        WindowControlKind? hover = null;
+        if (_showWindowControls && _pointerRow == 0 && _buffer is not null
+            && WindowControlLayout.TryHitTest(WindowControlPlatform, _buffer.Columns, _pointerCol, out WindowControlKind kind))
+        {
+            hover = kind;
+        }
+
+        if (hover != _hoveredControl)
+        {
+            _hoveredControl = hover;
+            InvalidateVisual();
+        }
+    }
+
+    // ---- borderless window chrome interaction (issue #116) --------------------------------
+
+    /// <summary>
+    /// Handles a left press when window controls are shown. Priority: a control button (so the top
+    /// resize edge never swallows a click on the buttons), then a resize border/corner, then the
+    /// remaining chrome-row drag region. Returns true (and marks the event handled) when consumed.
+    /// </summary>
+    private bool TryHandleChromePress(PointerPressedEventArgs e)
+    {
+        Point pos = e.GetPosition(this);
+
+        if (IsChromeRow(pos) && _buffer is not null
+            && WindowControlLayout.TryHitTest(WindowControlPlatform, _buffer.Columns, ScreenColumn(pos), out WindowControlKind kind))
+        {
+            WindowControlInvoked?.Invoke(kind);
+            e.Handled = true;
+            return true;
+        }
+
+        if (TryHitResizeEdge(pos, out WindowEdge edge))
+        {
+            WindowResizeRequested?.Invoke((edge, e));
+            e.Handled = true;
+            return true;
+        }
+
+        if (IsChromeRow(pos))
+        {
+            // Double-click the title region toggles maximize (standard desktop behavior); a single
+            // press starts a drag-to-move.
+            if (e.ClickCount >= 2)
+                WindowControlInvoked?.Invoke(WindowControlKind.Maximize);
+            else
+                WindowMoveRequested?.Invoke(e);
+            e.Handled = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>True when <paramref name="p"/> falls on screen row 0 (the chrome/title row).</summary>
+    private bool IsChromeRow(Point p) =>
+        _buffer is { TitleEnabled: true } && _cellHeight > 0
+        && p.Y >= _gridOffsetY && p.Y < _gridOffsetY + _cellHeight;
+
+    private int ScreenColumn(Point p) =>
+        _cellWidth > 0 ? (int)Math.Floor((p.X - _gridOffsetX) / _cellWidth) : -1;
+
+    /// <summary>Classifies a point near the window border into a resize edge/corner.</summary>
+    private bool TryHitResizeEdge(Point p, out WindowEdge edge)
+    {
+        WindowEdge? hit = WindowResizeHitTest.Classify(p.X, p.Y, Bounds.Width, Bounds.Height, ResizeBorderThickness);
+        edge = hit ?? default;
+        return hit is not null;
+    }
+
+    private static Cursor ResizeCursorFor(WindowEdge edge) => edge switch
+    {
+        WindowEdge.North or WindowEdge.South => ResizeCursorNS,
+        WindowEdge.East or WindowEdge.West => ResizeCursorWE,
+        WindowEdge.NorthWest or WindowEdge.SouthEast => ResizeCursorNwSe,
+        _ => ResizeCursorNeSw,
+    };
+
+    /// <summary>Shows a resize cursor over the borders; otherwise keeps the hidden cursor (we draw our own).</summary>
+    private void UpdateCursor(Point p)
+    {
+        Cursor desired = _showWindowControls && TryHitResizeEdge(p, out WindowEdge edge)
+            ? ResizeCursorFor(edge)
+            : HiddenCursor;
+
+        if (!ReferenceEquals(Cursor, desired))
+            Cursor = desired;
     }
 
     private void UpdatePointerCell(Point p)
@@ -1091,7 +1289,18 @@ public sealed class TerminalControl : Control
     {
         TerminalBuffer buf = _buffer!;
         if (buf.TitleEnabled && screenRow == 0)
-            return TitleOrStatus(buf.TitleCell, buf.DefaultStyle);
+        {
+            if (!_showWindowControls)
+                return TitleOrStatus(buf.TitleCell, buf.DefaultStyle);
+
+            // With controls shown: use the game's title bar if it set one, otherwise a default
+            // title-bar-styled row so the chrome looks like a proper bar rather than an empty strip.
+            TextStyle fill = buf.HasTitleContent ? buf.DefaultStyle : DefaultChromeBarStyle;
+            GlyphCell[] title = buf.HasTitleContent
+                ? TitleOrStatus(buf.TitleCell, fill)
+                : FilledRow(fill);
+            return OverlayWindowControls(title, fill);
+        }
         if (buf.StatusEnabled && screenRow == buf.Rows - 1)
             return TitleOrStatus(buf.StatusCell, new TextStyle(TerminalColor.Black, TerminalColor.LightGray));
 
@@ -1106,6 +1315,127 @@ public sealed class TerminalControl : Control
         for (int c = 0; c < row.Length; c++)
             row[c] = source(c) ?? new GlyphCell(' ', fill);
         return row;
+    }
+
+    // ---- in-TUI window controls (issue #116) ----------------------------------------------
+
+    /// <summary>Title-bar style used for the default chrome row when the game defines no title bar.</summary>
+    private static readonly TextStyle DefaultChromeBarStyle = new(TerminalColor.Black, TerminalColor.LightGray);
+
+    private GlyphCell[] FilledRow(TextStyle style)
+    {
+        GlyphCell[] row = new GlyphCell[_buffer!.Columns];
+        GlyphCell blank = new(' ', style);
+        for (int i = 0; i < row.Length; i++) row[i] = blank;
+        return row;
+    }
+
+    // Preferred glyphs, each with an ASCII fallback for sparse retro fonts that lack the Unicode form
+    // (e.g. the Apple II fonts have no ●/□). The fallback is chosen per-font via FontHasGlyph.
+    private const char MacDotGlyph = '●';       private const char MacDotFallback = 'O';
+    private const char MinimizeGlyph = '_';     // underscore: present in every bundled font, reads as minimize
+    private const char MaximizeGlyph = '□';     private const char MaximizeFallback = '#';
+    private const char CloseGlyph = '×';        private const char CloseFallback = 'x';
+
+    private readonly Dictionary<char, bool> _glyphAvailability = [];
+    private IGlyphTypeface? _glyphTypeface;
+    private bool _glyphTypefaceResolved;
+
+    /// <summary>True if the current typeface can render <paramref name="c"/> (cached per glyph).</summary>
+    private bool FontHasGlyph(char c)
+    {
+        if (_glyphAvailability.TryGetValue(c, out bool ok)) return ok;
+
+        if (!_glyphTypefaceResolved)
+        {
+            _glyphTypefaceResolved = true;
+            FontManager.Current.TryGetGlyphTypeface(_typeface, out _glyphTypeface);
+        }
+
+        try { ok = _glyphTypeface is not null && _glyphTypeface.TryGetGlyph(c, out ushort g) && g != 0; }
+        catch { ok = false; }
+
+        _glyphAvailability[c] = ok;
+        return ok;
+    }
+
+    private char GlyphOr(char preferred, char fallback) => FontHasGlyph(preferred) ? preferred : fallback;
+
+    /// <summary>
+    /// Draws the window controls over the chrome (title) row, replacing the title text in the button
+    /// columns so the two never overlap. Called only when <see cref="ShowWindowControls"/> is true.
+    /// </summary>
+    private GlyphCell[] OverlayWindowControls(GlyphCell[] titleRow, TextStyle barStyle)
+    {
+        // When the game defines no title bar, draw a default one (the window title) so the chrome row
+        // still looks like a proper title bar rather than an empty strip with buttons.
+        if (_buffer is { HasTitleContent: false } && !string.IsNullOrWhiteSpace(WindowTitle))
+            DrawDefaultTitle(titleRow, barStyle);
+
+        foreach (WindowControlCell control in WindowControlLayout.Compute(WindowControlPlatform, titleRow.Length))
+        {
+            if (control.Column < 0 || control.Column >= titleRow.Length) continue;
+            bool hovered = _hoveredControl == control.Kind;
+            // Base each button on the bar style at that column so it blends with the title bar background.
+            titleRow[control.Column] = ControlGlyph(control.Kind, titleRow[control.Column].Style, hovered);
+        }
+
+        return titleRow;
+    }
+
+    /// <summary>Centers <see cref="WindowTitle"/> in the chrome row, clear of the reserved control columns.</summary>
+    private void DrawDefaultTitle(GlyphCell[] row, TextStyle barStyle)
+    {
+        int regionStart = Math.Clamp(_buffer!.TitleBarInsetLeft, 0, row.Length);
+        int regionEnd = Math.Clamp(row.Length - _buffer.TitleBarInsetRight, regionStart, row.Length);
+        int regionWidth = regionEnd - regionStart;
+        if (regionWidth <= 0) return;
+
+        string title = WindowTitle!;
+        if (title.Length > regionWidth) title = title[..regionWidth];
+
+        int start = regionStart + Math.Max(0, (regionWidth - title.Length) / 2);
+        for (int i = 0; i < title.Length; i++)
+        {
+            int col = start + i;
+            if (col >= regionStart && col < regionEnd)
+                row[col] = new GlyphCell(title[i], barStyle);
+        }
+    }
+
+    private GlyphCell ControlGlyph(WindowControlKind kind, TextStyle barStyle, bool hovered)
+    {
+        bool mac = WindowControlPlatform == HostPlatform.MacOS;
+        char glyph = mac
+            ? GlyphOr(MacDotGlyph, MacDotFallback)
+            : kind switch
+            {
+                WindowControlKind.Minimize => MinimizeGlyph,
+                WindowControlKind.Maximize => GlyphOr(MaximizeGlyph, MaximizeFallback),
+                _ => GlyphOr(CloseGlyph, CloseFallback),
+            };
+
+        TerminalColor fg = mac
+            ? kind switch
+            {
+                WindowControlKind.Close => TerminalColor.LightRed,
+                WindowControlKind.Minimize => TerminalColor.Yellow,
+                _ => TerminalColor.LightGreen,
+            }
+            : barStyle.Foreground;
+
+        TextStyle style = new(fg, barStyle.Background);
+
+        if (hovered)
+        {
+            // Hover affordance: Close turns into a red highlight; everything else brightens on a
+            // dark backing so the target cell is obvious.
+            style = kind == WindowControlKind.Close && !mac
+                ? new TextStyle(TerminalColor.White, TerminalColor.LightRed)
+                : new TextStyle(TerminalColor.White, TerminalColor.DarkGray);
+        }
+
+        return new GlyphCell(glyph, style);
     }
 
     private void RenderRow(DrawingContext context, int screenRow, IReadOnlyList<GlyphCell[]> wrapped, int total, int windowTop, GlyphCell[] blankRow)
