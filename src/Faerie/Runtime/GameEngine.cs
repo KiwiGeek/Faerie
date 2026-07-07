@@ -734,7 +734,8 @@ public sealed class GameEngine
         if (!Terminal.SupportsBars) return;
 
         if (_game.TitleBar is { } title)
-            Terminal.SetTitleBar(BarComposer.Compose(title(_context), Terminal.Columns));
+            Terminal.SetTitleBar(BarComposer.Compose(
+                title(_context), Terminal.Columns, Terminal.TitleBarInsetLeft, Terminal.TitleBarInsetRight));
 
         if (_game.StatusBar is { } status)
             Terminal.SetStatusBar(BarComposer.Compose(status(_context), Terminal.Columns));

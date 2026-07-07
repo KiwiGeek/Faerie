@@ -123,6 +123,32 @@ public sealed class ExitFluentTests
     }
 
     [Fact]
+    public void Room_ExplicitId_RegistersWithGivenId()
+    {
+        GameBuilder b = GameBuilder.Create("Ids");
+        Room hall = b.Room("hall", "Entrance Hall");
+        b.StartIn(hall);
+
+        Assert.Equal("hall", hall.Id);
+        Assert.Equal("Entrance Hall", hall.Name);
+        Assert.Same(hall, b.World.FindRoom("hall"));
+    }
+
+    [Fact]
+    public void Thing_StartsIn_PlacesAtGameStart()
+    {
+        GameBuilder b = GameBuilder.Create("Place").AddCoreVerbs();
+        Room kitchen = b.Room("Kitchen");
+        Thing key = b.Item("key").StartsIn(kitchen);
+        b.StartIn(kitchen);
+
+        GameEngine engine = new(b.Build(), new InMemoryTerminal(), randomSeed: 1);
+        engine.Start();
+
+        Assert.Same(kitchen, engine.State.PlacementOf(key).Room);
+    }
+
+    [Fact]
     public void RoomRef_ResolvesWhenDestinationRegistered()
     {
         GameBuilder b = GameBuilder.Create("Ref").AddMovement();

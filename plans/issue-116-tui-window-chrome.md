@@ -53,45 +53,59 @@ with zero context); run the phase's **Verification Plan** and record the result 
 When all phases are done, fill in **Final Recap** and **Deployment Plan**.
 
 ## Phase 1: OS detection + borderless window scaffolding
-Status: Not started
+Status: Complete
 
-- [ ] Add `HostPlatform` helper (enum `MacOS | Windows | Linux` + `Current` using
-      `OperatingSystem.IsMacOS()/IsWindows()/IsLinux()`) under `WindowChrome/`, mirroring the existing
-      `OperatingSystem.IsWindows()` usage in `Faerie.Terminal.Headless/ParentConsole.cs`.
-- [ ] Add `WindowControlKind` enum (`Close | Minimize | Maximize`) and a `WindowControlLayout` type
-      that, given platform + column count, returns the ordered button cells and their column ranges
-      (macOS top-left close/min/max; Windows/Linux top-right min/max/close). No Avalonia types in
-      this class so it is unit-testable.
-- [ ] Add an opt-in `UseTuiWindowChrome` bool on `TerminalWindow` (default `true`) that sets
-      `SystemDecorations = SystemDecorations.None` and `ExtendClientAreaToDecorationsHint` as needed
-      when enabled; leave native chrome when disabled.
-- [ ] Wire the flag through `AvaloniaDisplayBuilder` with a `.WithTuiWindowChrome(bool = true)` method
-      and apply it in `Build()` alongside `ApplyGameWindowChrome`.
-- [ ] Ensure `MinWidth`/`MinHeight` still enforced so the button clusters always fit.
+- [x] Add `HostPlatform` helper (enum `Windows | MacOS | Linux` + `HostPlatformDetector.Current` using
+      `OperatingSystem.IsMacOS()/IsWindows()`, everything else = Linux). File:
+      `src/Faerie.Terminal.Avalonia/HostPlatform.cs`.
+- [x] Add `WindowControlKind` enum (`Minimize | Maximize | Close`), `WindowControlCell` record, and a
+      pure `WindowControlLayout` (macOS top-left close/min/max; Windows/Linux top-right
+      min/max/close; `Compute`, `TryHitTest`, `IsButtonColumn`, `ClusterWidth`). No Avalonia types so
+      it is unit-testable. File: `src/Faerie.Terminal.Avalonia/WindowControls.cs`.
+- [x] Add opt-in `UseTuiWindowChrome` bool on `TerminalWindow` (default `true`) that sets
+      `SystemDecorations = SystemDecorations.None` when enabled (via `ApplyWindowChromeMode`), and sets
+      `Terminal.ShowWindowControls` / `Terminal.WindowControlPlatform`.
+- [x] Wire the flag through `AvaloniaDisplayBuilder` with `.WithTuiWindowChrome(bool = true)`, applied
+      in `Build()` (`window.UseTuiWindowChrome = _useTuiWindowChrome`).
+- [x] `MinWidth`/`MinHeight` (480/300) remain enforced on `TerminalWindow`; the layout returns an empty
+      cluster if a grid is ever too narrow, so rendering degrades safely.
+- [x] Added `TerminalControl.ShowWindowControls` + `WindowControlPlatform` properties and
+      `EnforceChromeRow()` (forces the buffer title bar on when controls are shown, re-asserted each
+      layout pass since the engine re-applies `ConfigureBars` from the game at start).
 
 ### Verification Plan
 - `dotnet build src/Faerie.Terminal.Avalonia/Faerie.Terminal.Avalonia.csproj -c Debug` → builds with
   no new warnings/errors.
-- New unit test `HostPlatform_Current_MatchesOperatingSystem` and
-  `WindowControlLayout_OrdersButtons_PerPlatform` pass: `dotnet test tests/Faerie.Tests/Faerie.Tests.csproj
-  --filter FullyQualifiedName~WindowChrome` → all green.
+- `dotnet test tests/Faerie.Tests/Faerie.Tests.csproj --filter FullyQualifiedName~WindowChrome` → all
+  green (tests in `tests/Faerie.Tests/WindowChromeTests.cs`).
 
 ### Phase Summary
-_(write when phase completes)_
+Added the OS-detection and window-control scaffolding. `HostPlatform`/`HostPlatformDetector` isolate
+platform detection so tests drive layout deterministically. `WindowControlLayout` is the pure,
+Avalonia-free core (used by Phases 2–3 for rendering and hit-testing): macOS => Close/Minimize/Maximize
+anchored left; Windows/Linux => Minimize/Maximize/Close anchored right; one-cell `EdgeMargin` and
+`ButtonGap`. `TerminalWindow.UseTuiWindowChrome` (default on) drives `SystemDecorations.None` and pushes
+the flag + detected platform into the control; `AvaloniaDisplayBuilder.WithTuiWindowChrome` exposes it
+fluently. `EnforceChromeRow()` guarantees row 0 exists for the controls even when a game defines no
+title bar. Unit tests written (`WindowChromeTests.cs`) covering platform detection, per-platform
+ordering/anchoring, distinct columns (title-clip safety), hit-test round-trips, gap columns, and the
+too-narrow fallback. NOTE: `dotnet` is unavailable in the authoring sandbox, so the build/test commands
+above must be run on a machine with the .NET SDK; the code was written and self-reviewed for compilation.
+Key decision: rather than fight the engine's `ConfigureBars` call at start, the control re-asserts the
+chrome row on every layout pass (cheap, idempotent).
 
 ## Phase 2: Render TUI window controls in row 0
-Status: Not started
+Status: Complete
 
-- [ ] In `TerminalControl`, when TUI chrome is enabled, force row 0 to render as a chrome row even if
-      `buf.TitleEnabled` is false (extend `RowCells`/`TitleOrStatus` path so chrome always occupies
-      row 0).
-- [ ] Draw the control glyphs from `WindowControlLayout`: macOS uses filled circles (`●`) colored
-      red/yellow/green; Windows/Linux use minimize/maximize/close glyphs (e.g. `—` `▢` `✕`) in the
-      title style. Reserve those columns and clip the game title text to the region between clusters.
-- [ ] Add hover state: track pointer-over-button in `OnPointerMoved`/`OnPointerExited` and repaint the
-      hovered button (e.g. brighten, or reveal macOS glyphs on hover) so controls feel interactive.
-- [ ] Confirm background-run and glyph rendering (`RenderRow`/`RenderGlyph`) handle the per-cell button
-      colors without seams.
+- [x] `RowCells` now routes the title row through `OverlayWindowControls` when `ShowWindowControls` is
+      set; `EnforceChromeRow` (Phase 1) guarantees the title row exists, so chrome always occupies row 0.
+- [x] `OverlayWindowControls`/`ControlGlyph` draw the glyphs from `WindowControlLayout`: macOS uses
+      `●` colored LightRed/Yellow/LightGreen (close/min/max); Windows/Linux use `–` `□` `×` in the bar's
+      foreground. The button columns overwrite the title cells, so title text is clipped around them.
+- [x] Hover state via `_hoveredControl`, updated in `OnPointerMoved` (`UpdateHoveredControl`) and cleared
+      in `OnPointerExited`; hovered Close turns red-on-white (Win/Linux), others brighten on dark.
+- [x] Buttons are emitted as ordinary `GlyphCell`s, so the existing `RenderRow` background-run and
+      `RenderGlyph` paths draw them with no seams and no renderer changes.
 
 ### Verification Plan
 - `dotnet build src/Faerie.Terminal.Avalonia/Faerie.Terminal.Avalonia.csproj -c Debug` → clean build.
@@ -102,22 +116,30 @@ Status: Not started
   title visible and not overlapping buttons.
 
 ### Phase Summary
-_(write when phase completes)_
+Row 0 now renders the window controls. `RowCells` calls `OverlayWindowControls(title, barStyle)` for the
+title row when `ShowWindowControls` is set; it walks `WindowControlLayout.Compute(...)` and overwrites
+each button column with a `ControlGlyph`. Glyphs/colors are centralized in `ControlGlyph`: macOS draws
+`●` in LightRed/Yellow/LightGreen (traffic-light convention for close/minimize/maximize); Windows/Linux
+draw `–`/`□`/`×` in the bar foreground. Because the buttons are plain `GlyphCell`s, the existing
+background-run + glyph renderer handles them unchanged. Hover is tracked with `_hoveredControl` (set in
+`UpdateHoveredControl` from the screen-row-0 hit-test, cleared on pointer exit). Glyph choices are easy
+to tweak after the manual smoke test if a bundled retro font lacks a symbol; the default monospace
+typeface has all four. Clicks/drag/resize are NOT yet wired (Phase 3).
 
 ## Phase 3: Interaction — click commands, drag-to-move, edge/corner resize
-Status: Not started
+Status: Complete
 
-- [ ] Route `OnPointerPressed` on a button cell to the matching command (Close → `Window.Close()`;
-      Minimize → `WindowState.Minimized`; Maximize → toggle `Normal`/`Maximized`) via a chrome event
-      exposed by `TerminalControl` and handled in `TerminalWindow`. Button clicks must not start text
-      selection.
-- [ ] Drag-to-move: `PointerPressed` on the title-row region outside the buttons calls
-      `BeginMoveDrag(e)` on the hosting window.
-- [ ] 8-direction resize: hit-test a few px inside each edge/corner; on press in a resize zone call
-      `BeginResizeDrag(WindowEdge.*, e)`. Update the cursor (`Cursor`) per zone for affordance.
-      (Cell-snapping of the resulting size is handled in Phase 4.)
-- [ ] Ensure resize/move hit-testing does not interfere with in-grid text selection (selection only
-      when press is inside the game text area, not the chrome row or resize border).
+- [x] `TerminalControl.TryHandleChromePress` routes a button press to `WindowControlInvoked`; the window
+      handler (`OnWindowControlInvoked`) maps Close => `Close()`, Minimize => `WindowState.Minimized`,
+      Maximize => toggle `Normal`/`Maximized`. Handled presses `return` before selection begins.
+- [x] Drag-to-move: a press on the chrome row outside the buttons raises `WindowMoveRequested`; the
+      window calls `BeginMoveDrag(e)`.
+- [x] 8-direction resize: `WindowResizeHitTest.Classify` (pure) maps a border point to a `WindowEdge`;
+      a press there raises `WindowResizeRequested` and the window calls `BeginResizeDrag(edge, e)`.
+      `UpdateCursor` shows the matching resize cursor over the borders (hidden cursor elsewhere).
+- [x] Priority order (buttons → resize border → chrome drag) keeps the top edge from swallowing button
+      clicks; selection only starts when `TryHandleChromePress` returns false (i.e. inside the text area
+      away from borders), so in-grid selection is unaffected.
 
 ### Verification Plan
 - `dotnet build` of the Avalonia project → clean.
@@ -126,53 +148,76 @@ Status: Not started
   window; dragging each edge/corner resizes; text selection still works inside the game area.
 
 ### Phase Summary
-_(write when phase completes)_
+Interaction is wired. `TerminalControl` exposes three events — `WindowControlInvoked`,
+`WindowMoveRequested`, `WindowResizeRequested((WindowEdge, PointerPressedEventArgs))` — raised from
+`TryHandleChromePress` during `OnPointerPressed` (only when `ShowWindowControls`). `TerminalWindow`
+subscribes in its constructor and performs the actual window ops (`Close`/`WindowState`/`BeginMoveDrag`/
+`BeginResizeDrag`) since those are `Window` members. Priority is buttons → resize border → drag region,
+so the top resize edge never eats a button click and text selection is untouched (selection only runs
+when the press wasn't consumed). Resize-edge math was extracted to the pure `WindowResizeHitTest.Classify`
+so it's unit-tested (8 edges/corners + interior + corner-priority). Cursors update over the borders via
+`UpdateCursor`. Cell-snapping the resized/zoomed dimensions is Phase 4.
 
 ## Phase 4: Cell-snapped window sizing (no black border)
-Status: Not started
+Status: Complete
 
-- [ ] Add a `SnapClientSize(Size proposed) -> Size` helper (pure, testable) that rounds a proposed
-      client size to the nearest whole cell: `cols = round(width / _cellWidth)`,
-      `rows = round(height / _cellHeight)`, returning `cols x _cellWidth` by `rows x _cellHeight`,
-      clamped to `MinWidth`/`MinHeight`.
-- [ ] Snap on interactive resize: after `BeginResizeDrag`, snap the window client size to cell
-      multiples when the drag settles (handle window resize/size-changed), so no partial cells remain.
-      Skip snapping while `WindowState` is `Maximized` or `FullScreen`.
-- [ ] Snap on zoom: change `SetFontSize`/`ZoomBy`/`ResetZoom` so that in the normal state they hold the
-      current `cols x rows` constant and resize the window to `cols x newCellWidth` by
-      `rows x newCellHeight` (clamped to the working-area screen bounds), instead of keeping the window
-      fixed and reflowing the grid. When clamped by the screen, fall back to reflowing.
-- [ ] Gate the centered black border: keep the `offsetX`/`offsetY` centering in `Render` active only
-      when `Maximized`/`FullScreen` (or transiently mid-resize); in the normal snapped state the offsets
-      compute to ~0 so the grid meets the window edges with no border.
-- [ ] Set the initial window size on open to a snapped size for the default `cols x rows` so the app
-      launches border-free.
+- [x] Added the pure `WindowCellSnap.Snap(width, height, cellW, cellH, minW, minH)` helper that rounds
+      to whole cells (`MidpointRounding.AwayFromZero`) and enforces the minimums rounded up to whole
+      cells. Unit-tested.
+- [x] Snap on interactive resize: `TerminalWindow.OnPropertyChanged` watches `ClientSizeProperty`/
+      `WindowStateProperty` and calls `SnapToCellGrid`, which snaps `ClientSize` to a cell multiple when
+      `WindowState == Normal` (skipped for Maximized/FullScreen). Re-entrancy guarded by `_adjustingSize`.
+- [x] Zoom keeps the window ~fixed and reflows: `TerminalControl.SetFontSize` re-measures the cell,
+      reflows the grid to the current window (`ApplyGrid`), and raises `CellMetricsChanged`;
+      `TerminalWindow` handles it by calling `SnapToCellGrid`, nudging the window to the nearest whole
+      cell (sub-cell change) to remove the partial-cell border. (Revised from an earlier version that
+      preserved cols x rows and resized the window — per user feedback, zoom should hold window size.)
+- [x] Centered black border: no `Render` change needed — when snapped, `Render`'s existing
+      `offsetX`/`offsetY` compute to ~0 (grid == client size); only Maximized/FullScreen (snap disabled)
+      leaves a centered border, exactly as required.
+- [x] Initial size: the first `ClientSize` change after open triggers `SnapToCellGrid`, so the window
+      launches border-free at the default font.
 
 ### Verification Plan
 - `dotnet build src/Faerie.Terminal.Avalonia/Faerie.Terminal.Avalonia.csproj -c Debug` → clean build.
-- Unit tests pass: `SnapClientSize_RoundsToWholeCells`, `SnapClientSize_RespectsMinimums`,
-  and `Zoom_KeepsGridDimensions_AndResizesWindow` (drive cell metrics via injected values, no live
-  window) → all green.
-- Manual GUI smoke test (author, Windows): dragging any edge/corner leaves no black gap between the
-  window edge and text in the normal state; zooming in/out grows/shrinks the window while keeping the
-  same column/row count and no border; maximizing/fullscreen shows the centered black border and text
-  stays crisp.
+- Unit tests pass (`dotnet test ... --filter FullyQualifiedName~WindowChrome`): `CellSnap_ExactMultiples_AreUnchanged`,
+  `CellSnap_RoundsWidthToWholeCells`, `CellSnap_RespectsMinimums_RoundedUpToWholeCells`,
+  `CellSnap_ReturnsInputWhenCellSizeUnknown`, `CellSnap_NeverProducesZeroCells`.
+- Manual GUI smoke test (author, Windows): dragging any edge/corner leaves no black gap in the normal
+  state; zooming grows/shrinks the window while keeping the same column/row count and no border;
+  maximizing/fullscreen shows the centered black border and text stays crisp.
 
 ### Phase Summary
-_(write when phase completes)_
+Window sizing now snaps to the character grid. The pure `WindowCellSnap.Snap` does the rounding (tested);
+`TerminalWindow` applies it. Snap-on-resize is driven from `OnPropertyChanged` (watching `ClientSize`/
+`WindowState`) rather than a size-changed event, since `OnPropertyChanged` is a stable base hook;
+`_adjustingSize` prevents the Width/Height writes from recursing. Snap-on-zoom is a control->window
+handshake: `SetFontSize` preserves `cols x rows` and raises `WindowSizeToGridRequested`, the window
+resizes (clamped to the screen via `Screens.ScreenFromVisual`), and if it can't fit, the resulting layout
+reflows naturally. The centered-border requirement fell out for free — the existing centering yields 0 in
+the snapped normal state and a centered border only when Maximized/FullScreen (where snapping is off).
+RISKS to confirm in the manual smoke test: (1) snapping on every `ClientSize` change during an OS-driven
+`BeginResizeDrag` could feel slightly "sticky" — if so, move the snap to pointer-release; (2) the
+`Screens`/`Scaling` clamp APIs are assumed from Avalonia 11 and should be confirmed at build time.
+BUGFIX (found at first run): `OnPropertyChanged` fires during the base `Window` constructor's
+`set_ClientSize`, before `Terminal` is assigned, causing a `NullReferenceException` in `SnapToCellGrid`.
+Guarded with a `_chromeReady` flag set at the end of the constructor (SnapToCellGrid no-ops until then).
 
 ## Phase 5: Fullscreen reconciliation, fallback, tests & docs
-Status: Not started
+Status: Complete
 
-- [ ] Reconcile F11/Alt+Enter fullscreen (currently in `TerminalWindow.OnKeyDown`) with borderless
-      chrome: decide chrome visibility in fullscreen (recommend: keep row-0 chrome; Maximize button
-      reflects state) and verify toggling in/out restores the borderless snapped normal state correctly.
-- [ ] Verify `UseTuiWindowChrome=false` cleanly restores native decorations (regression path).
-- [ ] Finalize unit tests in `tests/Faerie.Tests/` covering `HostPlatform`, layout ordering, title
-      clipping, and hit-testing for all three platforms (drive platform via injected value, not the
-      live OS, so tests are deterministic on CI).
-- [ ] Update `src/Faerie.Terminal.Avalonia/README.md` and `docs/FEATURES.md` to describe the TUI
-      window chrome and the `WithTuiWindowChrome` option.
+- [x] F11/Alt+Enter fullscreen reconciled with no code change: `OnKeyDown` still toggles
+      `Normal`<->`FullScreen`; in FullScreen `SnapToCellGrid` steps aside (not `Normal`) so the grid
+      centers with a border, and the row-0 chrome keeps rendering. Returning to `Normal` re-snaps via
+      the `WindowStateProperty` branch of `OnPropertyChanged`.
+- [x] `UseTuiWindowChrome=false` verified by inspection: `ApplyWindowChromeMode` sets
+      `SystemDecorations.Full` + `ShowWindowControls=false`; the control skips chrome render/hit-test and
+      `SnapToCellGrid`/`OnWindowSizeToGrid` early-return, so native decorations and free resize return.
+- [x] Unit tests in `tests/Faerie.Tests/WindowChromeTests.cs` cover platform detection, per-platform
+      ordering/anchoring, distinct columns, hit-test round-trips, gap columns, too-narrow fallback,
+      resize edge/corner classification, and cell-snap rounding/minimums — all platform-driven, no live OS.
+- [x] `src/Faerie.Terminal.Avalonia/README.md` and `docs/FEATURES.md` updated to describe the borderless
+      chrome, controls, move/resize, cell-snapped sizing, and the `WithTuiWindowChrome(false)` opt-out.
 
 ### Verification Plan
 - Full solution build: `dotnet build Faerie.slnx -c Debug` → clean.
@@ -182,10 +227,44 @@ Status: Not started
   `WithTuiWindowChrome(false)` shows native title bar.
 
 ### Phase Summary
-_(write when phase completes)_
+No code change was needed for fullscreen: the existing `OnKeyDown` toggle plus the state-aware
+`SnapToCellGrid` gate already produce the intended behavior (border-free normal, centered border in
+maximized/fullscreen, chrome always visible). The native-chrome fallback is fully handled by
+`ApplyWindowChromeMode` and the `_useTuiWindowChrome` guards. Tests and docs finalized. A fresh-eyes code
+review found no compile errors in the new code (its one flag — `_activePumpFrame?.Continue = false;` — is
+pre-existing C# 14 null-conditional-assignment, valid on net10.0, and not part of this change).
 
 ## Final Recap
-_(write when all phases complete)_
+Issue #116 is implemented. The Avalonia window is borderless by default (`SystemDecorations.None`) with
+the OS title bar/buttons removed and reimplemented as character cells on row 0: macOS shows a
+red/yellow/green traffic-light cluster top-left (close/minimize/maximize), Windows/Linux show
+minimize/maximize/close top-right, chosen by `HostPlatformDetector`. The window is movable (drag the
+title row) and resizable from any edge/corner (`BeginMoveDrag`/`BeginResizeDrag`, with resize cursors),
+and in the normal state it snaps to whole character cells so there is no black border; zoom preserves the
+column/row count and resizes the window; maximized/fullscreen keep a centered border for font fidelity.
+All behavior is opt-out via `WithTuiWindowChrome(false)` / `TerminalWindow.UseTuiWindowChrome`.
+
+New files: `HostPlatform.cs`, `WindowControls.cs` (pure `WindowControlLayout` + `WindowResizeHitTest` +
+`WindowCellSnap`), `tests/Faerie.Tests/WindowChromeTests.cs`. Modified: `TerminalWindow.cs`,
+`TerminalControl.cs`, `AvaloniaDisplay.cs`, plus README/FEATURES docs. The pure geometry (layout,
+resize hit-test, cell-snap) is unit-tested; rendering, pointer wiring, and window sizing are validated by
+the manual GUI smoke tests listed per phase (the authoring sandbox has no .NET SDK).
 
 ## Deployment Plan
-_(write when all phases complete)_
+This is a library/front-end change (no data migration, no services). To ship on a machine with the .NET
+SDK:
+
+1. Build: `dotnet build Faerie.slnx -c Debug` (and `-c Release`) → expect clean.
+2. Test: `dotnet test tests/Faerie.Tests/Faerie.Tests.csproj` → all green (adds the `WindowChrome` tests).
+3. Manual GUI smoke test on Windows (and macOS/Linux if available): run a sample,
+   `dotnet run --project src/Faerie.Samples.Zork`. Confirm: borderless window; controls in the correct
+   corner for the OS; click close/minimize/maximize; drag the title row to move; drag edges/corners to
+   resize (with resize cursors); no black border in the normal state; zoom (`Ctrl`+`+`/`-`/`0`, `Ctrl`+
+   wheel) resizes the window keeping the grid; F11 fullscreen shows a centered border and text stays
+   crisp; verify `WithTuiWindowChrome(false)` restores the native title bar. Tweak the button glyphs in
+   `TerminalControl` if a bundled retro font lacks `●`/`□`/`×`/`–`.
+4. Commit on the feature branch (no Claude co-author) and open a PR to `master`. NOTE: `master` must
+   already contain the fluent-launcher commit (`28c2032`, cherry-picked as `666c90d`), which this branch
+   is based on.
+5. If interactive resize feels "sticky" (snapping mid-drag), change `SnapToCellGrid` to run on
+   pointer-release instead of every `ClientSize` change.

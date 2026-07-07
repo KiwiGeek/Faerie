@@ -38,6 +38,18 @@ public interface ITerminal
     bool SupportsBars => false;
 
     /// <summary>
+    /// Columns to leave clear at the left of the title bar for host window chrome (e.g. in-TUI window
+    /// controls). The engine composes title content into the region right of this inset. 0 by default.
+    /// </summary>
+    int TitleBarInsetLeft => 0;
+
+    /// <summary>
+    /// Columns to leave clear at the right of the title bar for host window chrome. The engine composes
+    /// title content into the region left of this inset. 0 by default.
+    /// </summary>
+    int TitleBarInsetRight => 0;
+
+    /// <summary>
     /// Reserves a non-scrolling top row (title bar) and/or bottom row (status bar). The scrolling
     /// text region shrinks to fit between whichever bars are enabled.
     /// </summary>

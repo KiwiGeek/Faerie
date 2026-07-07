@@ -49,6 +49,15 @@ public sealed class TerminalBuffer : ITerminal
     public bool TitleEnabled => _titleEnabled;
     public bool StatusEnabled => _statusEnabled;
 
+    /// <summary>Columns reserved for host window chrome at the left of the title bar (issue #116).</summary>
+    public int TitleBarInsetLeft { get; set; }
+
+    /// <summary>Columns reserved for host window chrome at the right of the title bar (issue #116).</summary>
+    public int TitleBarInsetRight { get; set; }
+
+    /// <summary>True once a title-bar row has been set (i.e. the game defined a title bar).</summary>
+    public bool HasTitleContent => _titleRow is not null;
+
     public event Action? Invalidated;
 
     // ---- ITerminal ------------------------------------------------------------------------
